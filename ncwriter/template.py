@@ -269,7 +269,7 @@ class NetCDFGroupDict(object):
                                      % (k, missing))
 
 
-class DictDataset(NetCDFGroupDict):
+class DatasetTemplate(NetCDFGroupDict):
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls)
 

@@ -316,7 +316,7 @@ class DictDataset(NetCDFGroupDict):
         like `zlib` and friends.
         """
         for v in self.variables.keys():
-            varname = self.variables[v]['name']
+            varname = v #self.variables[v]['name']
             datatype = self.variables[v]['type']
             dimensions = self.variables[v]['dims']
 
@@ -356,7 +356,7 @@ class DictDataset(NetCDFGroupDict):
                 self.ncobj.createVariable(
                     varname, datatype, dimensions=dimensions, **var_c_opts)
 
-            if self.variables[v]['attr'] is not None:
+            if 'attr' in self.variables[v].keys():
                 attrs = self.variables[v]['attr'].copy()
                 for not_attr in self._create_var_opts(attrs):
                     attrs.pop(not_attr)

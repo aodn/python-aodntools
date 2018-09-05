@@ -12,6 +12,8 @@ written by: Hugo Oliveira ocehugo@gmail.com
 # TODO createVariables too complex
 # TODO implement from_file/from_cdl/from_json kwarg!?
 
+from copy import deepcopy
+
 import netCDF4
 import numpy as np
 
@@ -71,37 +73,12 @@ class NetCDFGroupDict(object):
         self.check_consistency(self.dimensions, self.variables)
 
     def __add__(self, other):
-        return NetCDFGroupDict(
-            dimensions={
-                **self.dimensions,
-                **other.dimensions
-            },
-            variables={
-                **self.variables,
-                **other.variables
-            },
-            global_attributes={
-                **self.global_attributes,
-                **other.global_attributes
-            },
-            title=self.title + '+' + other.title)
-
-    def __sub__(self, other):
-        def diff(a, b):
-            return set(a.keys()).difference(set(b.keys()))
-
-        return NetCDFGroupDict(
-            dimensions={
-                **other.dimensions,
-                **self.dimensions
-            },
-            variables=dict((x, self.variables[x])
-                           for x in diff(self.variables, other.variables)),
-            global_attributes={
-                **other.global_attributes,
-                **self.global_attributes
-            },
-            title=self.title + '-' + other.title)
+        self_copy = deepcopy(self)
+        self_copy.dimensions.update(other.dimensions)
+        self_copy.variables.update(other.variables)
+        self_copy.global_attributes.update(other.global_attributes)
+        self_copy.title = "{t1} + {t2}".format(t1=self.title, t2=other.title)
+        return self_copy
 
     def is_dim_consistent(self):
         """Check if the variable dictionary
@@ -270,11 +247,8 @@ class NetCDFGroupDict(object):
 
 
 class DatasetTemplate(NetCDFGroupDict):
-    def __new__(cls, *args, **kwargs):
-        return super().__new__(cls)
-
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(DatasetTemplate, self).__init__(*args, **kwargs)
         self.cattrs = set([
             'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous',
             'chunksizes', 'endian', 'least_significant_digit'
@@ -338,7 +312,7 @@ class DatasetTemplate(NetCDFGroupDict):
                     x for x in var_c_opts.keys() if x in self.fill_aliases
                 ]
 
-                var_c_opts = {**var_c_opts, **cwargs}
+                var_c_opts.update(cwargs)
 
                 # user precendence
                 if (ureq_fillvalue and vreq_fillvalue):

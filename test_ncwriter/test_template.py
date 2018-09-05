@@ -1,16 +1,49 @@
+from collections import OrderedDict
+import numpy as np
 import unittest
 
 from ncwriter import DatasetTemplate
 
 
 class TestDatasetTemplate(unittest.TestCase):
-    def test_init(self):
-        template = DatasetTemplate()
+    dimensions = OrderedDict([
+        ('time', 0),
+        ('depth', 0)
+    ])
+    time = OrderedDict([
+        ('dims', ['time']),
+        ('type', np.float64),
+        ('attr', None)
+    ])
+    temp = OrderedDict([
+        ('dims', ['time', 'depth']),
+        ('type', np.float32),
+        ('attr', OrderedDict([('standard_name', 'sea_water_temperature'), ('units', 'degC')]))
+    ])
+    variables = OrderedDict([
+        ('TIME', time),
+        ('TEMP', temp)
+    ])
+    global_attributes = OrderedDict([
+        ('title', 'test dataset'),
+        ('abstract', 'This is a dataset used for testing'),
+        ('Conventions', 'CF-1.6,IMOS-1.4')
+    ])
 
-# Functionality to test
-#
-# TODO: create template from dicts
-# e.g. template = DatasetTemplate(dims, vars, globalattrs)
+    def test_init_empty(self):
+        template = DatasetTemplate()
+        self.assertEqual({}, template.dimensions)
+        self.assertEqual({}, template.variables)
+        self.assertEqual({}, template.global_attributes)
+
+    def test_init_from_dicts(self):
+        template = DatasetTemplate(dimensions=self.dimensions,
+                                   variables=self.variables,
+                                   global_attributes=self.global_attributes)
+        self.assertEqual(self.dimensions, template.dimensions)
+        self.assertEqual(self.variables, template.variables)
+        self.assertEqual(self.global_attributes, template.global_attributes)
+
 # TODO: create template from json file
 # e.g. DatasetTemplate.from_json(path='template.json')
 # TODO: create template from other formats (later...)

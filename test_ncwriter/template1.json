@@ -1,0 +1,33 @@
+{
+    "dimensions": {
+        "TIME": 0,
+        "DEPTH": null,
+        "LATITUDE": 100,
+        "LONGITUDE": 100
+    },
+    "variables": {
+        "TIME": {
+            "dims": [
+                "TIME"
+            ],
+            "type": "float64",
+            "attr": null
+        },
+        "TEMP": {
+            "dims": [
+                "TIME",
+                "DEPTH"
+            ],
+            "type": "float32",
+            "attr": {
+                "standard_name": "sea_water_temperature",
+                "units": "degC"
+            }
+        }
+    },
+    "global_attributes": {
+        "title": "test dataset",
+        "abstract": "This is a dataset used for testing",
+        "Conventions": "CF-1.6,IMOS-1.4"
+    }
+}

@@ -1,34 +1,22 @@
 from collections import OrderedDict
-import numpy as np
+import json
+import os
 import unittest
 
 from ncwriter import DatasetTemplate
 
 
+TEST_ROOT = os.path.dirname(__file__)
+TEMPLATE_JSON = os.path.join(TEST_ROOT, 'template1.json')
+TEMPLATE_PARTIAL_JSON = os.path.join(TEST_ROOT, 'template_partial.json')
+
+
 class TestDatasetTemplate(unittest.TestCase):
-    dimensions = OrderedDict([
-        ('time', 0),
-        ('depth', 0)
-    ])
-    time = OrderedDict([
-        ('dims', ['time']),
-        ('type', np.float64),
-        ('attr', None)
-    ])
-    temp = OrderedDict([
-        ('dims', ['time', 'depth']),
-        ('type', np.float32),
-        ('attr', OrderedDict([('standard_name', 'sea_water_temperature'), ('units', 'degC')]))
-    ])
-    variables = OrderedDict([
-        ('TIME', time),
-        ('TEMP', temp)
-    ])
-    global_attributes = OrderedDict([
-        ('title', 'test dataset'),
-        ('abstract', 'This is a dataset used for testing'),
-        ('Conventions', 'CF-1.6,IMOS-1.4')
-    ])
+    with open(TEMPLATE_JSON) as t:
+        template_dict = json.load(t, object_pairs_hook=OrderedDict)
+    dimensions = template_dict['dimensions']
+    variables = template_dict['variables']
+    global_attributes = template_dict['global_attributes']
 
     def test_init_empty(self):
         template = DatasetTemplate()
@@ -44,9 +32,21 @@ class TestDatasetTemplate(unittest.TestCase):
         self.assertEqual(self.variables, template.variables)
         self.assertEqual(self.global_attributes, template.global_attributes)
 
-# TODO: create template from json file
-# e.g. DatasetTemplate.from_json(path='template.json')
-# TODO: create template from other formats (later...)
+    def test_init_from_json(self):
+        template = DatasetTemplate.from_json(TEMPLATE_JSON)
+        self.assertEqual(self.dimensions, template.dimensions)
+        self.assertEqual(self.variables, template.variables)
+        self.assertEqual(self.global_attributes, template.global_attributes)
+
+    def test_init_from_partial_template(self):
+        template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)
+        with open(TEMPLATE_PARTIAL_JSON) as t:
+            tdict = json.load(t, object_pairs_hook=OrderedDict)
+        self.assertEqual({}, template.dimensions)
+        self.assertEqual(tdict['variables'], template.variables)
+        self.assertEqual(tdict['global_attributes'], template.global_attributes)
+
+    # TODO: create template from other formats (later...)
 
 # TODO: add global attributes
 # e.g. template.title = 'Test dataset'

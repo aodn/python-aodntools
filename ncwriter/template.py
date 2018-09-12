@@ -12,6 +12,8 @@ written by: Hugo Oliveira ocehugo@gmail.com
 # TODO createVariables too complex
 # TODO implement from_file/from_cdl/from_json kwarg!?
 
+import json
+from collections import OrderedDict
 from copy import deepcopy
 
 import netCDF4
@@ -20,9 +22,9 @@ import numpy as np
 
 class NetCDFGroupDict(object):
     def __init__(self,
-                 dimensions={},
-                 variables={},
-                 global_attributes={},
+                 dimensions=None,
+                 variables=None,
+                 global_attributes=None,
                  title='NetCDFGroupDict',
                  **kwargs):
         """ A dictionary to hold netCDF groups
@@ -52,9 +54,9 @@ class NetCDFGroupDict(object):
                 #w4.dimensions = {'lon':720,'lat':330,'time':300}
         """
         self.title = title
-        self.dimensions = dimensions
-        self.global_attributes = global_attributes
-        self.variables = variables
+        self.dimensions = dimensions or OrderedDict()
+        self.variables = variables or OrderedDict()
+        self.global_attributes = global_attributes or OrderedDict()
 
         if self.is_dim_consistent:
             self.rdimensions = dict((x, True) if y is -1 else (x, False)
@@ -236,7 +238,7 @@ class NetCDFGroupDict(object):
         alldims = dimdict.keys()
         allvars = vdict.keys()
         for k in allvars:
-            vardims = vdict[k]['dims']
+            vardims = vdict[k].get('dims')
             if vardims is None:
                 continue
             else:
@@ -255,6 +257,21 @@ class DatasetTemplate(NetCDFGroupDict):
         ])
         self.fill_aliases = set(
             ['fill_value', 'missing_value', 'FillValue', '_FillValue'])
+
+    @classmethod
+    def from_json(cls, path):
+        # load the JSON file into a dict
+        with open(path) as f:
+            template = json.load(f, object_pairs_hook=OrderedDict)
+
+        # e.g. this could call out to JSONschema to make sure the JSON has the expected
+        # high level structure, and  could refuse to create the object right here if it wasn't correct
+        # TODO: validate_template(template)
+
+        return cls(dimensions=template.get('dimensions'),
+                   variables=template.get('variables'),
+                   global_attributes=template.get('global_attributes')
+                   )
 
     def set_output(self, outfile, mode='w', **kwargs):
         """Create the dataset """

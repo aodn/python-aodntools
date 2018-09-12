@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import json
+import numpy as np
 import os
 import unittest
 
@@ -46,19 +47,57 @@ class TestDatasetTemplate(unittest.TestCase):
         self.assertEqual(tdict['variables'], template.variables)
         self.assertEqual(tdict['global_attributes'], template.global_attributes)
 
+    # TODO: def test_json_validation(self):
+
     # TODO: create template from other formats (later...)
 
-# TODO: add global attributes
-# e.g. template.title = 'Test dataset'
+    def test_add_global_attributes(self):
+        template = DatasetTemplate()
+        template.global_attributes.update(self.global_attributes)
+        self.assertEqual(self.global_attributes, template.global_attributes)
 
-# TODO: add dimensions
-# e.g. template.dimensions['TIME'] = 100
+    def test_add_dimensions(self):
+        template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)
+        template.dimensions['TIME'] = 100
+        template.dimensions['DEPTH'] = 10
+        self.assertEqual(OrderedDict([('TIME', 100), ('DEPTH', 10)]), template.dimensions)
 
-# TODO: add variables
-# TODO: add variable attributes
-# e.g. template.variables['PRES']['units'] = 'dbar'
+    def test_update_dimensions(self):
+        template = DatasetTemplate.from_json(TEMPLATE_JSON)
+        template.dimensions['TIME'] = 100
+        template.dimensions['DEPTH'] = 10
+        self.assertDictContainsSubset(OrderedDict([('TIME', 100), ('DEPTH', 10)]), template.dimensions)
 
-# TODO: add data from numpy arrays
+    def test_add_variables(self):
+        template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)
+        template.variables['TIME'] = self.variables['TIME']
+        self.assertEqual(['TEMP', 'TIME'], template.variables.keys())
+        self.assertEqual(self.variables['TIME'], template.variables['TIME'])
+
+    def test_add_variable_dimensions(self):
+        template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)
+        template.variables['TEMP']['dims'] = ['TIME', 'DEPTH']
+        self.assertEqual(['TIME', 'DEPTH'], template.variables['TEMP']['dims'])
+
+    def test_add_variable_attributes(self):
+        template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)
+        template.variables['TEMP']['attr'].update([('units', 'Kelvin'),
+                                                   ('comment', 'ok')
+                                                   ])
+        self.assertEqual(OrderedDict([('standard_name', 'sea_water_temperature'),
+                                      ('units', 'Kelvin'),
+                                      ('comment', 'ok')
+                                      ]),
+                         template.variables['TEMP']['attr']
+                         )
+
+    def test_set_variable_values(self):
+        template = DatasetTemplate.from_json(TEMPLATE_JSON)
+        temp_val = np.arange(10, dtype=np.float32)
+        template.variables['TEMP']['values'] = temp_val
+        self.assertTrue(all(template.variables['TEMP']['values'] == temp_val))
+
+# TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)
 # TODO: add data from Pandas dataframe (later...)
 # e.g. template.add_data(dataframe)

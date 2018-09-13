@@ -1,11 +1,14 @@
-from collections import OrderedDict
 import json
-import numpy as np
 import os
+import shutil
+import tempfile
 import unittest
+from collections import OrderedDict
+
+import numpy as np
+from netCDF4 import Dataset
 
 from ncwriter import DatasetTemplate
-
 
 TEST_ROOT = os.path.dirname(__file__)
 TEMPLATE_JSON = os.path.join(TEST_ROOT, 'template1.json')
@@ -18,6 +21,26 @@ class TestDatasetTemplate(unittest.TestCase):
     dimensions = template_dict['dimensions']
     variables = template_dict['variables']
     global_attributes = template_dict['global_attributes']
+    values1 = np.array([1], dtype=np.float32)
+    values10 = np.arange(10, dtype=np.float32)
+
+    @property
+    def temp_dir(self):
+        if not hasattr(self, '_temp_dir'):
+            self._temp_dir = tempfile.mkdtemp(prefix=self.__class__.__name__)
+        return self._temp_dir
+
+    @property
+    def temp_nc_file(self):
+        if not hasattr(self, '_temp_nc_file'):
+            with tempfile.NamedTemporaryFile(suffix='.nc', prefix=self.__class__.__name__, dir=self.temp_dir) as f:
+                pass
+            self._temp_nc_file = f.name
+        return self._temp_nc_file
+
+    def tearDown(self):
+        if hasattr(self, '_temp_dir'):
+            shutil.rmtree(self._temp_dir)
 
     def test_init_empty(self):
         template = DatasetTemplate()
@@ -93,17 +116,40 @@ class TestDatasetTemplate(unittest.TestCase):
 
     def test_set_variable_values(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
-        temp_val = np.arange(10, dtype=np.float32)
-        template.variables['TEMP']['values'] = temp_val
-        self.assertTrue(all(template.variables['TEMP']['values'] == temp_val))
+        template.variables['TEMP']['values'] = self.values10
+        self.assertTrue(all(template.variables['TEMP']['values'] == self.values10))
+
+    def test_create_empty_file(self):
+        template = DatasetTemplate()
+        template.create(self.temp_nc_file)
+        dataset = Dataset(self.temp_nc_file)
+
+    def test_create_file(self):
+        template = DatasetTemplate.from_json(TEMPLATE_JSON)
+        template.variables['TIME']['values'] = self.values10
+        template.variables['DEPTH']['values'] = self.values1
+        template.variables['TEMP']['values'] = self.values10
+        template.create(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+
+        ds_dimensions = OrderedDict((k, v.size) for k, v in dataset.dimensions.iteritems())
+        self.assertEqual(self.dimensions, ds_dimensions)
+
+        for vname, vdict in self.variables:
+            ds_var = dataset[vname]
+            self.assertEqual(vdict['dims'], ds_var.dimensions)
+            ds_var_attr = OrderedDict((k, ds_var[k]) for k in ds_var.ncattrs())
+            self.assertEqual(vdict['attr'], ds_var_attr)
+
+        ds_global_attributes = OrderedDict((k, dataset[k]) for k in dataset.ncattrs())
+        self.assertEqual(self.global_attributes, ds_global_attributes)
 
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)
 # TODO: add data from Pandas dataframe (later...)
 # e.g. template.add_data(dataframe)
 
-# TODO: create netCDF file
-# e.g. template.create(filename)   # user-specified file name
 # TODO: create netCDF file with auto-generated file name according to IMOS conventions
 # e.g. template.create()
 

@@ -1,9 +1,7 @@
 {
     "dimensions": {
         "TIME": 0,
-        "DEPTH": null,
-        "LATITUDE": 100,
-        "LONGITUDE": 100
+        "DEPTH": null
     },
     "variables": {
         "TIME": {
@@ -11,6 +9,13 @@
                 "TIME"
             ],
             "type": "float64",
+            "attr": null
+        },
+        "DEPTH": {
+            "dims": [
+                "DEPTH"
+            ],
+            "type": "float32",
             "attr": null
         },
         "TEMP": {

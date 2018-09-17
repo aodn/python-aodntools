@@ -128,21 +128,34 @@ class TestDatasetTemplate(unittest.TestCase):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
         template.variables['TIME']['values'] = self.values10
         template.variables['DEPTH']['values'] = self.values1
-        template.variables['TEMP']['values'] = self.values10
+        template.variables['TEMP']['values'] = self.values10.reshape((10, 1))
         template.create(self.temp_nc_file)
+        print("Created nc file '{}'".format(self.temp_nc_file))
 
         dataset = Dataset(self.temp_nc_file)
 
+        expected_dimensions = OrderedDict([
+            ('TIME', len(self.values10)),
+            ('DEPTH', len(self.values1))
+        ])
         ds_dimensions = OrderedDict((k, v.size) for k, v in dataset.dimensions.iteritems())
-        self.assertEqual(self.dimensions, ds_dimensions)
+        self.assertEqual(expected_dimensions, ds_dimensions)
 
-        for vname, vdict in self.variables:
+        for vname, vdict in self.variables.iteritems():
             ds_var = dataset[vname]
-            self.assertEqual(vdict['dims'], ds_var.dimensions)
-            ds_var_attr = OrderedDict((k, ds_var[k]) for k in ds_var.ncattrs())
-            self.assertEqual(vdict['attr'], ds_var_attr)
+            self.assertEqual(vdict['dims'], list(ds_var.dimensions))
+            self.assertEqual(vdict['type'], ds_var.dtype)
+            ds_var_attr = OrderedDict((k, ds_var.getncattr(k)) for k in ds_var.ncattrs())
+            if vdict['attr'] is None:
+                self.assertEqual({}, ds_var_attr)
+            else:
+                self.assertEqual(vdict['attr'], ds_var_attr)
 
-        ds_global_attributes = OrderedDict((k, dataset[k]) for k in dataset.ncattrs())
+        self.assertTrue(all(dataset['TIME'] == self.values10))
+        self.assertTrue(all(dataset['DEPTH'] == self.values1))
+        self.assertTrue(all(dataset['TEMP'] == self.values10.reshape(10, 1)))
+
+        ds_global_attributes = OrderedDict((k, dataset.getncattr(k)) for k in dataset.ncattrs())
         self.assertEqual(self.global_attributes, ds_global_attributes)
 
 # TODO: add data from multiple numpy arrays

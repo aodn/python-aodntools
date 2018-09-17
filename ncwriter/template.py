@@ -11,6 +11,7 @@ written by: Hugo Oliveira ocehugo@gmail.com
 # TODO check_var too complex
 # TODO createVariables too complex
 # TODO implement from_file/from_cdl/from_json kwarg!?
+# TODO Allow for attribute types to be specified in JSON
 
 import json
 from collections import OrderedDict
@@ -273,11 +274,6 @@ class DatasetTemplate(NetCDFGroupDict):
                    global_attributes=template.get('global_attributes')
                    )
 
-    def set_output(self, outfile, mode='w', **kwargs):
-        """Create the dataset """
-        self.outfile = outfile
-        self.ncobj = netCDF4.Dataset(self.outfile, mode=mode, **kwargs)
-
     def _create_var_opts(self, vdict):
         """Return a list with attribute names required for the creation of variable
         defined by :vdict: This include creation/special options like:
@@ -295,6 +291,40 @@ class DatasetTemplate(NetCDFGroupDict):
             inside = inside.union(aliases)
         return list(inside)
 
+    def update_dimensinos(self):
+        """Update the sizes of dimensions to be consistent with the arrays set as variable values, if possible.
+        Otherwise raise ValueError. Also raise ValueError if a dimension that already has a non-zero size is not
+        consistent with variable array sizes.
+        """
+        for name, var in self.variables.iteritems():
+            values = var.get('values')
+            if values is None:
+                continue
+
+            var_shape = values.shape
+            var_dims = var.get('dims', [])
+            if len(var_shape) != len(var_dims):
+                raise ValueError(
+                    "Variable '{name}' has {ndim} dimensions, but value array has {nshape} dimensions.".format(
+                        name=name, ndim=len(var_dims), nshape=len(var_shape)
+                    )
+                )
+
+            for dim, size in zip(var_dims, var_shape):
+                template_dim = self.dimensions[dim]
+                if template_dim is None or template_dim == 0:
+                    self.dimensions[dim] = size
+
+            # check that shape is now consistent
+            template_shape = tuple(self.dimensions[d] for d in var_dims)
+            if var_shape != template_shape:
+                raise ValueError(
+                    "Variable '{name}' has dimensions {var_dims} and shape {var_shape}, inconsistent with dimension "
+                    "sizes defined in template {template_shape}".format(
+                        name=name, var_dims=var_dims, var_shape=var_shape, template_shape=template_shape
+                    )
+                )
+
     def createDimensions(self):
         """Create the dimensions on the netcdf file"""
         for dname, dval in zip(self.dimensions.keys(),
@@ -306,20 +336,17 @@ class DatasetTemplate(NetCDFGroupDict):
         **kwargs are included here to overload all options for all variables
         like `zlib` and friends.
         """
-        for v in self.variables.keys():
-            varname = v #self.variables[v]['name']
-            datatype = self.variables[v]['type']
-            dimensions = self.variables[v]['dims']
-
-            var_c_opts = {}
+        for varname, var in self.variables.iteritems():
+            datatype = var['type']
+            dimensions = var['dims']
             cwargs = kwargs.copy()
             if dimensions is None:  # no kwargs in createVariable
-                self.ncobj.createVariable(varname, datatype)
+                ncvar = self.ncobj.createVariable(varname, datatype)
             else:
-                var_c_keys = list(self._create_var_opts(self.variables[v]))
+                var_c_keys = list(self._create_var_opts(var))
 
                 var_c_opts = dict(
-                    (x, self.variables[v][x]) for x in var_c_keys)
+                    (x, var[x]) for x in var_c_keys)
 
                 ureq_fillvalue = [
                     x for x in cwargs.keys() if x in self.fill_aliases
@@ -344,32 +371,33 @@ class DatasetTemplate(NetCDFGroupDict):
                     if fv_val:
                         var_c_opts['fill_value'] = fv_val[-1]
 
-                self.ncobj.createVariable(
+                ncvar = self.ncobj.createVariable(
                     varname, datatype, dimensions=dimensions, **var_c_opts)
 
-            if 'attr' in self.variables[v].keys():
-                attrs = self.variables[v]['attr'].copy()
+            # add variable values
+            ncvar[:] = var['values']
+
+            # add variable attributes
+            if var.get('attr'):
+                attrs = var['attr'].copy()
                 for not_attr in self._create_var_opts(attrs):
                     attrs.pop(not_attr)
-
-                for attname in attrs.keys():
-                    var = self.ncobj.variables[varname]
-                    value = np.array(attrs[attname]['value']).astype(
-                        attrs[attname]['type'])
-                    var.setncattr(attname, value)
+                ncvar.setncatts(attrs)
 
     def createGlobalAttrs(self):
         """Add the global attributes for the current class"""
         for att in self.global_attributes.keys():
             self.ncobj.setncattr(att, self.global_attributes[att])
 
-    def create(self, **kwargs):
-        """Create in the dimensions/variable and attributes and fill with
-        basic information"""
+    def create(self, outfile, mode='w', var_args={}, **kwargs):
+        """Create the file according to all the information in the template"""
+        self.outfile = outfile
+        self.ncobj = netCDF4.Dataset(self.outfile, mode=mode, **kwargs)
+
+        self.update_dimensinos()
         self.createDimensions()
-        self.createVariables(**kwargs)
+        self.createVariables(**var_args)
         self.createGlobalAttrs()
         self.ncobj.sync()
         self.ncobj.close()
         self.ncobj = netCDF4.Dataset(self.outfile, 'a')
-        pass

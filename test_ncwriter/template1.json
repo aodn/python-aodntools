@@ -26,13 +26,18 @@
             "type": "float32",
             "attr": {
                 "standard_name": "sea_water_temperature",
-                "units": "degC"
+                "units": "degC",
+                "valid_min": 0.0,
+                "valid_max": 42.00
             }
         }
     },
     "global_attributes": {
         "title": "test dataset",
         "abstract": "This is a dataset used for testing",
-        "Conventions": "CF-1.6,IMOS-1.4"
+        "Conventions": "CF-1.6,IMOS-1.4",
+        "number": 10,
+        "big_number": 12345678901234567890,
+        "big_float": 1.234567890123456e777
     }
 }

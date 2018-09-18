@@ -21,6 +21,19 @@ import netCDF4
 import numpy as np
 
 
+def validate_dict(o, name):
+    """
+    Check that the given object is a dictionary. If not, raise TypeError.
+
+    :param o: The object to validate.
+    :param str name: The name of the object to use in the error message.
+    :return: None
+    """
+
+    if not isinstance(o, dict):
+        raise TypeError("{name} should be a dictionary (got {o})".format(name=name, o=repr(o)))
+
+
 class NetCDFGroupDict(object):
     def __init__(self,
                  dimensions=None,
@@ -54,6 +67,10 @@ class NetCDFGroupDict(object):
                 #w4.variables.keys() = ['temp']
                 #w4.dimensions = {'lon':720,'lat':330,'time':300}
         """
+        self._dimensions = None
+        self._variables = None
+        self._global_attributes = None
+
         self.title = title
         self.dimensions = dimensions or OrderedDict()
         self.variables = variables or OrderedDict()
@@ -82,6 +99,33 @@ class NetCDFGroupDict(object):
         self_copy.global_attributes.update(other.global_attributes)
         self_copy.title = "{t1} + {t2}".format(t1=self.title, t2=other.title)
         return self_copy
+
+    @property
+    def dimensions(self):
+        return self._dimensions
+
+    @dimensions.setter
+    def dimensions(self, value):
+        validate_dict(value, 'dimensions')
+        self._dimensions = value
+
+    @property
+    def variables(self):
+        return self._variables
+
+    @variables.setter
+    def variables(self, value):
+        validate_dict(value, 'variables')
+        self._variables = value
+
+    @property
+    def global_attributes(self):
+        return self._global_attributes
+
+    @global_attributes.setter
+    def global_attributes(self, value):
+        validate_dict(value, 'global_attributes')
+        self._global_attributes = value
 
     def is_dim_consistent(self):
         """Check if the variable dictionary

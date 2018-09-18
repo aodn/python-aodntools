@@ -56,6 +56,22 @@ class TestDatasetTemplate(unittest.TestCase):
         self.assertEqual(self.variables, template.variables)
         self.assertEqual(self.global_attributes, template.global_attributes)
 
+    def test_init_from_dicts_validation(self):
+        with self.assertRaises(TypeError):
+            DatasetTemplate(dimensions='TIME')
+        with self.assertRaises(TypeError):
+            DatasetTemplate(dimensions=100)
+        with self.assertRaises(TypeError):
+            DatasetTemplate(dimensions=['TIME', 'Z'])
+
+        with self.assertRaises(TypeError):
+            DatasetTemplate(variables='TEMP')
+        with self.assertRaises(TypeError):
+            DatasetTemplate(variables=['TEMP', 'PSAL'])
+
+        with self.assertRaises(TypeError):
+            DatasetTemplate(global_attributes=['title', 'abstract'])
+
     def test_init_from_json(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
         self.assertEqual(self.dimensions, template.dimensions)

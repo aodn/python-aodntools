@@ -5,26 +5,25 @@
     },
     "variables": {
         "TIME": {
-            "dims": [
+            "dimensions": [
                 "TIME"
             ],
-            "type": "float64",
-            "attr": null
+            "type": "float64"
         },
         "DEPTH": {
-            "dims": [
+            "dimensions": [
                 "DEPTH"
             ],
             "type": "float32",
-            "attr": null
+            "attributes": {}
         },
         "TEMP": {
-            "dims": [
+            "dimensions": [
                 "TIME",
                 "DEPTH"
             ],
             "type": "float32",
-            "attr": {
+            "attributes": {
                 "standard_name": "sea_water_temperature",
                 "units": "degC",
                 "valid_min": 0.0,

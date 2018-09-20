@@ -8,7 +8,7 @@ from collections import OrderedDict
 import numpy as np
 from netCDF4 import Dataset
 
-from ncwriter import DatasetTemplate
+from ncwriter import DatasetTemplate, ValidationError
 
 TEST_ROOT = os.path.dirname(__file__)
 TEMPLATE_JSON = os.path.join(TEST_ROOT, 'template1.json')
@@ -57,20 +57,20 @@ class TestDatasetTemplate(unittest.TestCase):
         self.assertEqual(self.global_attributes, template.global_attributes)
 
     def test_init_from_dicts_validation(self):
-        with self.assertRaises(TypeError):
-            DatasetTemplate(dimensions='TIME')
-        with self.assertRaises(TypeError):
-            DatasetTemplate(dimensions=100)
-        with self.assertRaises(TypeError):
-            DatasetTemplate(dimensions=['TIME', 'Z'])
+        with self.assertRaises(ValidationError):
+            DatasetTemplate(dimensions='X')
+        with self.assertRaises(ValidationError):
+            DatasetTemplate(dimensions={'TIME': -1})
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValidationError):
             DatasetTemplate(variables='TEMP')
-        with self.assertRaises(TypeError):
-            DatasetTemplate(variables=['TEMP', 'PSAL'])
+        with self.assertRaises(ValidationError):
+            DatasetTemplate(variables={'_TEMP': {}})
 
-        with self.assertRaises(TypeError):
-            DatasetTemplate(global_attributes=['title', 'abstract'])
+        with self.assertRaises(ValidationError):
+            DatasetTemplate(global_attributes='title')
+        with self.assertRaises(ValidationError):
+            DatasetTemplate(global_attributes={'title': None})
 
     def test_init_from_json(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
@@ -115,19 +115,19 @@ class TestDatasetTemplate(unittest.TestCase):
 
     def test_add_variable_dimensions(self):
         template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)
-        template.variables['TEMP']['dims'] = ['TIME', 'DEPTH']
-        self.assertEqual(['TIME', 'DEPTH'], template.variables['TEMP']['dims'])
+        template.variables['TEMP']['dimensions'] = ['TIME', 'DEPTH']
+        self.assertEqual(['TIME', 'DEPTH'], template.variables['TEMP']['dimensions'])
 
     def test_add_variable_attributes(self):
         template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)
-        template.variables['TEMP']['attr'].update([('units', 'Kelvin'),
-                                                   ('comment', 'ok')
-                                                   ])
+        template.variables['TEMP']['attributes'].update([('units', 'Kelvin'),
+                                                         ('comment', 'ok')
+                                                         ])
         self.assertEqual(OrderedDict([('standard_name', 'sea_water_temperature'),
                                       ('units', 'Kelvin'),
                                       ('comment', 'ok')
                                       ]),
-                         template.variables['TEMP']['attr']
+                         template.variables['TEMP']['attributes']
                          )
 
     def test_set_variable_values(self):
@@ -159,13 +159,13 @@ class TestDatasetTemplate(unittest.TestCase):
 
         for vname, vdict in self.variables.iteritems():
             ds_var = dataset[vname]
-            self.assertEqual(vdict['dims'], list(ds_var.dimensions))
+            self.assertEqual(vdict['dimensions'], list(ds_var.dimensions))
             self.assertEqual(vdict['type'], ds_var.dtype)
             ds_var_attr = OrderedDict((k, ds_var.getncattr(k)) for k in ds_var.ncattrs())
-            if vdict['attr'] is None:
+            if vdict.get('attributes') is None:
                 self.assertEqual({}, ds_var_attr)
             else:
-                self.assertEqual(vdict['attr'], ds_var_attr)
+                self.assertEqual(vdict['attributes'], ds_var_attr)
 
         self.assertTrue(all(dataset['TIME'] == self.values10))
         self.assertTrue(all(dataset['DEPTH'] == self.values1))

@@ -421,10 +421,18 @@ class DatasetTemplate(NetCDFGroupDict):
         for att in self.global_attributes.keys():
             self.ncobj.setncattr(att, self.global_attributes[att])
 
-    def create(self, outfile, mode='w', var_args={}, **kwargs):
-        """Create the file according to all the information in the template"""
+    def to_netcdf(self, outfile, var_args={}, **kwargs):
+        """
+        Create a netCDF file according to all the information in the template.
+        See netCDF4 package documentation for additional arguments.
+
+        :param outfile: Path for the output file (clobbered by default if it already exists!)
+        :param var_args: Additional arguments passed on to  netCDF4.Dataset.createVariables()
+        :param kwargs: Additional arguments for netCDF4.Dataset()
+        :return: None
+        """
         self.outfile = outfile
-        self.ncobj = netCDF4.Dataset(self.outfile, mode=mode, **kwargs)
+        self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
 
         self.update_dimensinos()
         self.createDimensions()

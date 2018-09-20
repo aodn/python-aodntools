@@ -137,7 +137,7 @@ class TestDatasetTemplate(unittest.TestCase):
 
     def test_create_empty_file(self):
         template = DatasetTemplate()
-        template.create(self.temp_nc_file)
+        template.to_netcdf(self.temp_nc_file)
         dataset = Dataset(self.temp_nc_file)
 
     def test_create_file(self):
@@ -145,8 +145,7 @@ class TestDatasetTemplate(unittest.TestCase):
         template.variables['TIME']['values'] = self.values10
         template.variables['DEPTH']['values'] = self.values1
         template.variables['TEMP']['values'] = self.values10.reshape((10, 1))
-        template.create(self.temp_nc_file)
-        print("Created nc file '{}'".format(self.temp_nc_file))
+        template.to_netcdf(self.temp_nc_file)
 
         dataset = Dataset(self.temp_nc_file)
 

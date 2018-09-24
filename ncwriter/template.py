@@ -141,63 +141,6 @@ class NetCDFGroupDict(object):
         else:
             return True
 
-    def search_time_in_vars(self):
-        """Check all vars for specific time variables associated with them"""
-        tvars = set()
-        for v in self.variables:
-            try:
-                tvars.add(self.variables[v]['attributes']['time']['value'])
-            except KeyError:
-                pass
-
-        isnone = tvars == set()
-        if isnone:
-            return None
-        else:
-            return tvars
-
-    def change_time(self, var, timevar):
-        """Change the time dimension associated with variable :var:
-            :var: a list or str
-                Ex: 'zeta'
-                   ['zeta','u']
-                   ['u','v']
-                   ['Ptracer1','Ptracer2']
-            :timevar: a list or str
-                Ex: 'bry_time'
-                   ['zeta_time','uv_time']
-                   ['uv_time']
-                   ['ptime1','ptime2']
-        """
-
-        if var.__class__ is str:
-            var = [var]
-        if timevar.__class__ is str:
-            timevar = [timevar]
-
-        if len(var) == 1 and len(timevar) > 1:
-            raise ValueError('Invalid input')
-        elif len(var) > 1 and len(timevar) == 1:
-            timevar = [timevar for x in range(len(var))]
-
-        for v, t in zip(var, timevar):
-            vargroup = set(self.variables.keys())
-            dimgroup = set(self.dimensions.keys())
-            v_included = v in vargroup
-            t_included = t in vargroup and t in dimgroup
-
-            # varname should match dimname for time info
-            if not t_included:
-                raise ValueError('Time variable:', t, 'not present!')
-            if not v_included:
-                for k in self.variables.keys():
-                    if v in k:
-                        self.variables[k]['dimensions'][0] = t
-                        self.variables[k]['attributes']['time']['value'] = t
-            else:
-                self.variables[v]['dimensions'][0] = t
-                self.variables[v]['attributes']['time']['value'] = t
-
     @classmethod
     def check_var(cls, vardict, name=None):
         """ Check if the dictionary have all the required fields

@@ -1,0 +1,14 @@
+{
+    "variables": {
+        "TEMP": {
+            "attributes": {
+                "standard_name": "sea_water_temperature",
+                "units": "degC"
+            }
+        }
+    },
+    "global_attributes": {
+        "title": "Partial template",
+        "abstract": "This template only specifies global and variable attributes"
+    }
+}

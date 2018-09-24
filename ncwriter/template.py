@@ -27,7 +27,6 @@ class NetCDFGroupDict(object):
                  dimensions=None,
                  variables=None,
                  global_attributes=None,
-                 title='NetCDFGroupDict',
                  **kwargs):
         """ A dictionary to hold netCDF groups
             It consist of a generic class holding 3 different dictionaries:
@@ -59,25 +58,14 @@ class NetCDFGroupDict(object):
         self._variables = None
         self._global_attributes = None
 
-        self.title = title
         self.dimensions = dimensions or OrderedDict()
         self.variables = variables or OrderedDict()
         self.global_attributes = global_attributes or OrderedDict()
 
-        if self.is_dim_consistent:
-            self.rdimensions = dict((x, True) if y is -1 else (x, False)
-                                    for x, y in zip(self.dimensions.keys(),
-                                                    self.dimensions.values()))
-        else:
+        if not self.is_dim_consistent():
             raise TypeError("Correct the dimensions.")
 
-        notstr = self.title.__class__ is not str
-        if notstr:
-            raise TypeError("Title is not a str object")
-
-        self.check_dims(self.dimensions)
         self.check_var(self.variables)
-        self.check_global_attributes(self.global_attributes)
         self.check_consistency(self.dimensions, self.variables)
 
     def __add__(self, other):
@@ -85,7 +73,6 @@ class NetCDFGroupDict(object):
         self_copy.dimensions.update(other.dimensions)
         self_copy.variables.update(other.variables)
         self_copy.global_attributes.update(other.global_attributes)
-        self_copy.title = "{t1} + {t2}".format(t1=self.title, t2=other.title)
         return self_copy
 
     @property
@@ -161,7 +148,7 @@ class NetCDFGroupDict(object):
             try:
                 tvars.add(self.variables[v]['attributes']['time']['value'])
             except KeyError:
-                None
+                pass
 
         isnone = tvars == set()
         if isnone:
@@ -212,16 +199,8 @@ class NetCDFGroupDict(object):
                 self.variables[v]['attributes']['time']['value'] = t
 
     @classmethod
-    def check_dims(self, dimdict):
-        """ Check the dictionary """
-        for d in dimdict:
-            notint = dimdict[d].__class__ is not int
-            if notint:
-                ValueError("Dimension %s is not an integer object" % d)
-
-    @classmethod
-    def check_var(self, vardict, name=None):
-        """ Check if the dictionary have all the reuqired fields
+    def check_var(cls, vardict, name=None):
+        """ Check if the dictionary have all the required fields
         to be defined as variable"""
         if name is None:
             name = 'input'
@@ -235,7 +214,7 @@ class NetCDFGroupDict(object):
 
         if have_none:
             for k in vkeys:
-                self.check_var(vardict[k], name=k)
+                cls.check_var(vardict[k], name=k)
 
         if have_dims:
             notnone = vardict['dimensions'] is not None
@@ -256,14 +235,6 @@ class NetCDFGroupDict(object):
             if notstr and nottype and notcompound and notvl:
                 ValueError(
                     "Type for %s should be a string or type object" % name)
-
-    @classmethod
-    def check_global_attributes(self, gadict):
-        """ Check the dictionary """
-        for g in gadict:
-            notstr = gadict[g].__class__ is not str
-            if notstr:
-                ValueError("Global Attr %s is not an integer object" % g)
 
     @classmethod
     def check_consistency(self, dimdict, vdict):

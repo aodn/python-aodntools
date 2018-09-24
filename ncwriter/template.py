@@ -328,13 +328,13 @@ class DatasetTemplate(NetCDFGroupDict):
                     )
                 )
 
-    def createDimensions(self):
+    def create_dimensions(self):
         """Create the dimensions on the netcdf file"""
         for dname, dval in zip(self.dimensions.keys(),
                                self.dimensions.values()):
             self.ncobj.createDimension(dname, dval)
 
-    def createVariables(self, **kwargs):
+    def create_variables(self, **kwargs):
         """Create all variables for the current class
         **kwargs are included here to overload all options for all variables
         like `zlib` and friends.
@@ -390,7 +390,7 @@ class DatasetTemplate(NetCDFGroupDict):
                     attrs.pop(not_attr)
                 ncvar.setncatts(attrs)
 
-    def createGlobalAttrs(self):
+    def create_global_attributes(self):
         """Add the global attributes for the current class"""
         for att in self.global_attributes.keys():
             self.ncobj.setncattr(att, self.global_attributes[att])
@@ -409,9 +409,9 @@ class DatasetTemplate(NetCDFGroupDict):
         self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
 
         self.update_dimensions()
-        self.createDimensions()
-        self.createVariables(**var_args)
-        self.createGlobalAttrs()
+        self.create_dimensions()
+        self.create_variables(**var_args)
+        self.create_global_attributes()
         self.ncobj.sync()
         self.ncobj.close()
         self.ncobj = netCDF4.Dataset(self.outfile, 'a')

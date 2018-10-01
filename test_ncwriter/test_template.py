@@ -173,6 +173,43 @@ class TestDatasetTemplate(unittest.TestCase):
         ds_global_attributes = OrderedDict((k, dataset.getncattr(k)) for k in dataset.ncattrs())
         self.assertEqual(self.global_attributes, ds_global_attributes)
 
+    def test_fill_values(self):
+        template = DatasetTemplate(dimensions={'X': 10})
+        template.variables['X'] = {'dimensions': ['X'],
+                                   'type': 'float32',
+                                   'attributes': {'_FillValue': -999.}
+                                   }
+        x = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
+        template.variables['X']['values'] = x
+        template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        dsx = dataset.variables['X']
+        self.assertEqual(-999., dsx._FillValue)
+        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
+        self.assertTrue(dsx[:5].mask.all())
+        self.assertTrue((dsx[5:] == x[5:]).all())
+
+    def test_fill_values_from_masked_array(self):
+        template = DatasetTemplate(dimensions={'X': 10})
+        template.variables['X'] = {'dimensions': ['X'],
+                                   'type': 'float32',
+                                   'attributes': {'_FillValue': -999.}
+                                   }
+        x = np.array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5])
+        template.variables['X']['values'] = np.ma.masked_array(x,
+                                                               mask=[True, True, True, True, True,
+                                                                     False, False, False, False, False]
+                                                               )
+        template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        dsx = dataset.variables['X']
+        self.assertEqual(-999., dsx._FillValue)
+        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
+        self.assertTrue(dsx[:5].mask.all())
+        self.assertTrue((dsx[5:] == x[5:]).all())
+
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)
 # TODO: add data from Pandas dataframe (later...)

@@ -375,10 +375,10 @@ class DatasetTemplate(NetCDFGroupDict):
             if dimensions is None:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, datatype)
             else:
-                var_c_keys = list(self._create_var_opts(var))
+                var_attr = var.get('attributes', {})
+                var_c_keys = list(self._create_var_opts(var_attr))
 
-                var_c_opts = dict(
-                    (x, var[x]) for x in var_c_keys)
+                var_c_opts = {x: var_attr[x] for x in var_c_keys}
 
                 ureq_fillvalue = [
                     x for x in cwargs.keys() if x in self.fill_aliases
@@ -391,11 +391,11 @@ class DatasetTemplate(NetCDFGroupDict):
                 var_c_opts.update(cwargs)
 
                 # user precendence
-                if (ureq_fillvalue and vreq_fillvalue):
+                if ureq_fillvalue and vreq_fillvalue:
                     [var_c_opts.pop(x) for x in vreq_fillvalue]
                     fv_val = [var_c_opts.pop(x) for x in ureq_fillvalue]
                     var_c_opts['fill_value'] = fv_val[-1]
-                elif (ureq_fillvalue and not vreq_fillvalue):
+                elif ureq_fillvalue and not vreq_fillvalue:
                     fv_val = [var_c_opts.pop(x) for x in ureq_fillvalue]
                     var_c_opts['fill_value'] = fv_val[-1]
                 else:

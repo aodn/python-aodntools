@@ -407,7 +407,10 @@ class DatasetTemplate(NetCDFGroupDict):
                     varname, datatype, dimensions=dimensions, **var_c_opts)
 
             # add variable values
-            ncvar[:] = var['data']
+            if 'data' not in var:
+                raise ValueError('No data specified for variable {varname}'.format(varname=varname))
+            if var['data'] is not None:
+                ncvar[:] = var['data']
 
             # add variable attributes
             if var.get('attributes'):

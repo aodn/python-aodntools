@@ -140,6 +140,21 @@ class TestDatasetTemplate(unittest.TestCase):
         template.to_netcdf(self.temp_nc_file)
         dataset = Dataset(self.temp_nc_file)
 
+    def test_create_empty_variable(self):
+        template = DatasetTemplate(dimensions={'X': 10})
+        template.variables['X'] = {'dimensions': ['X'], 'type': 'float32'}
+        self.assertRaises(ValueError, template.to_netcdf, self.temp_nc_file)  # not providing 'data' is an error
+
+        del self._temp_nc_file  # Get a new temp file
+        template.variables['X']['data'] = None  # This is ok, it's a shortcut for all fill values
+        template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        dataset.set_auto_mask(True)
+        dsx = dataset.variables['X']
+        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
+        self.assertTrue(dsx[:].mask.all())
+
     def test_create_file(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
         template.variables['TIME']['data'] = self.values10
@@ -184,6 +199,7 @@ class TestDatasetTemplate(unittest.TestCase):
         template.to_netcdf(self.temp_nc_file)
 
         dataset = Dataset(self.temp_nc_file)
+        dataset.set_auto_mask(True)
         dsx = dataset.variables['X']
         self.assertEqual(-999., dsx._FillValue)
         self.assertIsInstance(dsx[:], np.ma.MaskedArray)

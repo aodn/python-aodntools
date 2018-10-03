@@ -132,8 +132,8 @@ class TestDatasetTemplate(unittest.TestCase):
 
     def test_set_variable_values(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
-        template.variables['TEMP']['values'] = self.values10
-        self.assertTrue(all(template.variables['TEMP']['values'] == self.values10))
+        template.variables['TEMP']['data'] = self.values10
+        self.assertTrue(all(template.variables['TEMP']['data'] == self.values10))
 
     def test_create_empty_file(self):
         template = DatasetTemplate()
@@ -142,9 +142,9 @@ class TestDatasetTemplate(unittest.TestCase):
 
     def test_create_file(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
-        template.variables['TIME']['values'] = self.values10
-        template.variables['DEPTH']['values'] = self.values1
-        template.variables['TEMP']['values'] = self.values10.reshape((10, 1))
+        template.variables['TIME']['data'] = self.values10
+        template.variables['DEPTH']['data'] = self.values1
+        template.variables['TEMP']['data'] = self.values10.reshape((10, 1))
         template.to_netcdf(self.temp_nc_file)
 
         dataset = Dataset(self.temp_nc_file)
@@ -180,7 +180,7 @@ class TestDatasetTemplate(unittest.TestCase):
                                    'attributes': {'_FillValue': -999.}
                                    }
         x = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
-        template.variables['X']['values'] = x
+        template.variables['X']['data'] = x
         template.to_netcdf(self.temp_nc_file)
 
         dataset = Dataset(self.temp_nc_file)
@@ -197,10 +197,9 @@ class TestDatasetTemplate(unittest.TestCase):
                                    'attributes': {'_FillValue': -999.}
                                    }
         x = np.array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5])
-        template.variables['X']['values'] = np.ma.masked_array(x,
-                                                               mask=[True, True, True, True, True,
-                                                                     False, False, False, False, False]
-                                                               )
+        template.variables['X']['data'] = np.ma.masked_array(x, mask=[True, True, True, True, True,
+                                                                      False, False, False, False, False]
+                                                             )
         template.to_netcdf(self.temp_nc_file)
 
         dataset = Dataset(self.temp_nc_file)

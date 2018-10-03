@@ -329,7 +329,7 @@ class DatasetTemplate(NetCDFGroupDict):
         consistent with variable array sizes.
         """
         for name, var in self.variables.iteritems():
-            values = var.get('values')
+            values = var.get('data')
             if values is None:
                 continue
 
@@ -407,7 +407,7 @@ class DatasetTemplate(NetCDFGroupDict):
                     varname, datatype, dimensions=dimensions, **var_c_opts)
 
             # add variable values
-            ncvar[:] = var['values']
+            ncvar[:] = var['data']
 
             # add variable attributes
             if var.get('attributes'):

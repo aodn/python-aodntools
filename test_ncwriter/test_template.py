@@ -105,12 +105,12 @@ class TestDatasetTemplate(unittest.TestCase):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
         template.dimensions['TIME'] = 100
         template.dimensions['DEPTH'] = 10
-        self.assertDictContainsSubset(OrderedDict([('TIME', 100), ('DEPTH', 10)]), template.dimensions)
+        self.assertEqual(OrderedDict([('TIME', 100), ('DEPTH', 10)]), template.dimensions)
 
     def test_add_variables(self):
         template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)
         template.variables['TIME'] = self.variables['TIME']
-        self.assertEqual(['TEMP', 'TIME'], template.variables.keys())
+        self.assertEqual({'TEMP', 'TIME'}, set(template.variables.keys()))
         self.assertEqual(self.variables['TIME'], template.variables['TIME'])
 
     def test_add_variable_dimensions(self):
@@ -153,10 +153,10 @@ class TestDatasetTemplate(unittest.TestCase):
             ('TIME', len(self.values10)),
             ('DEPTH', len(self.values1))
         ])
-        ds_dimensions = OrderedDict((k, v.size) for k, v in dataset.dimensions.iteritems())
+        ds_dimensions = OrderedDict((k, v.size) for k, v in dataset.dimensions.items())
         self.assertEqual(expected_dimensions, ds_dimensions)
 
-        for vname, vdict in self.variables.iteritems():
+        for vname, vdict in self.variables.items():
             ds_var = dataset[vname]
             self.assertEqual(vdict['dimensions'], list(ds_var.dimensions))
             self.assertEqual(vdict['type'], ds_var.dtype)

@@ -19,7 +19,7 @@ from copy import deepcopy
 
 import netCDF4
 
-from ncwriter.schema import validate_dimensions, validate_variables, validate_attributes
+from schema import validate_dimensions, validate_variables, validate_attributes
 
 
 class NetCDFGroupDict(object):

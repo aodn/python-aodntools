@@ -19,7 +19,7 @@ from copy import deepcopy
 
 import netCDF4
 
-from ncwriter.schema import validate_dimensions, validate_variables, validate_attributes
+from .schema import validate_dimensions, validate_variables, validate_attributes
 
 
 class NetCDFGroupDict(object):
@@ -323,13 +323,13 @@ class DatasetTemplate(NetCDFGroupDict):
             inside = inside.union(aliases)
         return list(inside)
 
-    def update_dimensinos(self):
+    def update_dimensions(self):
         """Update the sizes of dimensions to be consistent with the arrays set as variable values, if possible.
         Otherwise raise ValueError. Also raise ValueError if a dimension that already has a non-zero size is not
         consistent with variable array sizes.
         """
         for name, var in self.variables.items():
-            values = var.get('values')
+            values = var.get('data')
             if values is None:
                 continue
 
@@ -375,10 +375,10 @@ class DatasetTemplate(NetCDFGroupDict):
             if dimensions is None:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, datatype)
             else:
-                var_c_keys = list(self._create_var_opts(var))
+                var_attr = var.get('attributes', {})
+                var_c_keys = list(self._create_var_opts(var_attr))
 
-                var_c_opts = dict(
-                    (x, var[x]) for x in var_c_keys)
+                var_c_opts = {x: var_attr[x] for x in var_c_keys}
 
                 ureq_fillvalue = [
                     x for x in cwargs.keys() if x in self.fill_aliases
@@ -391,11 +391,11 @@ class DatasetTemplate(NetCDFGroupDict):
                 var_c_opts.update(cwargs)
 
                 # user precendence
-                if (ureq_fillvalue and vreq_fillvalue):
+                if ureq_fillvalue and vreq_fillvalue:
                     [var_c_opts.pop(x) for x in vreq_fillvalue]
                     fv_val = [var_c_opts.pop(x) for x in ureq_fillvalue]
                     var_c_opts['fill_value'] = fv_val[-1]
-                elif (ureq_fillvalue and not vreq_fillvalue):
+                elif ureq_fillvalue and not vreq_fillvalue:
                     fv_val = [var_c_opts.pop(x) for x in ureq_fillvalue]
                     var_c_opts['fill_value'] = fv_val[-1]
                 else:
@@ -407,7 +407,10 @@ class DatasetTemplate(NetCDFGroupDict):
                     varname, datatype, dimensions=dimensions, **var_c_opts)
 
             # add variable values
-            ncvar[:] = var['values']
+            if 'data' not in var:
+                raise ValueError('No data specified for variable {varname}'.format(varname=varname))
+            if var['data'] is not None:
+                ncvar[:] = var['data']
 
             # add variable attributes
             if var.get('attributes'):
@@ -434,7 +437,7 @@ class DatasetTemplate(NetCDFGroupDict):
         self.outfile = outfile
         self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
 
-        self.update_dimensinos()
+        self.update_dimensions()
         self.createDimensions()
         self.createVariables(**var_args)
         self.createGlobalAttrs()

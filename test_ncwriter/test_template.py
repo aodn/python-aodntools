@@ -132,19 +132,34 @@ class TestDatasetTemplate(unittest.TestCase):
 
     def test_set_variable_values(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
-        template.variables['TEMP']['values'] = self.values10
-        self.assertTrue(all(template.variables['TEMP']['values'] == self.values10))
+        template.variables['TEMP']['data'] = self.values10
+        self.assertTrue(all(template.variables['TEMP']['data'] == self.values10))
 
     def test_create_empty_file(self):
         template = DatasetTemplate()
         template.to_netcdf(self.temp_nc_file)
         dataset = Dataset(self.temp_nc_file)
 
+    def test_create_empty_variable(self):
+        template = DatasetTemplate(dimensions={'X': 10})
+        template.variables['X'] = {'dimensions': ['X'], 'type': 'float32'}
+        self.assertRaises(ValueError, template.to_netcdf, self.temp_nc_file)  # not providing 'data' is an error
+
+        del self._temp_nc_file  # Get a new temp file
+        template.variables['X']['data'] = None  # This is ok, it's a shortcut for all fill values
+        template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        dataset.set_auto_mask(True)
+        dsx = dataset.variables['X']
+        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
+        self.assertTrue(dsx[:].mask.all())
+
     def test_create_file(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
-        template.variables['TIME']['values'] = self.values10
-        template.variables['DEPTH']['values'] = self.values1
-        template.variables['TEMP']['values'] = self.values10.reshape((10, 1))
+        template.variables['TIME']['data'] = self.values10
+        template.variables['DEPTH']['data'] = self.values1
+        template.variables['TEMP']['data'] = self.values10.reshape((10, 1))
         template.to_netcdf(self.temp_nc_file)
 
         dataset = Dataset(self.temp_nc_file)
@@ -172,6 +187,43 @@ class TestDatasetTemplate(unittest.TestCase):
 
         ds_global_attributes = OrderedDict((k, dataset.getncattr(k)) for k in dataset.ncattrs())
         self.assertEqual(self.global_attributes, ds_global_attributes)
+
+    def test_fill_values(self):
+        template = DatasetTemplate(dimensions={'X': 10})
+        template.variables['X'] = {'dimensions': ['X'],
+                                   'type': 'float32',
+                                   'attributes': {'_FillValue': -999.}
+                                   }
+        x = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
+        template.variables['X']['data'] = x
+        template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        dataset.set_auto_mask(True)
+        dsx = dataset.variables['X']
+        self.assertEqual(-999., dsx._FillValue)
+        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
+        self.assertTrue(dsx[:5].mask.all())
+        self.assertTrue((dsx[5:] == x[5:]).all())
+
+    def test_fill_values_from_masked_array(self):
+        template = DatasetTemplate(dimensions={'X': 10})
+        template.variables['X'] = {'dimensions': ['X'],
+                                   'type': 'float32',
+                                   'attributes': {'_FillValue': -999.}
+                                   }
+        x = np.array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5])
+        template.variables['X']['data'] = np.ma.masked_array(x, mask=[True, True, True, True, True,
+                                                                      False, False, False, False, False]
+                                                             )
+        template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        dsx = dataset.variables['X']
+        self.assertEqual(-999., dsx._FillValue)
+        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
+        self.assertTrue(dsx[:5].mask.all())
+        self.assertTrue((dsx[5:] == x[5:]).all())
 
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)

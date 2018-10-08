@@ -38,7 +38,8 @@ VARIABLE_DEFINITION_SCHEMA = {
             "items": {"type": "string", "pattern": NAME_PATTERN}
         },
         "type": {"type": "string"},
-        "attributes": ATTRIBUTES_SCHEMA
+        "attributes": ATTRIBUTES_SCHEMA,
+        "data": {"type": ["null", "array"]}
     },
     "additionalProperties": False
 }

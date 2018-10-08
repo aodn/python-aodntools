@@ -32,12 +32,14 @@ class TestSchema(unittest.TestCase):
         validate_variables({'X': {'type': 'float32'}})
         validate_variables({'X': {'dimensions': []}})
         validate_variables({'X': {'attributes': {'name': 'X'}}})
+        validate_variables({'X': {'data': None}})
         validate_variables({'X': {'dimensions': ['X'], 'type': 'float32'}})
         validate_variables({
             'X': {
                 'dimensions': ['X'],
                 'type': 'float32',
-                'attributes': {'name': 'X', 'count': 1}
+                'attributes': {'name': 'X', 'count': 1},
+                'data': [42]
             }
         })
 
@@ -51,6 +53,8 @@ class TestSchema(unittest.TestCase):
             validate_variables({'X': {'type': 'float32', 'something': 'else'}})
         with self.assertRaises(ValidationError):
             validate_variables({'X': {'type': 'float32', 'attributes': 'none'}})
+        with self.assertRaises(ValidationError):
+            validate_variables({'X': {'data': 100}})
 
     def test_validate_attributes(self):
         validate_attributes({})

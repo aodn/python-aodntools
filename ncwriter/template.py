@@ -19,7 +19,7 @@ from copy import deepcopy
 
 import netCDF4
 
-from schema import validate_dimensions, validate_variables, validate_attributes
+from .schema import validate_dimensions, validate_variables, validate_attributes
 
 
 class NetCDFGroupDict(object):
@@ -328,7 +328,7 @@ class DatasetTemplate(NetCDFGroupDict):
         Otherwise raise ValueError. Also raise ValueError if a dimension that already has a non-zero size is not
         consistent with variable array sizes.
         """
-        for name, var in self.variables.iteritems():
+        for name, var in self.variables.items():
             values = var.get('data')
             if values is None:
                 continue
@@ -368,7 +368,7 @@ class DatasetTemplate(NetCDFGroupDict):
         **kwargs are included here to overload all options for all variables
         like `zlib` and friends.
         """
-        for varname, var in self.variables.iteritems():
+        for varname, var in self.variables.items():
             datatype = var['type']
             dimensions = var['dimensions']
             cwargs = kwargs.copy()

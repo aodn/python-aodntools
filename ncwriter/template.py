@@ -323,7 +323,7 @@ class DatasetTemplate(NetCDFGroupDict):
             inside = inside.union(aliases)
         return list(inside)
 
-    def update_dimensinos(self):
+    def update_dimensions(self):
         """Update the sizes of dimensions to be consistent with the arrays set as variable values, if possible.
         Otherwise raise ValueError. Also raise ValueError if a dimension that already has a non-zero size is not
         consistent with variable array sizes.
@@ -437,7 +437,7 @@ class DatasetTemplate(NetCDFGroupDict):
         self.outfile = outfile
         self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
 
-        self.update_dimensinos()
+        self.update_dimensions()
         self.createDimensions()
         self.createVariables(**var_args)
         self.createGlobalAttrs()

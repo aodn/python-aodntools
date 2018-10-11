@@ -62,9 +62,6 @@ class NetCDFGroupDict(object):
         self.variables = variables or OrderedDict()
         self.global_attributes = global_attributes or OrderedDict()
 
-        if not self.is_dim_consistent():
-            raise TypeError("Correct the dimensions.")
-
         self.check_var(self.variables)
         self.check_consistency(self.dimensions, self.variables)
 
@@ -204,6 +201,8 @@ class DatasetTemplate(NetCDFGroupDict):
         ])
         self.fill_aliases = set(
             ['fill_value', 'missing_value', 'FillValue', '_FillValue'])
+        self.outfile = None
+        self.ncobj = None
 
     @classmethod
     def from_json(cls, path):
@@ -349,9 +348,12 @@ class DatasetTemplate(NetCDFGroupDict):
         :return: None
         """
         self.outfile = outfile
-        self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
 
         self.update_dimensions()
+        if not self.is_dim_consistent():
+            raise ValueError("Dimensions.")
+
+        self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
         self.create_dimensions()
         self.create_variables(**var_args)
         self.create_global_attributes()

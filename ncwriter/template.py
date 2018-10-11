@@ -3,14 +3,11 @@
 written by: Hugo Oliveira ocehugo@gmail.com
 """
 
-# TODO write tests
 # TODO how we handle groups!?
 # TODO cleanup the user precedence rules of fill_values
 # TODO is_dim_consistent too complex
-# TODO change_time too complex
 # TODO check_var too complex
 # TODO createVariables too complex
-# TODO implement from_file/from_cdl/from_json kwarg!?
 # TODO Allow for attribute types to be specified in JSON
 
 import json
@@ -34,25 +31,23 @@ class NetCDFGroupDict(object):
             variables is <key:[str,class,list,dict,int]> dict
             global_attributes is a <key:int> dict
 
-            This class has __add__ to growth variables/dims/global attrs
-            and __sub__ to remove unwanted variables from
-            other :NetCDFGroupDict: instances.
+            This class has __add__ to combine variables/dimensions/global attributes
+            from :NetCDFGroupDict: instances.
 
             Example:
                 dmn = {'lon':360,'lat':210}
                 var = {}
                 var['water'] = {'type':'double','dimensions':['lat','lon']}
                 w1 = NetCDFGroupDict(dimensions=dmn,variables=var)
+
                 dmn2 = {'time':300,'lon':720,'lat':330}
                 var2 = {}
                 var2['temp'] = {'type':'double','dimensions':['time','lat','lon']}
                 w2 = NetCDFGroupDict(dimensions=dmn2,variables=var2)
+
                 w3 = w1+w2
                 #w3.variables.keys() = ['water','temp']
                 #w3.dimensions = {'time':300,'lon':360,'lat':210}
-                w4 = w2-w1
-                #w4.variables.keys() = ['temp']
-                #w4.dimensions = {'lon':720,'lat':330,'time':300}
         """
         self._dimensions = None
         self._variables = None
@@ -74,6 +69,7 @@ class NetCDFGroupDict(object):
 
     @property
     def dimensions(self):
+        """Property to store the dictionary mapping dimension names to their sizes."""
         return self._dimensions
 
     @dimensions.setter
@@ -83,6 +79,9 @@ class NetCDFGroupDict(object):
 
     @property
     def variables(self):
+        """Property to store dictionary of variables. Keys are variable names, values are dictionaries of variable
+        properties (dimensions, type, attributes, etc...)
+        """
         return self._variables
 
     @variables.setter
@@ -92,6 +91,7 @@ class NetCDFGroupDict(object):
 
     @property
     def global_attributes(self):
+        """Property to store dictionary of global attributes"""
         return self._global_attributes
 
     @global_attributes.setter
@@ -100,8 +100,7 @@ class NetCDFGroupDict(object):
         self._global_attributes = value
 
     def is_dim_consistent(self):
-        """Check if the variable dictionary
-        is consistent with current dimensions"""
+        """Check if the variable dictionary is consistent with current dimensions"""
         checkdims = set()
         for k in self.variables.keys():
             try:
@@ -140,8 +139,7 @@ class NetCDFGroupDict(object):
 
     @classmethod
     def check_var(cls, vardict, name=None):
-        """ Check if the dictionary have all the required fields
-        to be defined as variable"""
+        """Check if the dictionary have all the required fields to be defined as variable """
         if name is None:
             name = 'input'
 
@@ -178,7 +176,7 @@ class NetCDFGroupDict(object):
 
     @classmethod
     def check_consistency(self, dimdict, vdict):
-        """ Check the dictionary """
+        """Check that all dimensions referenced by variables in :vdict: are defined in the :dimdict:"""
         alldims = dimdict.keys()
         allvars = vdict.keys()
         for k in allvars:
@@ -193,26 +191,25 @@ class NetCDFGroupDict(object):
 
 
 class DatasetTemplate(NetCDFGroupDict):
+    """Template object used for creating netCDF files"""
+
     def __init__(self, *args, **kwargs):
         super(DatasetTemplate, self).__init__(*args, **kwargs)
-        self.cattrs = set([
-            'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous',
-            'chunksizes', 'endian', 'least_significant_digit'
-        ])
-        self.fill_aliases = set(
-            ['fill_value', 'missing_value', 'FillValue', '_FillValue'])
+        self.cattrs = {'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous', 'chunksizes', 'endian',
+                       'least_significant_digit'}
+        self.fill_aliases = {'fill_value', 'missing_value', 'FillValue', '_FillValue'}
         self.outfile = None
         self.ncobj = None
 
     @classmethod
     def from_json(cls, path):
-        # load the JSON file into a dict
+        """Load template from a JSON file"""
+
         with open(path) as f:
             template = json.load(f, object_pairs_hook=OrderedDict)
 
-        # e.g. this could call out to JSONschema to make sure the JSON has the expected
-        # high level structure, and  could refuse to create the object right here if it wasn't correct
         # TODO: validate_template(template)
+        #       - just check that the only top-level properties are "dimensions", "variables" and "global_attribute"
 
         return cls(dimensions=template.get('dimensions'),
                    variables=template.get('variables'),
@@ -225,7 +222,8 @@ class DatasetTemplate(NetCDFGroupDict):
             `zlib`
             `least_significant_digit`
             `dimensions`
-            etc"""
+            etc
+        """
         vset = set(list(vdict.keys()))
         inside = vset.intersection(self.cattrs)
         aliases = vset.intersection(self.fill_aliases)
@@ -303,7 +301,7 @@ class DatasetTemplate(NetCDFGroupDict):
 
                 var_c_opts.update(cwargs)
 
-                # user precendence
+                # user precedence
                 if ureq_fillvalue and vreq_fillvalue:
                     [var_c_opts.pop(x) for x in vreq_fillvalue]
                     fv_val = [var_c_opts.pop(x) for x in ureq_fillvalue]

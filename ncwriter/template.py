@@ -174,8 +174,8 @@ class NetCDFGroupDict(object):
                 ValueError(
                     "Type for %s should be a string or type object" % name)
 
-    @classmethod
-    def check_consistency(self, dimdict, vdict):
+    @staticmethod
+    def check_consistency(dimdict, vdict):
         """Check that all dimensions referenced by variables in :vdict: are defined in the :dimdict:"""
         alldims = dimdict.keys()
         allvars = vdict.keys()

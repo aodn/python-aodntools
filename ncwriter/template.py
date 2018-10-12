@@ -3,14 +3,11 @@
 written by: Hugo Oliveira ocehugo@gmail.com
 """
 
-# TODO write tests
 # TODO how we handle groups!?
 # TODO cleanup the user precedence rules of fill_values
 # TODO is_dim_consistent too complex
-# TODO change_time too complex
 # TODO check_var too complex
 # TODO createVariables too complex
-# TODO implement from_file/from_cdl/from_json kwarg!?
 # TODO Allow for attribute types to be specified in JSON
 
 import json
@@ -27,7 +24,6 @@ class NetCDFGroupDict(object):
                  dimensions=None,
                  variables=None,
                  global_attributes=None,
-                 title='NetCDFGroupDict',
                  **kwargs):
         """ A dictionary to hold netCDF groups
             It consist of a generic class holding 3 different dictionaries:
@@ -35,49 +31,33 @@ class NetCDFGroupDict(object):
             variables is <key:[str,class,list,dict,int]> dict
             global_attributes is a <key:int> dict
 
-            This class has __add__ to growth variables/dims/global attrs
-            and __sub__ to remove unwanted variables from
-            other :NetCDFGroupDict: instances.
+            This class has __add__ to combine variables/dimensions/global attributes
+            from :NetCDFGroupDict: instances.
 
             Example:
                 dmn = {'lon':360,'lat':210}
                 var = {}
                 var['water'] = {'type':'double','dimensions':['lat','lon']}
                 w1 = NetCDFGroupDict(dimensions=dmn,variables=var)
+
                 dmn2 = {'time':300,'lon':720,'lat':330}
                 var2 = {}
                 var2['temp'] = {'type':'double','dimensions':['time','lat','lon']}
                 w2 = NetCDFGroupDict(dimensions=dmn2,variables=var2)
+
                 w3 = w1+w2
                 #w3.variables.keys() = ['water','temp']
                 #w3.dimensions = {'time':300,'lon':360,'lat':210}
-                w4 = w2-w1
-                #w4.variables.keys() = ['temp']
-                #w4.dimensions = {'lon':720,'lat':330,'time':300}
         """
         self._dimensions = None
         self._variables = None
         self._global_attributes = None
 
-        self.title = title
         self.dimensions = dimensions or OrderedDict()
         self.variables = variables or OrderedDict()
         self.global_attributes = global_attributes or OrderedDict()
 
-        if self.is_dim_consistent:
-            self.rdimensions = dict((x, True) if y is -1 else (x, False)
-                                    for x, y in zip(self.dimensions.keys(),
-                                                    self.dimensions.values()))
-        else:
-            raise TypeError("Correct the dimensions.")
-
-        notstr = self.title.__class__ is not str
-        if notstr:
-            raise TypeError("Title is not a str object")
-
-        self.check_dims(self.dimensions)
         self.check_var(self.variables)
-        self.check_global_attributes(self.global_attributes)
         self.check_consistency(self.dimensions, self.variables)
 
     def __add__(self, other):
@@ -85,11 +65,11 @@ class NetCDFGroupDict(object):
         self_copy.dimensions.update(other.dimensions)
         self_copy.variables.update(other.variables)
         self_copy.global_attributes.update(other.global_attributes)
-        self_copy.title = "{t1} + {t2}".format(t1=self.title, t2=other.title)
         return self_copy
 
     @property
     def dimensions(self):
+        """Property to store the dictionary mapping dimension names to their sizes."""
         return self._dimensions
 
     @dimensions.setter
@@ -99,6 +79,9 @@ class NetCDFGroupDict(object):
 
     @property
     def variables(self):
+        """Property to store dictionary of variables. Keys are variable names, values are dictionaries of variable
+        properties (dimensions, type, attributes, etc...)
+        """
         return self._variables
 
     @variables.setter
@@ -108,6 +91,7 @@ class NetCDFGroupDict(object):
 
     @property
     def global_attributes(self):
+        """Property to store dictionary of global attributes"""
         return self._global_attributes
 
     @global_attributes.setter
@@ -116,8 +100,7 @@ class NetCDFGroupDict(object):
         self._global_attributes = value
 
     def is_dim_consistent(self):
-        """Check if the variable dictionary
-        is consistent with current dimensions"""
+        """Check if the variable dictionary is consistent with current dimensions"""
         checkdims = set()
         for k in self.variables.keys():
             try:
@@ -154,75 +137,9 @@ class NetCDFGroupDict(object):
         else:
             return True
 
-    def search_time_in_vars(self):
-        """Check all vars for specific time variables associated with them"""
-        tvars = set()
-        for v in self.variables:
-            try:
-                tvars.add(self.variables[v]['attributes']['time']['value'])
-            except KeyError:
-                None
-
-        isnone = tvars == set()
-        if isnone:
-            return None
-        else:
-            return tvars
-
-    def change_time(self, var, timevar):
-        """Change the time dimension associated with variable :var:
-            :var: a list or str
-                Ex: 'zeta'
-                   ['zeta','u']
-                   ['u','v']
-                   ['Ptracer1','Ptracer2']
-            :timevar: a list or str
-                Ex: 'bry_time'
-                   ['zeta_time','uv_time']
-                   ['uv_time']
-                   ['ptime1','ptime2']
-        """
-
-        if var.__class__ is str:
-            var = [var]
-        if timevar.__class__ is str:
-            timevar = [timevar]
-
-        if len(var) == 1 and len(timevar) > 1:
-            raise ValueError('Invalid input')
-        elif len(var) > 1 and len(timevar) == 1:
-            timevar = [timevar for x in range(len(var))]
-
-        for v, t in zip(var, timevar):
-            vargroup = set(self.variables.keys())
-            dimgroup = set(self.dimensions.keys())
-            v_included = v in vargroup
-            t_included = t in vargroup and t in dimgroup
-
-            # varname should match dimname for time info
-            if not t_included:
-                raise ValueError('Time variable:', t, 'not present!')
-            if not v_included:
-                for k in self.variables.keys():
-                    if v in k:
-                        self.variables[k]['dimensions'][0] = t
-                        self.variables[k]['attributes']['time']['value'] = t
-            else:
-                self.variables[v]['dimensions'][0] = t
-                self.variables[v]['attributes']['time']['value'] = t
-
     @classmethod
-    def check_dims(self, dimdict):
-        """ Check the dictionary """
-        for d in dimdict:
-            notint = dimdict[d].__class__ is not int
-            if notint:
-                ValueError("Dimension %s is not an integer object" % d)
-
-    @classmethod
-    def check_var(self, vardict, name=None):
-        """ Check if the dictionary have all the reuqired fields
-        to be defined as variable"""
+    def check_var(cls, vardict, name=None):
+        """Check if the dictionary have all the required fields to be defined as variable """
         if name is None:
             name = 'input'
 
@@ -235,7 +152,7 @@ class NetCDFGroupDict(object):
 
         if have_none:
             for k in vkeys:
-                self.check_var(vardict[k], name=k)
+                cls.check_var(vardict[k], name=k)
 
         if have_dims:
             notnone = vardict['dimensions'] is not None
@@ -257,17 +174,9 @@ class NetCDFGroupDict(object):
                 ValueError(
                     "Type for %s should be a string or type object" % name)
 
-    @classmethod
-    def check_global_attributes(self, gadict):
-        """ Check the dictionary """
-        for g in gadict:
-            notstr = gadict[g].__class__ is not str
-            if notstr:
-                ValueError("Global Attr %s is not an integer object" % g)
-
-    @classmethod
-    def check_consistency(self, dimdict, vdict):
-        """ Check the dictionary """
+    @staticmethod
+    def check_consistency(dimdict, vdict):
+        """Check that all dimensions referenced by variables in :vdict: are defined in the :dimdict:"""
         alldims = dimdict.keys()
         allvars = vdict.keys()
         for k in allvars:
@@ -282,24 +191,25 @@ class NetCDFGroupDict(object):
 
 
 class DatasetTemplate(NetCDFGroupDict):
+    """Template object used for creating netCDF files"""
+
     def __init__(self, *args, **kwargs):
         super(DatasetTemplate, self).__init__(*args, **kwargs)
-        self.cattrs = set([
-            'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous',
-            'chunksizes', 'endian', 'least_significant_digit'
-        ])
-        self.fill_aliases = set(
-            ['fill_value', 'missing_value', 'FillValue', '_FillValue'])
+        self.cattrs = {'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous', 'chunksizes', 'endian',
+                       'least_significant_digit'}
+        self.fill_aliases = {'fill_value', 'missing_value', 'FillValue', '_FillValue'}
+        self.outfile = None
+        self.ncobj = None
 
     @classmethod
     def from_json(cls, path):
-        # load the JSON file into a dict
+        """Load template from a JSON file"""
+
         with open(path) as f:
             template = json.load(f, object_pairs_hook=OrderedDict)
 
-        # e.g. this could call out to JSONschema to make sure the JSON has the expected
-        # high level structure, and  could refuse to create the object right here if it wasn't correct
         # TODO: validate_template(template)
+        #       - just check that the only top-level properties are "dimensions", "variables" and "global_attribute"
 
         return cls(dimensions=template.get('dimensions'),
                    variables=template.get('variables'),
@@ -312,7 +222,8 @@ class DatasetTemplate(NetCDFGroupDict):
             `zlib`
             `least_significant_digit`
             `dimensions`
-            etc"""
+            etc
+        """
         vset = set(list(vdict.keys()))
         inside = vset.intersection(self.cattrs)
         aliases = vset.intersection(self.fill_aliases)
@@ -357,13 +268,13 @@ class DatasetTemplate(NetCDFGroupDict):
                     )
                 )
 
-    def createDimensions(self):
+    def create_dimensions(self):
         """Create the dimensions on the netcdf file"""
         for dname, dval in zip(self.dimensions.keys(),
                                self.dimensions.values()):
             self.ncobj.createDimension(dname, dval)
 
-    def createVariables(self, **kwargs):
+    def create_variables(self, **kwargs):
         """Create all variables for the current class
         **kwargs are included here to overload all options for all variables
         like `zlib` and friends.
@@ -390,7 +301,7 @@ class DatasetTemplate(NetCDFGroupDict):
 
                 var_c_opts.update(cwargs)
 
-                # user precendence
+                # user precedence
                 if ureq_fillvalue and vreq_fillvalue:
                     [var_c_opts.pop(x) for x in vreq_fillvalue]
                     fv_val = [var_c_opts.pop(x) for x in ureq_fillvalue]
@@ -419,7 +330,7 @@ class DatasetTemplate(NetCDFGroupDict):
                     attrs.pop(not_attr)
                 ncvar.setncatts(attrs)
 
-    def createGlobalAttrs(self):
+    def create_global_attributes(self):
         """Add the global attributes for the current class"""
         for att in self.global_attributes.keys():
             self.ncobj.setncattr(att, self.global_attributes[att])
@@ -435,12 +346,15 @@ class DatasetTemplate(NetCDFGroupDict):
         :return: None
         """
         self.outfile = outfile
-        self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
 
         self.update_dimensions()
-        self.createDimensions()
-        self.createVariables(**var_args)
-        self.createGlobalAttrs()
+        if not self.is_dim_consistent():
+            raise ValueError("Dimensions.")
+
+        self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
+        self.create_dimensions()
+        self.create_variables(**var_args)
+        self.create_global_attributes()
         self.ncobj.sync()
         self.ncobj.close()
         self.ncobj = netCDF4.Dataset(self.outfile, 'a')

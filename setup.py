@@ -1,13 +1,14 @@
 from setuptools import setup, find_packages
 
-from ncwriter.version import __version__
+version = {}
+with open("ncwriter/version.py") as fp:
+    exec(fp.read(), version)
 
-INSTALL_REQUIRES = [line.strip() for line in open('requirements.txt')]
-# INSTALL_REQUIRES = [
-#     'jsonschema==2.6.0',
-#     'numpy>=1.13.0',
-#     'netCDF4'
-# ]
+INSTALL_REQUIRES = [
+    'jsonschema==2.6.0',
+    'numpy>=1.13.0',
+    'netCDF4'
+]
 
 # TODO: add this when we have JSON schema files and templates bundled
 # PACKAGE_DATA = {
@@ -20,7 +21,7 @@ PACKAGE_NAME = 'ncwriter'
 
 setup(
     name=PACKAGE_NAME,
-    version=__version__,
+    version=version['__version__'],
     packages=find_packages(exclude=PACKAGE_EXCLUDES),
     # package_data=PACKAGE_DATA,
     url='https://github.com/aodn',

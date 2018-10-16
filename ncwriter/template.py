@@ -281,7 +281,7 @@ class DatasetTemplate(NetCDFGroupDict):
         """
         for varname, var in self.variables.items():
             datatype = var['type']
-            dimensions = var['dimensions']
+            dimensions = var.get('dimensions')
             cwargs = kwargs.copy()
             if dimensions is None:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, datatype)

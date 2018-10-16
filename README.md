@@ -40,7 +40,7 @@ template.global_attributes.update({
 # add/update variables
 template.variables["TIME"]["atttributes"] = {
     "standard_name": "time",
-    "units": "days since 1950-01-01T00:00:00Z"
+    "units": "days since 1950-01-01 00:00:00 +00:00"
 }
 template.variables["TEMP"] = {
     "dimensions": ["TIME"],

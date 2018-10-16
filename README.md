@@ -34,7 +34,7 @@ template = DatasetTemplate.from_json('template.json')
 # add/update attributes
 template.global_attributes.update({
     'comment': 'this was added later',
-    'date_created': '2018-09-20 00:00:00 +00:00'
+    'date_created': '2018-09-20T00:00:00Z'
     })
 
 # add/update variables

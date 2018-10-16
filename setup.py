@@ -1,8 +1,6 @@
 from setuptools import setup, find_packages
 
-version = {}
-with open("ncwriter/version.py") as fp:
-    exec(fp.read(), version)
+import versioneer
 
 INSTALL_REQUIRES = [
     'jsonschema==2.6.0',
@@ -21,7 +19,7 @@ PACKAGE_NAME = 'ncwriter'
 
 setup(
     name=PACKAGE_NAME,
-    version=version['__version__'],
+    version=versioneer.get_version(),
     packages=find_packages(exclude=PACKAGE_EXCLUDES),
     # package_data=PACKAGE_DATA,
     url='https://github.com/aodn',

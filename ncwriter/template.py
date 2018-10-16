@@ -351,10 +351,15 @@ class DatasetTemplate(NetCDFGroupDict):
         if not self.is_dim_consistent():
             raise ValueError("Dimensions.")
 
-        self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
-        self.create_dimensions()
-        self.create_variables(**var_args)
-        self.create_global_attributes()
-        self.ncobj.sync()
-        self.ncobj.close()
+        try:
+            self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
+            self.create_dimensions()
+            self.create_variables(**var_args)
+            self.create_global_attributes()
+            self.ncobj.sync()
+        except Exception:
+            raise
+        finally:
+            self.ncobj.close()
+
         self.ncobj = netCDF4.Dataset(self.outfile, 'a')

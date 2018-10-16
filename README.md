@@ -34,13 +34,13 @@ template = DatasetTemplate.from_json('template.json')
 # add/update attributes
 template.global_attributes.update({
     'comment': 'this was added later',
-    'date_created': '2018-09-20T00:00:00Z'
+    'date_created': '2018-09-20 00:00:00 +00:00'
     })
 
 # add/update variables
 template.variables["TIME"]["atttributes"] = {
     "standard_name": "time",
-    "units": "days since 1950-01-01T00:00:00Z"
+    "units": "days since 1950-01-01 00:00:00 +00:00"
 }
 template.variables["TEMP"] = {
     "dimensions": ["TIME"],

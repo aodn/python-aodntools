@@ -1,0 +1,6 @@
+# Python files
+*.pyc
+*.egg-info
+
+# PyCharm settings
+.idea

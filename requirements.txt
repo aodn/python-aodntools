@@ -1,3 +1,2 @@
-numpy
-netCDF4
-jsonschema
+--index-url https://pypi.python.org/simple/
+-e .

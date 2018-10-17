@@ -225,6 +225,19 @@ class TestDatasetTemplate(unittest.TestCase):
         self.assertTrue(dsx[:5].mask.all())
         self.assertTrue((dsx[5:] == x[5:]).all())
 
+    def test_close_file_on_exception(self):
+        template = DatasetTemplate.from_json(TEMPLATE_JSON)
+        self.assertIsNone(template.ncobj)
+        self.assertRaises(ValueError, template.to_netcdf, self.temp_nc_file)
+        self.assertFalse(template.ncobj.isopen())
+
+    def test_dimensionless_variable(self):
+        template = DatasetTemplate(variables={'X': {'type': 'double', 'data': None}})
+        template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        self.assertEqual((), dataset.variables['X'].dimensions)
+
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)
 # TODO: add data from Pandas dataframe (later...)

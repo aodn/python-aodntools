@@ -36,6 +36,24 @@ def metadata_attributes(attr):
     return meta
 
 
+def special_attributes(attr):
+    """
+    Helper function to extract the special attributes (defining netCDF file structure) from a dictionary.
+    Special attributes are those with keys beginning with an underscore character. The underscore is removed
+    in the keys of the output dictionary.
+
+    :param attr: Attribute dictionary (any dictionary-like class)
+    :return: Dictionary of special attributes
+    :rtype: same type as `attr`
+    """
+    meta = attr.__class__()
+    for k, v in attr.items():
+        if k[0].startswith('_'):
+            meta[k[1:]] = v
+
+    return meta
+
+
 class NetCDFGroupDict(object):
     def __init__(self,
                  dimensions=None,
@@ -210,7 +228,7 @@ class DatasetTemplate(NetCDFGroupDict):
         super(DatasetTemplate, self).__init__(*args, **kwargs)
         self.cattrs = {'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous', 'chunksizes', 'endian',
                        'least_significant_digit'}
-        self.fill_aliases = {'fill_value', 'missing_value', 'FillValue', '_FillValue'}
+        self.fill_aliases = {'fill_value', 'missing_value', 'FillValue'}
         self.outfile = None
         self.ncobj = None
 
@@ -230,22 +248,29 @@ class DatasetTemplate(NetCDFGroupDict):
                    )
 
     def _create_var_opts(self, vdict):
-        """Return a list with attribute names required for the creation of variable
+        """Return a dictionary of attributes required for the creation of variable
         defined by :vdict: This include creation/special options like:
             `zlib`
             `least_significant_digit`
-            `_dimensions`
+            `fill_value`
             etc
         """
-        vset = set(list(vdict.keys()))
-        inside = vset.intersection(self.cattrs)
-        aliases = vset.intersection(self.fill_aliases)
+        metadata_dict = metadata_attributes(vdict)
+        special_dict = special_attributes(vdict)
+        struct_keys = self.cattrs.intersection(special_dict.keys())
+        fill_aliases = self.fill_aliases.intersection(special_dict.keys())
+        fill_aliases.update(
+            self.fill_aliases.intersection(metadata_dict.keys())  # in case fill value was specified without underscore
+        )
 
-        if len(aliases) > 1:
+        if len(fill_aliases) > 1:
             raise ValueError('You can only provide one missing value alias!')
-        else:
-            inside = inside.union(aliases)
-        return list(inside)
+
+        struct_keys = struct_keys.union(fill_aliases)
+        return {k: v
+                for k, v in special_dict.items()
+                if k in struct_keys
+                }
 
     def update_dimensions(self):
         """Update the sizes of dimensions to be consistent with the arrays set as variable values, if possible.
@@ -283,8 +308,7 @@ class DatasetTemplate(NetCDFGroupDict):
 
     def create_dimensions(self):
         """Create the dimensions on the netcdf file"""
-        for dname, dval in zip(self.dimensions.keys(),
-                               self.dimensions.values()):
+        for dname, dval in self.dimensions.items():
             self.ncobj.createDimension(dname, dval)
 
     def create_variables(self, **kwargs):
@@ -292,17 +316,14 @@ class DatasetTemplate(NetCDFGroupDict):
         **kwargs are included here to overload all options for all variables
         like `zlib` and friends.
         """
-        for varname, var in self.variables.items():
-            datatype = var['_datatype']
-            dimensions = var.get('_dimensions')
+        for varname, varattr in self.variables.items():
+            datatype = varattr['_datatype']
+            dimensions = varattr.get('_dimensions')
             cwargs = kwargs.copy()
             if dimensions is None:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, datatype)
             else:
-                var_attr = var.get('attributes', {})
-                var_c_keys = list(self._create_var_opts(var_attr))
-
-                var_c_opts = {x: var_attr[x] for x in var_c_keys}
+                var_c_opts = self._create_var_opts(varattr)
 
                 ureq_fillvalue = [
                     x for x in cwargs.keys() if x in self.fill_aliases
@@ -331,17 +352,13 @@ class DatasetTemplate(NetCDFGroupDict):
                     varname, datatype, dimensions=dimensions, **var_c_opts)
 
             # add variable values
-            if '_data' not in var:
+            if '_data' not in varattr:
                 raise ValueError('No data specified for variable {varname}'.format(varname=varname))
-            if var['_data'] is not None:
-                ncvar[:] = var['_data']
+            if varattr['_data'] is not None:
+                ncvar[:] = varattr['_data']
 
             # add variable attributes
-            if var.get('attributes'):
-                attrs = var['attributes'].copy()
-                for not_attr in self._create_var_opts(attrs):
-                    attrs.pop(not_attr)
-                ncvar.setncatts(attrs)
+            ncvar.setncatts(metadata_attributes(varattr))
 
     def create_global_attributes(self):
         """Add the global attributes for the current class"""

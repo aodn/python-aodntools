@@ -8,11 +8,32 @@ from collections import OrderedDict
 import numpy as np
 from netCDF4 import Dataset
 
-from ncwriter import DatasetTemplate, ValidationError, metadata_attributes
+from ncwriter import DatasetTemplate, ValidationError, metadata_attributes, special_attributes
 
 TEST_ROOT = os.path.dirname(__file__)
 TEMPLATE_JSON = os.path.join(TEST_ROOT, 'template1.json')
 TEMPLATE_PARTIAL_JSON = os.path.join(TEST_ROOT, 'template_partial.json')
+
+
+class TestUtils(unittest.TestCase):
+    def test_metadata_attributes(self):
+        self.assertEqual({}, metadata_attributes({}))
+        self.assertEqual({}, metadata_attributes({'_dimensions': {}, '_fill_value': -999}))
+        self.assertEqual({'title': 'Title'},
+                         metadata_attributes({'title': 'Title'})
+                         )
+        self.assertEqual({'title': 'Title'},
+                         metadata_attributes({'title': 'Title', '_fill_value': -999})
+                         )
+        self.assertIsInstance(metadata_attributes(OrderedDict()), OrderedDict)
+
+    def test_special_attributes(self):
+        self.assertEqual({}, special_attributes({}))
+        self.assertEqual({}, special_attributes({'title': 'Title'}))
+        self.assertEqual({'dimensions': {}, 'fill_value': -999},
+                         special_attributes({'_dimensions': {}, '_fill_value': -999}))
+        self.assertEqual({'fill_value': -999},
+                         special_attributes({'title': 'Title', '_fill_value': -999}))
 
 
 class TestDatasetTemplate(unittest.TestCase):
@@ -176,10 +197,7 @@ class TestDatasetTemplate(unittest.TestCase):
             self.assertEqual(vdict['_dimensions'], list(ds_var.dimensions))
             self.assertEqual(vdict['_datatype'], ds_var.dtype)
             ds_var_attr = OrderedDict((k, ds_var.getncattr(k)) for k in ds_var.ncattrs())
-            if vdict.get('attributes') is None:
-                self.assertEqual({}, ds_var_attr)
-            else:
-                self.assertEqual(vdict['attributes'], ds_var_attr)
+            self.assertEqual(metadata_attributes(vdict), ds_var_attr)
 
         self.assertTrue(all(dataset['TIME'] == self.values10))
         self.assertTrue(all(dataset['DEPTH'] == self.values1))
@@ -192,7 +210,7 @@ class TestDatasetTemplate(unittest.TestCase):
         template = DatasetTemplate(dimensions={'X': 10})
         template.variables['X'] = {'_dimensions': ['X'],
                                    '_datatype': 'float32',
-                                   'attributes': {'_FillValue': -999.}
+                                   '_FillValue': -999.
                                    }
         x = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
         template.variables['X']['_data'] = x
@@ -210,7 +228,7 @@ class TestDatasetTemplate(unittest.TestCase):
         template = DatasetTemplate(dimensions={'X': 10})
         template.variables['X'] = {'_dimensions': ['X'],
                                    '_datatype': 'float32',
-                                   'attributes': {'_FillValue': -999.}
+                                   '_FillValue': -999.
                                    }
         x = np.array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5])
         template.variables['X']['_data'] = np.ma.masked_array(x, mask=[True, True, True, True, True,

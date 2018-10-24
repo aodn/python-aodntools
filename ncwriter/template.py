@@ -16,7 +16,24 @@ from copy import deepcopy
 
 import netCDF4
 
-from .schema import validate_dimensions, validate_variables, validate_attributes
+from .schema import validate_dimensions, validate_variables, validate_global_attributes
+
+
+def metadata_attributes(attr):
+    """
+    Helper function to extract the metadata attributes (to be written to netCDF file) from a dictionary.
+    The metadata attributes are those with keys beginning with a letter (upper or lower case).
+
+    :param attr: Attribute dictionary (any dictionary-like class)
+    :return: Dictionary of metadata attributes
+    :rtype: same type as `attr`
+    """
+    meta = attr.__class__()
+    for k, v in attr.items():
+        if k[0].isalpha():
+            meta[k] = v
+
+    return meta
 
 
 class NetCDFGroupDict(object):
@@ -37,12 +54,12 @@ class NetCDFGroupDict(object):
             Example:
                 dmn = {'lon':360,'lat':210}
                 var = {}
-                var['water'] = {'type':'double','dimensions':['lat','lon']}
+                var['water'] = {'_datatype':'double','_dimensions':['lat','lon']}
                 w1 = NetCDFGroupDict(dimensions=dmn,variables=var)
 
                 dmn2 = {'time':300,'lon':720,'lat':330}
                 var2 = {}
-                var2['temp'] = {'type':'double','dimensions':['time','lat','lon']}
+                var2['temp'] = {'_datatype':'double','_dimensions':['time','lat','lon']}
                 w2 = NetCDFGroupDict(dimensions=dmn2,variables=var2)
 
                 w3 = w1+w2
@@ -96,7 +113,7 @@ class NetCDFGroupDict(object):
 
     @global_attributes.setter
     def global_attributes(self, value):
-        validate_attributes(value)
+        validate_global_attributes(value)
         self._global_attributes = value
 
     def is_dim_consistent(self):
@@ -104,21 +121,21 @@ class NetCDFGroupDict(object):
         checkdims = set()
         for k in self.variables.keys():
             try:
-                for d in self.variables[k]['dimensions']:
+                for d in self.variables[k]['_dimensions']:
                     checkdims.add(d)
             except KeyError:
                 print("Variable %s missing dimension information `dims`" % k)
 
             except TypeError:
-                if self.variables[k]['dimensions'] is None:
+                if self.variables[k]['_dimensions'] is None:
                     continue
 
-                missing = ['dimensions']
+                missing = ['_dimensions']
 
                 try:
                     self.variables['k']['vtype']
                 except KeyError:
-                    missing += ['type']
+                    missing += ['_datatype']
 
                 try:
                     self.variables['k']['attributes']
@@ -144,9 +161,9 @@ class NetCDFGroupDict(object):
             name = 'input'
 
         vkeys = vardict.keys()
-        have_dims = 'dimensions' in vkeys
-        have_type = 'type' in vkeys
-        have_att = 'attributes' in vkeys
+        have_dims = '_dimensions' in vkeys
+        have_type = '_datatype' in vkeys
+        have_att = len(metadata_attributes(vardict)) > 0
         have_one = have_dims | have_type | have_att
         have_none = not have_one
 
@@ -155,21 +172,17 @@ class NetCDFGroupDict(object):
                 cls.check_var(vardict[k], name=k)
 
         if have_dims:
-            notnone = vardict['dimensions'] is not None
-            notlist = vardict['dimensions'] is not list
+            notnone = vardict['_dimensions'] is not None
+            notlist = vardict['_dimensions'] is not list
             if notnone and notlist:
                 ValueError(
                     "Dim for %s should be a None or a list object" % name)
 
-        if have_att:
-            notdict = vardict['attributes'] is not dict
-            if notdict:
-                ValueError("Attr for %s should be a dictionary object" % name)
         if have_type:
-            notstr = vardict['type'].__class__ is not str
-            nottype = vardict['type'].__class__ is not type
-            notcompound = vardict['type'].__class__ is not netCDF4.CompoundType
-            notvl = vardict['type'].__class__ is not netCDF4.VLType
+            notstr = vardict['_datatype'].__class__ is not str
+            nottype = vardict['_datatype'].__class__ is not type
+            notcompound = vardict['_datatype'].__class__ is not netCDF4.CompoundType
+            notvl = vardict['_datatype'].__class__ is not netCDF4.VLType
             if notstr and nottype and notcompound and notvl:
                 ValueError(
                     "Type for %s should be a string or type object" % name)
@@ -180,7 +193,7 @@ class NetCDFGroupDict(object):
         alldims = dimdict.keys()
         allvars = vdict.keys()
         for k in allvars:
-            vardims = vdict[k].get('dimensions')
+            vardims = vdict[k].get('_dimensions')
             if vardims is None:
                 continue
             else:
@@ -209,11 +222,11 @@ class DatasetTemplate(NetCDFGroupDict):
             template = json.load(f, object_pairs_hook=OrderedDict)
 
         # TODO: validate_template(template)
-        #       - just check that the only top-level properties are "dimensions", "variables" and "global_attribute"
+        #       - just check that the only top-level properties are "_dimensions", '_variables' and "global_attribute"
 
-        return cls(dimensions=template.get('dimensions'),
-                   variables=template.get('variables'),
-                   global_attributes=template.get('global_attributes')
+        return cls(dimensions=template.get('_dimensions'),
+                   variables=template.get('_variables'),
+                   global_attributes=metadata_attributes(template)
                    )
 
     def _create_var_opts(self, vdict):
@@ -221,7 +234,7 @@ class DatasetTemplate(NetCDFGroupDict):
         defined by :vdict: This include creation/special options like:
             `zlib`
             `least_significant_digit`
-            `dimensions`
+            `_dimensions`
             etc
         """
         vset = set(list(vdict.keys()))
@@ -240,12 +253,12 @@ class DatasetTemplate(NetCDFGroupDict):
         consistent with variable array sizes.
         """
         for name, var in self.variables.items():
-            values = var.get('data')
+            values = var.get('_data')
             if values is None:
                 continue
 
             var_shape = values.shape
-            var_dims = var.get('dimensions', [])
+            var_dims = var.get('_dimensions', [])
             if len(var_shape) != len(var_dims):
                 raise ValueError(
                     "Variable '{name}' has {ndim} dimensions, but value array has {nshape} dimensions.".format(
@@ -280,8 +293,8 @@ class DatasetTemplate(NetCDFGroupDict):
         like `zlib` and friends.
         """
         for varname, var in self.variables.items():
-            datatype = var['type']
-            dimensions = var.get('dimensions')
+            datatype = var['_datatype']
+            dimensions = var.get('_dimensions')
             cwargs = kwargs.copy()
             if dimensions is None:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, datatype)
@@ -318,10 +331,10 @@ class DatasetTemplate(NetCDFGroupDict):
                     varname, datatype, dimensions=dimensions, **var_c_opts)
 
             # add variable values
-            if 'data' not in var:
+            if '_data' not in var:
                 raise ValueError('No data specified for variable {varname}'.format(varname=varname))
-            if var['data'] is not None:
-                ncvar[:] = var['data']
+            if var['_data'] is not None:
+                ncvar[:] = var['_data']
 
             # add variable attributes
             if var.get('attributes'):

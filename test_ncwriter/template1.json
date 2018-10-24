@@ -18,15 +18,12 @@
                 "DEPTH"
             ],
             "_datatype": "float32",
-            "_zlib": true,
-            "_complevel": 5,
             "standard_name": "sea_water_temperature",
             "units": "degC",
             "valid_min": 0.0,
             "valid_max": 42.00
         }
     },
-    "_format": "NETCDF4",
     "title": "test dataset",
     "abstract": "This is a dataset used for testing",
     "Conventions": "CF-1.6,IMOS-1.4",

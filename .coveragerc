@@ -1,0 +1,19 @@
+[run]
+branch = True
+source = ncwriter
+omit =
+    test_ncwriter/*
+    ncwriter/_version.py
+    versioneer.py
+
+[report]
+exclude_lines =
+    @abc.abstractmethod
+    @abc.abstractproperty
+    raise
+    def __repr__
+    if self.debug:
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
+ignore_errors = True

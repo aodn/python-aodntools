@@ -93,7 +93,6 @@ class NetCDFGroupDict(object):
         self.global_attributes = global_attributes or OrderedDict()
 
         self.check_var(self.variables)
-        self.check_consistency(self.dimensions, self.variables)
 
     def __add__(self, other):
         self_copy = deepcopy(self)
@@ -136,41 +135,12 @@ class NetCDFGroupDict(object):
 
     def is_dim_consistent(self):
         """Check if the variable dictionary is consistent with current dimensions"""
-        checkdims = set()
-        for k in self.variables.keys():
-            try:
-                for d in self.variables[k]['_dimensions']:
-                    checkdims.add(d)
-            except KeyError:
-                print("Variable %s missing dimension information `dims`" % k)
+        vardims = set(d
+                      for var in self.variables.values()
+                      for d in (var.get('_dimensions') or [])
+                      )
 
-            except TypeError:
-                if self.variables[k]['_dimensions'] is None:
-                    continue
-
-                missing = ['_dimensions']
-
-                try:
-                    self.variables['k']['vtype']
-                except KeyError:
-                    missing += ['_datatype']
-
-                try:
-                    self.variables['k']['attributes']
-                except KeyError:
-                    missing += ['attributes']
-
-                errstr = "Variable %s is missing information for: "
-                for _ in missing:
-                    errstr += '%s, '
-                errtuple = tuple([k] + missing)
-                print(errstr % errtuple)
-
-        if checkdims != set(self.dimensions.keys()):
-            print("Consistent dimensions are: %s" % checkdims)
-            return False
-        else:
-            return True
+        return vardims == set(self.dimensions.keys())
 
     @classmethod
     def check_var(cls, vardict, name=None):
@@ -208,6 +178,7 @@ class NetCDFGroupDict(object):
     @staticmethod
     def check_consistency(dimdict, vdict):
         """Check that all dimensions referenced by variables in :vdict: are defined in the :dimdict:"""
+        # TODO: Combine this method with is_dim_consistent
         alldims = dimdict.keys()
         allvars = vdict.keys()
         for k in allvars:

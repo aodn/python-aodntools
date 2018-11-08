@@ -111,6 +111,23 @@ class TestDatasetTemplate(unittest.TestCase):
 
     # TODO: create template from other formats (later...)
 
+    def test_is_dim_consistent(self):
+        template = DatasetTemplate()
+        self.assertTrue(template.is_dim_consistent())
+        template = DatasetTemplate(dimensions={'X': 1},
+                                   variables={'X': {'_dimensions': ['X']}}
+                                   )
+        self.assertTrue(template.is_dim_consistent())
+
+        template = DatasetTemplate(dimensions={'X': 1},
+                                   variables={'X': {'_dimensions': ['Y']}}
+                                   )
+        self.assertFalse(template.is_dim_consistent())
+        template = DatasetTemplate(dimensions={'X': 1},
+                                   variables={'Z': {'_dimensions': ['X', 'Y']}}
+                                   )
+        self.assertFalse(template.is_dim_consistent())
+
     def test_add_global_attributes(self):
         template = DatasetTemplate()
         template.global_attributes.update(self.global_attributes)

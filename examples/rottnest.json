@@ -1,0 +1,53 @@
+{
+    "_dimensions": {
+        "TIME": null
+    },
+    "_variables": {
+        "TIME": {
+            "_dimensions": ["TIME"],
+            "_datatype": "float64",
+            "standard_name": "time",
+            "units": "days since 1950-01-01 00:00:00 UTC",
+            "calendar": "gregorian",
+            "axis": "T"
+        },
+        "LATITUDE": {
+            "_datatype": "float32",
+            "standard_name": "latitude",
+            "units": "degrees_north",
+            "axis": "Y"
+        },
+        "LONGITUDE": {
+            "_datatype": "float32",
+            "standard_name": "longitude",
+            "units": "degrees_east",
+            "axis": "X"
+        },
+        "DEPTH": {
+            "_dimensions": ["TIME"],
+            "_datatype": "float32",
+            "standard_name": "depth",
+            "units": "m",
+            "reference_datum": "sea surface",
+            "positive": "down",
+            "axis": "Z"
+        },
+        "PRES_REL": {
+            "_dimensions": ["TIME"],
+            "_datatype": "float32",
+            "standard_name": "sea_water_pressure_due_to_sea_water",
+            "units": "dbar"
+        },
+        "TEMP": {
+            "_dimensions": ["TIME"],
+            "_datatype": "float32",
+            "standard_name": "sea_water_temperature",
+            "units": "degC",
+            "valid_min": 0.0,
+            "valid_max": 42.00
+        }
+    },
+    "title": "Sample data from Rottnest Island NRS",
+    "Conventions": "CF-1.6,IMOS-1.4",
+    "naming_authority": "IMOS"
+}

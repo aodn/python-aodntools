@@ -1,42 +1,33 @@
 {
-    "dimensions": {
+    "_dimensions": {
         "TIME": 0,
         "DEPTH": null
     },
-    "variables": {
+    "_variables": {
         "TIME": {
-            "dimensions": [
-                "TIME"
-            ],
-            "type": "float64"
+            "_dimensions": ["TIME"],
+            "_datatype": "float64"
         },
         "DEPTH": {
-            "dimensions": [
-                "DEPTH"
-            ],
-            "type": "float32",
-            "attributes": {}
+            "_dimensions": ["DEPTH"],
+            "_datatype": "float32"
         },
         "TEMP": {
-            "dimensions": [
+            "_dimensions": [
                 "TIME",
                 "DEPTH"
             ],
-            "type": "float32",
-            "attributes": {
-                "standard_name": "sea_water_temperature",
-                "units": "degC",
-                "valid_min": 0.0,
-                "valid_max": 42.00
-            }
+            "_datatype": "float32",
+            "standard_name": "sea_water_temperature",
+            "units": "degC",
+            "valid_min": 0.0,
+            "valid_max": 42.00
         }
     },
-    "global_attributes": {
-        "title": "test dataset",
-        "abstract": "This is a dataset used for testing",
-        "Conventions": "CF-1.6,IMOS-1.4",
-        "number": 10,
-        "big_number": 12345678901234567890,
-        "big_float": 1.234567890123456e777
-    }
+    "title": "test dataset",
+    "abstract": "This is a dataset used for testing",
+    "Conventions": "CF-1.6,IMOS-1.4",
+    "number": 10,
+    "big_number": 12345678901234567890,
+    "big_float": 1.234567890123456e777
 }

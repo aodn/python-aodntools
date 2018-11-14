@@ -1,9 +1,11 @@
-from .template import DatasetTemplate
+from .template import DatasetTemplate, metadata_attributes, special_attributes
 from .schema import ValidationError
 
 __all__ = [
     'DatasetTemplate',
-    'ValidationError'
+    'ValidationError',
+    'metadata_attributes',
+    'special_attributes'
 ]
 
 from ._version import get_versions

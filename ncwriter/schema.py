@@ -19,27 +19,18 @@ DIMENSIONS_SCHEMA = {
     "additionalProperties": False
 }
 
-ATTRIBUTES_SCHEMA = {
-    "type": "object",
-    "patternProperties": {
-        NAME_PATTERN: {
-            "type": ["string", "number", "array"]
-        }
-    },
-    "additionalProperties": False
-}
-
-
 VARIABLE_DEFINITION_SCHEMA = {
     "type": "object",
     "properties": {
-        "dimensions": {
+        "_dimensions": {
             "type": "array",
             "items": {"type": "string", "pattern": NAME_PATTERN}
         },
-        "type": {"type": "string"},
-        "attributes": ATTRIBUTES_SCHEMA,
-        "data": {"type": ["null", "array"]}
+        "_datatype": {"type": "string"},
+        "_data": {"type": ["null", "array"]}
+    },
+    "patternProperties": {
+        NAME_PATTERN: {"type": ["string", "number", "array"]}
     },
     "additionalProperties": False
 }
@@ -54,6 +45,25 @@ VARIABLES_SCHEMA = {
 }
 
 
+TEMPLATE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "_dimensions": DIMENSIONS_SCHEMA,
+        "_variables": VARIABLES_SCHEMA
+    },
+    "patternProperties": {
+        NAME_PATTERN: {
+            "type": ["string", "number", "array"]
+        }
+    },
+    "additionalProperties": False
+}
+
+
+ATTRIBUTES_SCHEMA = TEMPLATE_SCHEMA.copy()
+ATTRIBUTES_SCHEMA.pop("properties")  # remove special properties, leaving only global attributes
+
+
 def validate_dimensions(d):
     validate(d, DIMENSIONS_SCHEMA)
 
@@ -62,5 +72,5 @@ def validate_variables(v):
     validate(v, VARIABLES_SCHEMA)
 
 
-def validate_attributes(a):
+def validate_global_attributes(a):
     validate(a, ATTRIBUTES_SCHEMA)

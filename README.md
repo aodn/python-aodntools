@@ -12,18 +12,16 @@ This module provides a basic templating tool for creating netCDF files based on 
 Templates can be provided as individual Python dictionaries, or as a JSON file, e.g. `template.json`:
 ```json
 {
-    "dimensions": {
+    "_dimensions": {
         "TIME": 0
     },
-    "variables": {
+    "_variables": {
         "TIME": {
-            "dimensions": ["TIME"],
-            "type": "float64"
+            "_dimensions": ["TIME"],
+            "_datatype": "float64"
         }
     },
-    "global_attributes": {
-        "title": "test dataset"
-    }
+    "title": "test dataset"
 }
 ```
 Basic usage
@@ -42,24 +40,22 @@ template.global_attributes.update({
     })
 
 # add/update variables
-template.variables["TIME"]["atttributes"] = {
+template.variables["TIME"].update({
     "standard_name": "time",
     "units": "days since 1950-01-01 00:00:00 +00:00"
-}
+    })
 template.variables["TEMP"] = {
-    "dimensions": ["TIME"],
-    "type": "float32",
-    "attributes": {
-        "standard_name": "sea_water_temperature",
-        "units": "degC",
-        "valid_min": 0.0,
-        "valid_max": 42.00
-    }
+    "_dimensions": ["TIME"],
+    "_datatype": "float32",
+    "standard_name": "sea_water_temperature",
+    "units": "degC",
+    "valid_min": 0.0,
+    "valid_max": 42.00
 }
 
 # add variable values (automatically updates size of corresponding dimensions)
-template.variables['TIME']['values'] = np.arange(10)
-template.variables['TEMP']['values'] = np.array([12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.0])
+template.variables['TIME']['_data'] = np.arange(10)
+template.variables['TEMP']['_data'] = np.array([12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.0])
 
 # create netCDF file
 template.to_netcdf('example.nc')

@@ -139,11 +139,21 @@ class TestDatasetTemplate(unittest.TestCase):
         template.dimensions['DEPTH'] = 10
         self.assertEqual(OrderedDict([('TIME', 100), ('DEPTH', 10)]), template.dimensions)
 
-    def test_update_dimensions(self):
+    def test_change_dimensions(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
         template.dimensions['TIME'] = 100
         template.dimensions['DEPTH'] = 10
         self.assertEqual(OrderedDict([('TIME', 100), ('DEPTH', 10)]), template.dimensions)
+
+    def test_update_dimensions(self):
+        template = DatasetTemplate(dimensions={'X': 0}, variables={'X': {'_dimensions': ['X']}})
+        template.variables['X']['_data'] = self.values10
+        template.update_dimensions()
+        self.assertEqual(10, template.dimensions['X'])
+
+        template.variables['X']['_data'] = self.values1
+        self.assertRaisesRegexp(ValueError, 'inconsistent with dimension sizes defined in template',
+                                template.update_dimensions)  # now should fail because inconsistent
 
     def test_add_variables(self):
         template = DatasetTemplate.from_json(TEMPLATE_PARTIAL_JSON)

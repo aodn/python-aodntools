@@ -254,7 +254,7 @@ class DatasetTemplate(NetCDFGroupDict):
                 continue
 
             var_shape = values.shape
-            var_dims = var.get('_dimensions', [])
+            var_dims = var.get('_dimensions') or []
             if len(var_shape) != len(var_dims):
                 raise ValueError(
                     "Variable '{name}' has {ndim} dimensions, but value array has {nshape} dimensions.".format(

@@ -2,6 +2,8 @@
 template, and also the helper functions necessary to validate an object against their respective schema.
 """
 
+import numpy as np
+
 from jsonschema import validate, ValidationError
 
 
@@ -27,6 +29,7 @@ VARIABLE_DEFINITION_SCHEMA = {
             "items": {"type": "string", "pattern": NAME_PATTERN}
         },
         "_datatype": {"type": "string"},
+        "_FillValue": {"type": ["number", "string"]},
         "_data": {"type": ["null", "array"]}
     },
     "patternProperties": {
@@ -69,7 +72,7 @@ def validate_dimensions(d):
 
 
 def validate_variables(v):
-    validate(v, VARIABLES_SCHEMA)
+    validate(v, VARIABLES_SCHEMA, types={"array": (list, np.ndarray)})
 
 
 def validate_global_attributes(a):

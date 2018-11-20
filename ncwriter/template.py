@@ -193,9 +193,6 @@ class DatasetTemplate(NetCDFGroupDict):
         with open(path) as f:
             template = json.load(f, object_pairs_hook=OrderedDict)
 
-        # TODO: validate_template(template)
-        #       - just check that the only top-level properties are "_dimensions", '_variables' and "global_attribute"
-
         return cls(dimensions=template.get('_dimensions'),
                    variables=template.get('_variables'),
                    global_attributes=metadata_attributes(template)
@@ -319,9 +316,9 @@ class DatasetTemplate(NetCDFGroupDict):
         """
         for varname, varattr in self.variables.items():
             datatype = varattr['_datatype']
-            dimensions = varattr['_dimensions']
+            dimensions = tuple(varattr['_dimensions'])
             cwargs = kwargs.copy()
-            if dimensions is None:  # no kwargs in createVariable
+            if not dimensions:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, datatype)
             else:
                 var_c_opts = self._create_var_opts(varattr)
@@ -364,7 +361,7 @@ class DatasetTemplate(NetCDFGroupDict):
         for att in self.global_attributes.keys():
             self.ncobj.setncattr(att, self.global_attributes[att])
 
-    def to_netcdf(self, outfile, var_args={}, **kwargs):
+    def to_netcdf(self, outfile, var_args=None, **kwargs):
         """
         Create a netCDF file according to all the information in the template.
         See netCDF4 package documentation for additional arguments.
@@ -375,6 +372,7 @@ class DatasetTemplate(NetCDFGroupDict):
         :return: None
         """
         self.outfile = outfile
+        _var_args = var_args or {}
 
         self.validate_schema()
         self.ensure_completeness()
@@ -383,7 +381,7 @@ class DatasetTemplate(NetCDFGroupDict):
         try:
             self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
             self.create_dimensions()
-            self.create_variables(**var_args)
+            self.create_variables(**_var_args)
             self.create_global_attributes()
             self.ncobj.sync()
         except Exception:

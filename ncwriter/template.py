@@ -5,7 +5,6 @@ written by: Hugo Oliveira ocehugo@gmail.com
 
 # TODO how we handle groups!?
 # TODO cleanup the user precedence rules of fill_values
-# TODO is_dim_consistent too complex
 # TODO check_var too complex
 # TODO createVariables too complex
 # TODO Allow for attribute types to be specified in JSON
@@ -141,15 +140,6 @@ class NetCDFGroupDict(object):
         validate_dimensions(self.dimensions)
         validate_variables(self.variables)
         validate_global_attributes(self.global_attributes)
-
-    def is_dim_consistent(self):
-        """Check if the variable dictionary is consistent with current dimensions"""
-        vardims = set(d
-                      for var in self.variables.values()
-                      for d in (var.get('_dimensions') or [])
-                      )
-
-        return vardims == set(self.dimensions.keys())
 
     @classmethod
     def check_var(cls, vardict, name=None):

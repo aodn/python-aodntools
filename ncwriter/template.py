@@ -92,8 +92,6 @@ class NetCDFGroupDict(object):
         self.variables = variables or OrderedDict()
         self.global_attributes = global_attributes or OrderedDict()
 
-        self.check_var(self.variables)
-
     def __add__(self, other):
         self_copy = deepcopy(self)
         self_copy.dimensions.update(other.dimensions)
@@ -140,39 +138,6 @@ class NetCDFGroupDict(object):
         validate_dimensions(self.dimensions)
         validate_variables(self.variables)
         validate_global_attributes(self.global_attributes)
-
-    @classmethod
-    def check_var(cls, vardict, name=None):
-        """Check if the dictionary have all the required fields to be defined as variable """
-        if name is None:
-            name = 'input'
-
-        vkeys = vardict.keys()
-        have_dims = '_dimensions' in vkeys
-        have_type = '_datatype' in vkeys
-        have_att = len(metadata_attributes(vardict)) > 0
-        have_one = have_dims | have_type | have_att
-        have_none = not have_one
-
-        if have_none:
-            for k in vkeys:
-                cls.check_var(vardict[k], name=k)
-
-        if have_dims:
-            notnone = vardict['_dimensions'] is not None
-            notlist = vardict['_dimensions'] is not list
-            if notnone and notlist:
-                ValueError(
-                    "Dim for %s should be a None or a list object" % name)
-
-        if have_type:
-            notstr = vardict['_datatype'].__class__ is not str
-            nottype = vardict['_datatype'].__class__ is not type
-            notcompound = vardict['_datatype'].__class__ is not netCDF4.CompoundType
-            notvl = vardict['_datatype'].__class__ is not netCDF4.VLType
-            if notstr and nottype and notcompound and notvl:
-                ValueError(
-                    "Type for %s should be a string or type object" % name)
 
 
 class DatasetTemplate(NetCDFGroupDict):

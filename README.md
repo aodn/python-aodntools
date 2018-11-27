@@ -61,3 +61,5 @@ template.variables['TEMP']['_data'] = np.array([12.1, 12.2, 12.3, 12.4, 12.5, 12
 template.to_netcdf('example.nc')
 
 ```
+
+See the examples folder for more complete examples.

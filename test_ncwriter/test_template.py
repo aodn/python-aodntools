@@ -122,7 +122,7 @@ class TestDatasetTemplate(unittest.TestCase):
         template.dimensions['DEPTH'] = 10
         self.assertEqual(OrderedDict([('TIME', 100), ('DEPTH', 10)]), template.dimensions)
 
-    def test_update_dimensions(self):
+    def test_change_dimensions(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
         template.dimensions['TIME'] = 100
         template.dimensions['DEPTH'] = 10
@@ -164,7 +164,7 @@ class TestDatasetTemplate(unittest.TestCase):
     def test_create_empty_variable(self):
         template = DatasetTemplate(dimensions={'X': 10})
         template.variables['X'] = {'_dimensions': ['X'], '_datatype': 'float32'}
-        self.assertRaises(ValueError, template.to_netcdf, self.temp_nc_file)  # not providing '_data' is an error
+        self.assertRaises(ValidationError, template.to_netcdf, self.temp_nc_file)  # not providing '_data' is an error
 
         del self._temp_nc_file  # Get a new temp file
         template.variables['X']['_data'] = None  # This is ok, it's a shortcut for all fill values
@@ -232,8 +232,7 @@ class TestDatasetTemplate(unittest.TestCase):
                                    }
         x = np.array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5])
         template.variables['X']['_data'] = np.ma.masked_array(x, mask=[True, True, True, True, True,
-                                                                      False, False, False, False, False]
-                                                             )
+                                                                       False, False, False, False, False])
         template.to_netcdf(self.temp_nc_file)
 
         dataset = Dataset(self.temp_nc_file)
@@ -244,17 +243,93 @@ class TestDatasetTemplate(unittest.TestCase):
         self.assertTrue((dsx[5:] == x[5:]).all())
 
     def test_close_file_on_exception(self):
-        template = DatasetTemplate.from_json(TEMPLATE_JSON)
+        template = DatasetTemplate(variables={'Z': {}})
         self.assertIsNone(template.ncobj)
-        self.assertRaises(ValueError, template.to_netcdf, self.temp_nc_file)
-        self.assertFalse(template.ncobj.isopen())
+        self.assertRaises(ValidationError, template.to_netcdf, self.temp_nc_file)
+        self.assertIsNone(template.ncobj)
+        # self.assertFalse(template.ncobj.isopen())
+        # TODO: Use mock to make this fail *after* ncobj is created
 
     def test_dimensionless_variable(self):
-        template = DatasetTemplate(variables={'X': {'_datatype': 'double', '_data': None}})
+        template = DatasetTemplate(variables={'X': {'_datatype': 'double', '_data': np.array(1)}})
         template.to_netcdf(self.temp_nc_file)
 
         dataset = Dataset(self.temp_nc_file)
         self.assertEqual((), dataset.variables['X'].dimensions)
+
+    def test_ensure_completeness(self):
+        template = DatasetTemplate(dimensions={'X': 1})
+        template.variables = {
+            'A': {'_dimensions': ['X'], '_datatype': 'float32', '_data': [12.3]},
+            'B': {'_dimensions': ['X'], '_data': [12.3]},
+            'X': {'_dimensions': ['X'], '_data': self.values1},
+            'Y': {'_datatype': 'float32', '_data': None}
+        }
+        template.ensure_completeness()
+
+        self.assertEqual(['X'], template.variables['A']['_dimensions'])
+        self.assertEqual(np.dtype('float32'), template.variables['A']['_datatype'])
+        self.assertEqual([12.3], template.variables['A']['_data'])
+        self.assertIsInstance(template.variables['A']['_data'], np.ndarray)
+
+        self.assertEqual(np.dtype('float64'), template.variables['B']['_datatype'])
+
+        self.assertIs(self.values1.dtype, template.variables['X']['_datatype'])
+
+        self.assertEqual([], template.variables['Y']['_dimensions'])
+
+        template.variables = {'Z': {'_dimensions': [], '_data': None}}
+        self.assertRaisesRegexp(ValidationError, r"No data type information for variable 'Z'",
+                                template.ensure_completeness)
+
+        template.variables = {'Z': {'_dimensions': []}}
+        self.assertRaisesRegexp(ValidationError, r"No data specified for variable 'Z'",
+                                template.ensure_completeness)
+
+    def test_ensure_consistency(self):
+        template = DatasetTemplate()
+        scalar = {'_dimensions': [], '_data': np.array(1)}
+        template.variables = {'SCALAR': scalar}
+        template.ensure_consistency()
+        self.assertEqual({}, template.dimensions)
+        self.assertIs(scalar, template.variables['SCALAR'])
+
+        template = DatasetTemplate(dimensions={'TEN': 10})
+        var_10 = {'_dimensions': ['TEN'], '_data': self.values10}
+        template.variables = {'TEN': var_10}
+        template.ensure_consistency()
+        self.assertEqual({'TEN': 10}, template.dimensions)
+        self.assertIs(var_10, template.variables['TEN'])
+
+        template = DatasetTemplate(dimensions={'X': None})
+        var_12 = {'_dimensions': ['X'], '_data': np.arange(12)}
+        template.variables = {'X': var_12}
+        template.ensure_consistency()
+        self.assertEqual({'X': 12}, template.dimensions)
+        self.assertIs(var_12, template.variables['X'])
+
+        empty = {'_dimensions': ['X'], '_data': None}
+        template.variables['EMPTY'] = empty
+        template.ensure_consistency()
+        self.assertEqual({'X': 12}, template.dimensions)
+        self.assertIs(empty, template.variables['EMPTY'])
+
+        template.variables['X']['_data'] = self.values1
+        self.assertRaisesRegexp(ValueError, 'inconsistent with dimension sizes defined in template',
+                                template.ensure_consistency)  # now should fail because dim X is already set
+
+        template.variables = {
+            'Z': {'_dimensions': ["NOSUCHTHING"], '_data': self.values10}
+        }
+        self.assertRaisesRegexp(ValidationError, 'undefined dimensions', template.ensure_consistency)
+
+        template.variables = {
+            'W': {'_dimensions': ['X'], '_data': np.arange(20).reshape((10,2))}
+        }
+        self.assertRaisesRegexp(ValueError,
+                                "Variable 'W' has 1 dimensions, but value array has 2 dimensions.",
+                                template.ensure_consistency
+                                )
 
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)

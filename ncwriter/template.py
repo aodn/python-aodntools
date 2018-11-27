@@ -5,7 +5,6 @@ written by: Hugo Oliveira ocehugo@gmail.com
 
 # TODO how we handle groups!?
 # TODO cleanup the user precedence rules of fill_values
-# TODO is_dim_consistent too complex
 # TODO check_var too complex
 # TODO createVariables too complex
 # TODO Allow for attribute types to be specified in JSON
@@ -15,8 +14,9 @@ from collections import OrderedDict
 from copy import deepcopy
 
 import netCDF4
+import numpy as np
 
-from .schema import validate_dimensions, validate_variables, validate_global_attributes
+from .schema import validate_dimensions, validate_variables, validate_global_attributes, ValidationError
 
 
 def metadata_attributes(attr):
@@ -92,9 +92,6 @@ class NetCDFGroupDict(object):
         self.variables = variables or OrderedDict()
         self.global_attributes = global_attributes or OrderedDict()
 
-        self.check_var(self.variables)
-        self.check_consistency(self.dimensions, self.variables)
-
     def __add__(self, other):
         self_copy = deepcopy(self)
         self_copy.dimensions.update(other.dimensions)
@@ -134,91 +131,13 @@ class NetCDFGroupDict(object):
         validate_global_attributes(value)
         self._global_attributes = value
 
-    def is_dim_consistent(self):
-        """Check if the variable dictionary is consistent with current dimensions"""
-        checkdims = set()
-        for k in self.variables.keys():
-            try:
-                for d in self.variables[k]['_dimensions']:
-                    checkdims.add(d)
-            except KeyError:
-                print("Variable %s missing dimension information `dims`" % k)
-
-            except TypeError:
-                if self.variables[k]['_dimensions'] is None:
-                    continue
-
-                missing = ['_dimensions']
-
-                try:
-                    self.variables['k']['vtype']
-                except KeyError:
-                    missing += ['_datatype']
-
-                try:
-                    self.variables['k']['attributes']
-                except KeyError:
-                    missing += ['attributes']
-
-                errstr = "Variable %s is missing information for: "
-                for _ in missing:
-                    errstr += '%s, '
-                errtuple = tuple([k] + missing)
-                print(errstr % errtuple)
-
-        if checkdims != set(self.dimensions.keys()):
-            print("Consistent dimensions are: %s" % checkdims)
-            return False
-        else:
-            return True
-
-    @classmethod
-    def check_var(cls, vardict, name=None):
-        """Check if the dictionary have all the required fields to be defined as variable """
-        if name is None:
-            name = 'input'
-
-        vkeys = vardict.keys()
-        have_dims = '_dimensions' in vkeys
-        have_type = '_datatype' in vkeys
-        have_att = len(metadata_attributes(vardict)) > 0
-        have_one = have_dims | have_type | have_att
-        have_none = not have_one
-
-        if have_none:
-            for k in vkeys:
-                cls.check_var(vardict[k], name=k)
-
-        if have_dims:
-            notnone = vardict['_dimensions'] is not None
-            notlist = vardict['_dimensions'] is not list
-            if notnone and notlist:
-                ValueError(
-                    "Dim for %s should be a None or a list object" % name)
-
-        if have_type:
-            notstr = vardict['_datatype'].__class__ is not str
-            nottype = vardict['_datatype'].__class__ is not type
-            notcompound = vardict['_datatype'].__class__ is not netCDF4.CompoundType
-            notvl = vardict['_datatype'].__class__ is not netCDF4.VLType
-            if notstr and nottype and notcompound and notvl:
-                ValueError(
-                    "Type for %s should be a string or type object" % name)
-
-    @staticmethod
-    def check_consistency(dimdict, vdict):
-        """Check that all dimensions referenced by variables in :vdict: are defined in the :dimdict:"""
-        alldims = dimdict.keys()
-        allvars = vdict.keys()
-        for k in allvars:
-            vardims = vdict[k].get('_dimensions')
-            if vardims is None:
-                continue
-            else:
-                missing = [x for x in vardims if x not in alldims]
-                if missing:
-                    raise ValueError("Variable %s has undefined dimensions: %s"
-                                     % (k, missing))
+    def validate_schema(self):
+        """Validate the template against the full schema, raising ValidationError if not valid.
+        This checks all the three dictionaries: dimensions, variables and global attributes.
+        """
+        validate_dimensions(self.dimensions)
+        validate_variables(self.variables)
+        validate_global_attributes(self.global_attributes)
 
 
 class DatasetTemplate(NetCDFGroupDict):
@@ -239,13 +158,91 @@ class DatasetTemplate(NetCDFGroupDict):
         with open(path) as f:
             template = json.load(f, object_pairs_hook=OrderedDict)
 
-        # TODO: validate_template(template)
-        #       - just check that the only top-level properties are "_dimensions", '_variables' and "global_attribute"
-
         return cls(dimensions=template.get('_dimensions'),
                    variables=template.get('_variables'),
                    global_attributes=metadata_attributes(template)
                    )
+
+    def ensure_completeness(self):
+        """Ensure that all variables have all the necessary information to create a netCDF file.
+        If _data is not None and not a numpy array, attempt to convert it into a numpy array.
+        If _datatype is missing, try to guess based on value assigned to _data.
+
+        Raises ValidationError if
+        * the "_data" value is missing for a variable; or
+        * the "_datatype" value is missing and it can't be guessed from the "_data" value.
+        """
+        for name, var in self.variables.items():
+            if "_dimensions" not in var:
+                var["_dimensions"] = []
+
+            if "_data" not in var:
+                raise ValidationError("No data specified for variable '{name}'".format(name=name))
+            if var["_data"] is not None and not isinstance(var["_data"], np.ndarray):
+                var["_data"] = np.array(var["_data"])
+
+            if "_datatype" not in var:
+                datatype = getattr(var["_data"], 'dtype', None)
+                if datatype is not None:
+                    print("WARNING: Guessed data type {datatype} "
+                          "for variable '{name}'".format(datatype=datatype, name=name))
+                    var["_datatype"] = datatype
+                else:
+                    raise ValidationError("No data type information for variable '{name}'".format(name=name))
+
+    def ensure_consistency(self):
+        """For each variable, ensure that the specified dimensions and data arrays are consistent with each other, and
+        with the global dimensions defined for the template.
+
+        For dimensions set to None in the template, update their size to match the size of corresponding data arrays,
+        if possible to do so in a self-consistent way.
+
+        Raises ValidationError if any variable has dimensions not defined in the template.
+
+        Raises ValueError if unable to make dimensions consistent because
+        * A data array's shape doesn't match the number of dimensions defined for the variable; or
+        * A dimension that already has a defined size is not consistent with variable array sizes.
+
+        Prerequisite: run ensure_completeness() first!
+        """
+        # TODO: check _datatype against type of array in _data?
+        # TODO: check for "unused" dimensions?
+        for name, var in self.variables.items():
+            # check dimensions exist
+            var_dims = var['_dimensions'] or []
+            inconsistent_dims = set(var_dims).difference(self.dimensions)
+            if inconsistent_dims:
+                raise ValidationError("Variable '{name}' has undefined dimensions "
+                                      "{inconsistent_dims}".format(name=name, inconsistent_dims=inconsistent_dims)
+                                      )
+
+            # if we have no data array, can't do any more
+            values = var.get('_data')
+            if values is None:
+                continue
+
+            # check number of dimensions
+            var_shape = values.shape
+            if len(var_shape) != len(var_dims):
+                raise ValueError(
+                    "Variable '{name}' has {ndim} dimensions, but value array has {nshape} dimensions.".format(
+                        name=name, ndim=len(var_dims), nshape=len(var_shape))
+                )
+
+            # adjust dimension size if not already set
+            for dim, size in zip(var_dims, var_shape):
+                if self.dimensions[dim] is None:
+                    self.dimensions[dim] = size
+
+            # check that shape is now consistent
+            template_shape = tuple(self.dimensions[d] for d in var_dims)
+            if var_shape != template_shape:
+                raise ValueError(
+                    "Variable '{name}' has dimensions {var_dims} and shape {var_shape}, inconsistent with dimension "
+                    "sizes defined in template {template_shape}".format(
+                        name=name, var_dims=var_dims, var_shape=var_shape, template_shape=template_shape
+                    )
+                )
 
     def _create_var_opts(self, vdict):
         """Return a dictionary of attributes required for the creation of variable
@@ -272,40 +269,6 @@ class DatasetTemplate(NetCDFGroupDict):
                 if k in struct_keys
                 }
 
-    def update_dimensions(self):
-        """Update the sizes of dimensions to be consistent with the arrays set as variable values, if possible.
-        Otherwise raise ValueError. Also raise ValueError if a dimension that already has a non-zero size is not
-        consistent with variable array sizes.
-        """
-        for name, var in self.variables.items():
-            values = var.get('_data')
-            if values is None:
-                continue
-
-            var_shape = values.shape
-            var_dims = var.get('_dimensions', [])
-            if len(var_shape) != len(var_dims):
-                raise ValueError(
-                    "Variable '{name}' has {ndim} dimensions, but value array has {nshape} dimensions.".format(
-                        name=name, ndim=len(var_dims), nshape=len(var_shape)
-                    )
-                )
-
-            for dim, size in zip(var_dims, var_shape):
-                template_dim = self.dimensions[dim]
-                if template_dim is None or template_dim == 0:
-                    self.dimensions[dim] = size
-
-            # check that shape is now consistent
-            template_shape = tuple(self.dimensions[d] for d in var_dims)
-            if var_shape != template_shape:
-                raise ValueError(
-                    "Variable '{name}' has dimensions {var_dims} and shape {var_shape}, inconsistent with dimension "
-                    "sizes defined in template {template_shape}".format(
-                        name=name, var_dims=var_dims, var_shape=var_shape, template_shape=template_shape
-                    )
-                )
-
     def create_dimensions(self):
         """Create the dimensions on the netcdf file"""
         for dname, dval in self.dimensions.items():
@@ -318,9 +281,9 @@ class DatasetTemplate(NetCDFGroupDict):
         """
         for varname, varattr in self.variables.items():
             datatype = varattr['_datatype']
-            dimensions = varattr.get('_dimensions')
+            dimensions = tuple(varattr['_dimensions'])
             cwargs = kwargs.copy()
-            if dimensions is None:  # no kwargs in createVariable
+            if not dimensions:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, datatype)
             else:
                 var_c_opts = self._create_var_opts(varattr)
@@ -352,8 +315,6 @@ class DatasetTemplate(NetCDFGroupDict):
                     varname, datatype, dimensions=dimensions, **var_c_opts)
 
             # add variable values
-            if '_data' not in varattr:
-                raise ValueError('No data specified for variable {varname}'.format(varname=varname))
             if varattr['_data'] is not None:
                 ncvar[:] = varattr['_data']
 
@@ -365,7 +326,7 @@ class DatasetTemplate(NetCDFGroupDict):
         for att in self.global_attributes.keys():
             self.ncobj.setncattr(att, self.global_attributes[att])
 
-    def to_netcdf(self, outfile, var_args={}, **kwargs):
+    def to_netcdf(self, outfile, var_args=None, **kwargs):
         """
         Create a netCDF file according to all the information in the template.
         See netCDF4 package documentation for additional arguments.
@@ -376,15 +337,16 @@ class DatasetTemplate(NetCDFGroupDict):
         :return: None
         """
         self.outfile = outfile
+        _var_args = var_args or {}
 
-        self.update_dimensions()
-        if not self.is_dim_consistent():
-            raise ValueError("Dimensions.")
+        self.validate_schema()
+        self.ensure_completeness()
+        self.ensure_consistency()
 
         try:
             self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
             self.create_dimensions()
-            self.create_variables(**var_args)
+            self.create_variables(**_var_args)
             self.create_global_attributes()
             self.ncobj.sync()
         except Exception:

@@ -37,6 +37,7 @@ class TestSchema(unittest.TestCase):
         validate_variables({'X': {'_dimensions': []}})
         validate_variables({'X': {'name': 'X'}})
         validate_variables({'X': {'_data': None}})
+        validate_variables({'X': {'_data': 100}})
         validate_variables({'X': {'_dimensions': ['X'], '_datatype': 'float32'}})
         validate_variables({
             'X': {
@@ -59,8 +60,6 @@ class TestSchema(unittest.TestCase):
             validate_variables({'X': {'_datatype': 'float32', '_unknown': 'else'}})
         with self.assertRaises(ValidationError):
             validate_variables({'X': {'_datatype': 'float32', '0': 'none'}})
-        with self.assertRaises(ValidationError):
-            validate_variables({'X': {'_data': 100}})
 
     def test_validate_attributes(self):
         validate_global_attributes({})

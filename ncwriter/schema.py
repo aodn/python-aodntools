@@ -50,7 +50,7 @@ VARIABLE_DEFINITION_SCHEMA = {
         },
         "_datatype": {"type": "datatype"},
         "_FillValue": {"type": ["number", "string"]},
-        "_data": {"type": ["null", "array"]}
+        "_data": {"type": ["null", "number", "array"]}
     },
     "patternProperties": {
         NAME_PATTERN: {"type": ["string", "number", "array"]}

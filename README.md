@@ -62,4 +62,4 @@ template.to_netcdf('example.nc')
 
 ```
 
-See the examples folder for more complete examples.
+See the [examples](examples) folder for more complete examples.

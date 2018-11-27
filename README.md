@@ -13,7 +13,7 @@ Templates can be provided as individual Python dictionaries, or as a JSON file, 
 ```json
 {
     "_dimensions": {
-        "TIME": 0
+        "TIME": null
     },
     "_variables": {
         "TIME": {
@@ -26,6 +26,7 @@ Templates can be provided as individual Python dictionaries, or as a JSON file, 
 ```
 Basic usage
 ```python
+import numpy as np
 from ncwriter import DatasetTemplate
 
 # create template from individual dictionaries
@@ -53,11 +54,11 @@ template.variables["TEMP"] = {
     "valid_max": 42.00
 }
 
-# add variable values (automatically updates size of corresponding dimensions)
+# add variable values
 template.variables['TIME']['_data'] = np.arange(10)
 template.variables['TEMP']['_data'] = np.array([12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.0])
 
-# create netCDF file
+# create netCDF file (dimensions set to 'null' in the template are adjusted to match data array sizes, if possible)
 template.to_netcdf('example.nc')
 
 ```

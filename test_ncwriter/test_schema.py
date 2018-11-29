@@ -8,7 +8,7 @@ from ncwriter.schema import validate_dimensions, validate_variables, validate_gl
 class TestSchema(unittest.TestCase):
     def test_validate_dimensions(self):
         validate_dimensions({})
-        validate_dimensions({'X': 1, 'Y': 2})
+        validate_dimensions({'X': 1, 'Y': None})
 
         with self.assertRaises(ValidationError):
             validate_dimensions(None)

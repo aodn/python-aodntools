@@ -1,0 +1,50 @@
+{
+    "type": "object",
+    "definitions": {
+        "fileDimensions": {
+            "type": "object",
+            "patternProperties": {
+                "^[A-Za-z][A-Za-z0-9_]*$": {
+                    "type": ["integer", "null"],
+                    "minimum": 0
+                }
+            },
+            "additionalProperties": false
+        },
+        "fileVariables": {
+            "type": "object",
+            "patternProperties": {
+                "^[A-Za-z][A-Za-z0-9_]*$": {"$ref": "#/definitions/variableDefinition"}
+            },
+            "additionalProperties": false
+        },
+        "variableDefinition": {
+            "type": "object",
+            "properties": {
+                "_dimensions": {"$ref": "#/definitions/variableDimensionsList"},
+                "_datatype": {"type": "datatype"},
+                "_FillValue": {"type": ["number", "string"]},
+                "_data": {"type": ["null", "number", "array"]}
+            },
+            "patternProperties": {
+                "^[A-Za-z][A-Za-z0-9_]*$": {"$ref": "#/definitions/attributeDefinition"}
+            },
+            "additionalProperties": false
+        },
+        "variableDimensionsList": {
+            "type": "array",
+            "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*$"}
+        },
+        "attributeDefinition": {
+            "type": ["string", "number", "array"]
+        }
+    },
+    "properties": {
+        "_dimensions": {"$ref": "#/definitions/fileDimensions"},
+        "_variables": {"$ref": "#/definitions/fileVariables"}
+    },
+    "patternProperties": {
+        "^[A-Za-z][A-Za-z0-9_]*$": {"$ref": "#/definitions/attributeDefinition"}
+    },
+    "additionalProperties": false
+}

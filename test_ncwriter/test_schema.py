@@ -2,10 +2,22 @@ import unittest
 
 import numpy as np
 
-from ncwriter.schema import validate_dimensions, validate_variables, validate_global_attributes, ValidationError
+from ncwriter.schema import (validate_template, validate_dimensions, validate_variables, validate_global_attributes,
+                             ValidationError)
 
 
 class TestSchema(unittest.TestCase):
+    def test_validate_template(self):
+        validate_template({})
+        validate_template({'_dimensions': {'X': 1}})
+        validate_template({'_variables': {'X': {'name': 'X'}}})
+        validate_template({'title': 'test'})
+
+        self.assertRaises(ValidationError, validate_template, {'_bad': 1})
+        self.assertRaises(ValidationError, validate_template, {'_dimensions': None})
+        self.assertRaises(ValidationError, validate_template, {'_variables': 1})
+        self.assertRaises(ValidationError, validate_template, {'_variables': {'X': {'_dimensions': 1}}})
+
     def test_validate_dimensions(self):
         validate_dimensions({})
         validate_dimensions({'X': 1, 'Y': None})

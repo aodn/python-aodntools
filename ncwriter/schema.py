@@ -44,11 +44,14 @@ GLOBAL_ATTRIBUTES_SCHEMA = TEMPLATE_SCHEMA.copy()
 GLOBAL_ATTRIBUTES_SCHEMA.pop("properties")  # remove special properties, leaving only global attributes
 
 
+def validate_template(t):
+    TemplateValidator(TEMPLATE_SCHEMA).validate(t)
+
+
 def validate_dimensions(d):
     TemplateValidator(DIMENSIONS_SCHEMA).validate(d)
 
 
-# validate_variables = LocalValidator(VARIABLES_SCHEMA).validate
 def validate_variables(v):
     TemplateValidator(VARIABLES_SCHEMA).validate(v)
 

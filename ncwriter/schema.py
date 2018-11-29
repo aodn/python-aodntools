@@ -34,14 +34,8 @@ with open(TEMPLATE_SCHEMA_JSON) as f:
 TemplateValidator.check_schema(TEMPLATE_SCHEMA)
 
 
-DIMENSIONS_SCHEMA = TEMPLATE_SCHEMA['definitions']['fileDimensions']
-
-_TEMP_DEFS_COPY = deepcopy(TEMPLATE_SCHEMA['definitions'])
-VARIABLES_SCHEMA = _TEMP_DEFS_COPY.pop('fileVariables')
-VARIABLES_SCHEMA['definitions'] = _TEMP_DEFS_COPY
-
 GLOBAL_ATTRIBUTES_SCHEMA = TEMPLATE_SCHEMA.copy()
-GLOBAL_ATTRIBUTES_SCHEMA.pop("properties")  # remove special properties, leaving only global attributes
+GLOBAL_ATTRIBUTES_SCHEMA.pop('properties')  # remove special properties, leaving only global attributes
 
 
 def validate_template(t):
@@ -49,11 +43,11 @@ def validate_template(t):
 
 
 def validate_dimensions(d):
-    TemplateValidator(DIMENSIONS_SCHEMA).validate(d)
+    validate_template({'_dimensions': d})
 
 
 def validate_variables(v):
-    TemplateValidator(VARIABLES_SCHEMA).validate(v)
+    validate_template({'_variables': v})
 
 
 def validate_global_attributes(a):

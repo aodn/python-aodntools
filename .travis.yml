@@ -3,6 +3,9 @@ python:
   - "2.7"
   - "3.5"
 
+before_install:
+  - pip install --install-option="--no-cython-compile" cython
+
 install:
   - pip install -r requirements.txt
   - pip install coverage

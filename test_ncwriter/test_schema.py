@@ -50,6 +50,7 @@ class TestSchema(unittest.TestCase):
         validate_variables({'X': {'name': 'X'}})
         validate_variables({'X': {'_data': None}})
         validate_variables({'X': {'_data': 100}})
+        validate_variables({'X': {'_data': np.array([1, 2])}})
         validate_variables({'X': {'_dimensions': ['X'], '_datatype': 'float32'}})
         validate_variables({
             'X': {
@@ -69,7 +70,11 @@ class TestSchema(unittest.TestCase):
         with self.assertRaises(ValidationError):
             validate_variables({'__X': {}})
         with self.assertRaises(ValidationError):
-            validate_variables({'X': {'_datatype': 'float32', '_unknown': 'else'}})
+            validate_variables({'X': {'_unknown': 'else'}})
+        with self.assertRaises(ValidationError):
+            validate_variables({'X': {'_datatype': 'no_such_type'}})
+        with self.assertRaises(ValidationError):
+            validate_variables({'X': {'_datatype': 42}})
         with self.assertRaises(ValidationError):
             validate_variables({'X': {'_datatype': 'float32', '0': 'none'}})
 

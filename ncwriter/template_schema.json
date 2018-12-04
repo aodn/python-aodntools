@@ -23,7 +23,7 @@
             "type": "object",
             "properties": {
                 "_dimensions": {"$ref": "#/definitions/variableDimensionsList"},
-                "_datatype": {"type": "datatype"},
+                "_datatype": {"$ref": "#/definitions/dataTypeDefinition"},
                 "_FillValue": {"type": ["number", "string"]},
                 "_data": {"type": ["null", "number", "array"]}
             },
@@ -38,6 +38,9 @@
         },
         "attributeDefinition": {
             "type": ["string", "number", "array"]
+        },
+        "dataTypeDefinition": {
+            "format": "datatype"
         }
     },
     "properties": {

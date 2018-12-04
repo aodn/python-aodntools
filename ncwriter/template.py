@@ -131,7 +131,7 @@ class NetCDFGroupDict(object):
         validate_global_attributes(value)
         self._global_attributes = value
 
-    def validate_schema(self):
+    def validate_template_schema(self):
         """Validate the template against the full schema, raising ValidationError if not valid.
         This checks all the three dictionaries: dimensions, variables and global attributes.
         """
@@ -339,7 +339,7 @@ class DatasetTemplate(NetCDFGroupDict):
         self.outfile = outfile
         _var_args = var_args or {}
 
-        self.validate_schema()
+        self.validate_template_schema()
         self.ensure_completeness()
         self.ensure_consistency()
 

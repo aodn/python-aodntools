@@ -2,11 +2,13 @@
 template, and also the helper functions necessary to validate an object against their respective schema.
 """
 
+import json
 from copy import deepcopy
 
 import numpy as np
 
 from jsonschema import validators, Draft4Validator, ValidationError
+from pkg_resources import resource_filename
 
 try:
     basestring
@@ -26,77 +28,27 @@ TemplateValidator = validators.create(meta_schema=meta,
                                       default_types=types
                                       )
 
-
-NAME_PATTERN = r"^[A-Za-z][A-Za-z0-9_]*$"
-
-
-DIMENSIONS_SCHEMA = {
-    "type": "object",
-    "patternProperties": {
-        NAME_PATTERN: {
-            "type": ["integer", "null"],
-            "minimum": 0
-        }
-    },
-    "additionalProperties": False
-}
-
-VARIABLE_DEFINITION_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "_dimensions": {
-            "type": "array",
-            "items": {"type": "string", "pattern": NAME_PATTERN}
-        },
-        "_datatype": {"type": "datatype"},
-        "_FillValue": {"type": ["number", "string"]},
-        "_data": {"type": ["null", "number", "array"]}
-    },
-    "patternProperties": {
-        NAME_PATTERN: {"type": ["string", "number", "array"]}
-    },
-    "additionalProperties": False
-}
-
-
-VARIABLES_SCHEMA = {
-    "type": "object",
-    "patternProperties": {
-        NAME_PATTERN: VARIABLE_DEFINITION_SCHEMA
-    },
-    "additionalProperties": False
-}
-
-TEMPLATE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "_dimensions": DIMENSIONS_SCHEMA,
-        "_variables": VARIABLES_SCHEMA
-    },
-    "patternProperties": {
-        NAME_PATTERN: {
-            "type": ["string", "number", "array"]
-        }
-    },
-    "additionalProperties": False
-}
-
-
-ATTRIBUTES_SCHEMA = TEMPLATE_SCHEMA.copy()
-ATTRIBUTES_SCHEMA.pop("properties")  # remove special properties, leaving only global attributes
-
-
+TEMPLATE_SCHEMA_JSON = resource_filename(__name__, 'template_schema.json')
+with open(TEMPLATE_SCHEMA_JSON) as f:
+    TEMPLATE_SCHEMA = json.load(f)
 TemplateValidator.check_schema(TEMPLATE_SCHEMA)
 
 
+GLOBAL_ATTRIBUTES_SCHEMA = TEMPLATE_SCHEMA.copy()
+GLOBAL_ATTRIBUTES_SCHEMA.pop('properties')  # remove special properties, leaving only global attributes
+
+
+def validate_template(t):
+    TemplateValidator(TEMPLATE_SCHEMA).validate(t)
+
+
 def validate_dimensions(d):
-    TemplateValidator(DIMENSIONS_SCHEMA).validate(d)
+    validate_template({'_dimensions': d})
 
 
-# validate_variables = LocalValidator(VARIABLES_SCHEMA).validate
 def validate_variables(v):
-    TemplateValidator(VARIABLES_SCHEMA).validate(v)
+    validate_template({'_variables': v})
 
 
 def validate_global_attributes(a):
-    TemplateValidator(ATTRIBUTES_SCHEMA).validate(a)
+    TemplateValidator(GLOBAL_ATTRIBUTES_SCHEMA).validate(a)

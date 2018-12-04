@@ -8,11 +8,9 @@ INSTALL_REQUIRES = [
     'netCDF4'
 ]
 
-# TODO: add this when we have JSON schema files and templates bundled
-# PACKAGE_DATA = {
-#     'ncwriter': [
-#     ]
-# }
+PACKAGE_DATA = {
+    'ncwriter': ['*.json']
+}
 
 PACKAGE_EXCLUDES = ['test_ncwrwiter.*', 'test_ncwriter']
 PACKAGE_NAME = 'ncwriter'
@@ -21,7 +19,7 @@ setup(
     name=PACKAGE_NAME,
     version=versioneer.get_version(),
     packages=find_packages(exclude=PACKAGE_EXCLUDES),
-    # package_data=PACKAGE_DATA,
+    package_data=PACKAGE_DATA,
     url='https://github.com/aodn',
     license='GPLv3',
     author='AODN',

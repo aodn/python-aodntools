@@ -3,12 +3,12 @@ template, and also the helper functions necessary to validate an object against 
 """
 
 import json
-import os
 from copy import deepcopy
 
 import numpy as np
 
 from jsonschema import validators, Draft4Validator, ValidationError
+from pkg_resources import resource_filename
 
 try:
     basestring
@@ -28,7 +28,7 @@ TemplateValidator = validators.create(meta_schema=meta,
                                       default_types=types
                                       )
 
-TEMPLATE_SCHEMA_JSON = os.path.join(os.path.dirname(__file__), 'template_schema.json')
+TEMPLATE_SCHEMA_JSON = resource_filename(__name__, 'template_schema.json')
 with open(TEMPLATE_SCHEMA_JSON) as f:
     TEMPLATE_SCHEMA = json.load(f)
 TemplateValidator.check_schema(TEMPLATE_SCHEMA)

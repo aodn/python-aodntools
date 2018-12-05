@@ -91,6 +91,8 @@ class TestSchema(unittest.TestCase):
         with self.assertRaises(ValidationError):
             validate_global_attributes([])
         with self.assertRaises(ValidationError):
+            validate_global_attributes({'_dimensions': {}})
+        with self.assertRaises(ValidationError):
             validate_global_attributes({'_badname': 1})
         with self.assertRaises(ValidationError):
             validate_global_attributes({'null': None})

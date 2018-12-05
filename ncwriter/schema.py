@@ -5,7 +5,6 @@ template, and also the helper functions necessary to validate an object against 
 import json
 
 import numpy as np
-
 from jsonschema import validators, Draft4Validator, FormatChecker, ValidationError
 from pkg_resources import resource_filename
 
@@ -13,7 +12,6 @@ from pkg_resources import resource_filename
 # Create a new validator class (based on Draft4Validator) to allow templates to use
 # * Python types or numpy dtypes to specify variable data types; and
 # * numpy arrays to specify variable data.
-
 TemplateValidator = validators.create(meta_schema=Draft4Validator.META_SCHEMA,
                                       validators=Draft4Validator.VALIDATORS)
 format_checker = FormatChecker()
@@ -39,10 +37,6 @@ TemplateValidator.check_schema(TEMPLATE_SCHEMA)
 
 template_validator = TemplateValidator(TEMPLATE_SCHEMA, types=TYPES, format_checker=format_checker)
 
-GLOBAL_ATTRIBUTES_SCHEMA = TEMPLATE_SCHEMA.copy()
-GLOBAL_ATTRIBUTES_SCHEMA.pop('properties')  # remove special properties, leaving only global attributes
-global_attribute_validator = TemplateValidator(GLOBAL_ATTRIBUTES_SCHEMA, types=TYPES, format_checker=format_checker)
-
 
 def validate_template(t):
     template_validator.validate(t)
@@ -57,4 +51,8 @@ def validate_variables(v):
 
 
 def validate_global_attributes(a):
-    global_attribute_validator.validate(a)
+    if hasattr(a, 'keys'):
+        special = [k for k in a.keys() if k.startswith('_')]
+        if special:
+            raise ValidationError('Special attributes {} not allowed in global attributes dict'.format(special))
+    template_validator.validate(a)

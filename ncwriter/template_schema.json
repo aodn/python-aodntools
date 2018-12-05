@@ -40,7 +40,18 @@
             "type": ["string", "number", "array"]
         },
         "dataTypeDefinition": {
-            "format": "datatype"
+            "anyOf": [
+                {
+                    "type": "string",
+                    "enum": [
+                        "int", "int8", "int16", "int32", "int64",
+                        "float", "float16", "float32", "float64", "double",
+                        "S1", "c", "i1", "b", "B", "u1", "i2", "h", "s", "u2", "i4", "i", "l", "u4",
+                        "i8", "u8", "f4", "f", "f8", "d"
+                    ]
+                },
+                {"format": "datatype"}
+            ]
         }
     },
     "properties": {

@@ -9,10 +9,6 @@ import numpy as np
 from jsonschema import validators, Draft4Validator, FormatChecker, ValidationError
 from pkg_resources import resource_filename
 
-try:
-    basestring
-except NameError:
-    basestring = str
 
 # Create a new validator class (based on Draft4Validator) to allow templates to use
 # * Python types or numpy dtypes to specify variable data types; and
@@ -22,18 +18,10 @@ TemplateValidator = validators.create(meta_schema=Draft4Validator.META_SCHEMA,
                                       validators=Draft4Validator.VALIDATORS)
 format_checker = FormatChecker()
 
-TYPE_STRINGS = ('int', 'int8', 'int16', 'int32', 'int64',
-                'float', 'float8', 'float16', 'float32', 'float64', 'double',
-                'S1', 'c', 'i1', 'b', 'B', 'u1', 'i2', 'h', 's', 'u2', 'i4', 'i', 'l', 'u4',
-                'i8', 'u8', 'f4', 'f', 'f8', 'd'
-                )
-
 
 @format_checker.checks('datatype')
-def is_datatype(value):
+def is_python_datatype(value):
     """Return whether the given value is a valid data type specification for a NetCDF variable"""
-    if isinstance(value, basestring):
-        return value in TYPE_STRINGS
     if isinstance(value, np.dtype):
         return True
     if isinstance(value, type):

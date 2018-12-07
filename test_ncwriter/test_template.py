@@ -38,7 +38,7 @@ class TestUtils(unittest.TestCase):
                          special_attributes({'title': 'Title', '_fill_value': -999}))
 
 
-class TestDatasetTemplate(unittest.TestCase):
+class BaseTestCase(unittest.TestCase):
     with open(TEMPLATE_JSON) as t:
         template_dict = json.load(t, object_pairs_hook=OrderedDict)
     dimensions = template_dict['_dimensions']
@@ -65,6 +65,8 @@ class TestDatasetTemplate(unittest.TestCase):
         if hasattr(self, '_temp_dir'):
             shutil.rmtree(self._temp_dir)
 
+
+class TestDatasetTemplate(BaseTestCase):
     def test_init_empty(self):
         template = DatasetTemplate()
         self.assertEqual({}, template.dimensions)
@@ -212,42 +214,6 @@ class TestDatasetTemplate(unittest.TestCase):
         ds_global_attributes = OrderedDict((k, dataset.getncattr(k)) for k in dataset.ncattrs())
         self.assertEqual(self.global_attributes, ds_global_attributes)
 
-    def test_fill_values(self):
-        template = DatasetTemplate(dimensions={'X': 10})
-        template.variables['X'] = {'_dimensions': ['X'],
-                                   '_datatype': 'float32',
-                                   '_FillValue': -999.
-                                   }
-        x = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
-        template.variables['X']['_data'] = x
-        template.to_netcdf(self.temp_nc_file)
-
-        dataset = Dataset(self.temp_nc_file)
-        dataset.set_auto_mask(True)
-        dsx = dataset.variables['X']
-        self.assertEqual(-999., dsx._FillValue)
-        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
-        self.assertTrue(dsx[:5].mask.all())
-        self.assertTrue((dsx[5:] == x[5:]).all())
-
-    def test_fill_values_from_masked_array(self):
-        template = DatasetTemplate(dimensions={'X': 10})
-        template.variables['X'] = {'_dimensions': ['X'],
-                                   '_datatype': 'float32',
-                                   '_FillValue': -999.
-                                   }
-        x = np.array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5])
-        template.variables['X']['_data'] = np.ma.masked_array(x, mask=[True, True, True, True, True,
-                                                                       False, False, False, False, False])
-        template.to_netcdf(self.temp_nc_file)
-
-        dataset = Dataset(self.temp_nc_file)
-        dsx = dataset.variables['X']
-        self.assertEqual(-999., dsx._FillValue)
-        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
-        self.assertTrue(dsx[:5].mask.all())
-        self.assertTrue((dsx[5:] == x[5:]).all())
-
     def test_close_file_on_exception(self):
         template = DatasetTemplate(variables={'Z': {}})
         self.assertIsNone(template.ncobj)
@@ -336,6 +302,46 @@ class TestDatasetTemplate(unittest.TestCase):
                                 "Variable 'W' has 1 dimensions, but value array has 2 dimensions.",
                                 template.ensure_consistency
                                 )
+
+
+class TestFillValues(BaseTestCase):
+    def setUp(self):
+        super(TestFillValues, self).setUp()
+        self.template = DatasetTemplate(
+            dimensions={'X': 10},
+            variables={'X': {'_dimensions': ['X'],
+                             '_datatype': 'float32',
+                             '_FillValue': -999.
+                             }
+                       }
+        )
+
+    def test_fill_values(self):
+        x = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
+        self.template.variables['X']['_data'] = x
+        self.template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        dataset.set_auto_mask(True)
+        dsx = dataset.variables['X']
+        self.assertEqual(-999., dsx._FillValue)
+        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
+        self.assertTrue(dsx[:5].mask.all())
+        self.assertTrue((dsx[5:] == x[5:]).all())
+
+    def test_fill_values_from_masked_array(self):
+        x = np.array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5])
+        self.template.variables['X']['_data'] = np.ma.masked_array(x, mask=[True, True, True, True, True,
+                                                                            False, False, False, False, False])
+        self.template.to_netcdf(self.temp_nc_file)
+
+        dataset = Dataset(self.temp_nc_file)
+        dsx = dataset.variables['X']
+        self.assertEqual(-999., dsx._FillValue)
+        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
+        self.assertTrue(dsx[:5].mask.all())
+        self.assertTrue((dsx[5:] == x[5:]).all())
+
 
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)

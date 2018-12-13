@@ -188,8 +188,7 @@ class DatasetTemplate(NetCDFGroupDict):
             if "_datatype" not in var:
                 datatype = getattr(var["_data"], 'dtype', None)
                 if datatype is not None:
-                    print("WARNING: Guessed data type {datatype} "
-                          "for variable '{name}'".format(datatype=datatype, name=name))
+                    warn("Guessed data type '{datatype}' for variable '{name}'".format(datatype=datatype, name=name))
                     var["_datatype"] = datatype
                 else:
                     raise ValidationError("No data type information for variable '{name}'".format(name=name))

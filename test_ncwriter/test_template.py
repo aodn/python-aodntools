@@ -307,40 +307,47 @@ class TestDatasetTemplate(BaseTestCase):
 class TestFillValues(BaseTestCase):
     def setUp(self):
         super(TestFillValues, self).setUp()
+        self.data_array = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
+        self.data_masked = np.ma.masked_array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5],
+                                              mask=[True, True, True, True, True, False, False, False, False, False])
         self.template = DatasetTemplate(
             dimensions={'X': 10},
-            variables={'X': {'_dimensions': ['X'],
-                             '_datatype': 'float32',
-                             '_FillValue': -999.
-                             }
-                       }
+            variables={
+                'X': {
+                    '_dimensions': ['X'],
+                    '_datatype': 'float32',
+                    '_FillValue': -999.,
+                    '_data': self.data_array
+                },
+                'Y': {
+                    '_dimensions': ['X'],
+                    '_datatype': 'float32',
+                    '_fill_value': -999.,
+                    '_data': self.data_masked
+                }
+            }
         )
 
     def test_fill_values(self):
-        x = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
-        self.template.variables['X']['_data'] = x
         self.template.to_netcdf(self.temp_nc_file)
-
         dataset = Dataset(self.temp_nc_file)
         dataset.set_auto_mask(True)
-        dsx = dataset.variables['X']
-        self.assertEqual(-999., dsx._FillValue)
-        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
-        self.assertTrue(dsx[:5].mask.all())
-        self.assertTrue((dsx[5:] == x[5:]).all())
+        for varname in ('X', 'Y'):
+            dsvar = dataset.variables[varname]
+            self.assertEqual(-999., dsvar._FillValue)
+            self.assertIsInstance(dsvar[:], np.ma.MaskedArray)
+            self.assertTrue(dsvar[:5].mask.all())
+            self.assertTrue((dsvar[5:] == self.data_array[5:]).all())
 
-    def test_fill_values_from_masked_array(self):
-        x = np.array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5])
-        self.template.variables['X']['_data'] = np.ma.masked_array(x, mask=[True, True, True, True, True,
-                                                                            False, False, False, False, False])
+    def test_fill_value_aliases(self):
+        self.template.variables['X']['_fill_value'] = -999.  # both aliases, but equal so should still work
         self.template.to_netcdf(self.temp_nc_file)
-
         dataset = Dataset(self.temp_nc_file)
-        dsx = dataset.variables['X']
-        self.assertEqual(-999., dsx._FillValue)
-        self.assertIsInstance(dsx[:], np.ma.MaskedArray)
-        self.assertTrue(dsx[:5].mask.all())
-        self.assertTrue((dsx[5:] == x[5:]).all())
+        self.assertEqual(-999., dataset.variables['X']._FillValue)
+
+        del self._temp_nc_file
+        self.template.variables['X']['_fill_value'] = -666.  # now they're different, which is an error
+        self.assertRaises(ValueError, self.template.to_netcdf, self.temp_nc_file)
 
 
 # TODO: add data from multiple numpy arrays

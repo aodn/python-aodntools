@@ -25,6 +25,7 @@
                 "_dimensions": {"$ref": "#/definitions/variableDimensionsList"},
                 "_datatype": {"$ref": "#/definitions/dataTypeDefinition"},
                 "_FillValue": {"type": ["number", "string"]},
+                "_fill_value": {"type": ["number", "string"]},
                 "_data": {"type": ["null", "number", "array"]}
             },
             "patternProperties": {

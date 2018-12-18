@@ -12,6 +12,7 @@ written by: Hugo Oliveira ocehugo@gmail.com
 import json
 from collections import OrderedDict
 from copy import deepcopy
+from warnings import warn
 
 import netCDF4
 import numpy as np
@@ -147,7 +148,7 @@ class DatasetTemplate(NetCDFGroupDict):
         super(DatasetTemplate, self).__init__(*args, **kwargs)
         self.cattrs = {'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous', 'chunksizes', 'endian',
                        'least_significant_digit'}
-        self.fill_aliases = {'fill_value', 'missing_value', 'FillValue'}
+        self.fill_aliases = {'fill_value', 'FillValue'}
         self.outfile = None
         self.ncobj = None
 
@@ -187,8 +188,7 @@ class DatasetTemplate(NetCDFGroupDict):
             if "_datatype" not in var:
                 datatype = getattr(var["_data"], 'dtype', None)
                 if datatype is not None:
-                    print("WARNING: Guessed data type {datatype} "
-                          "for variable '{name}'".format(datatype=datatype, name=name))
+                    warn("Guessed data type '{datatype}' for variable '{name}'".format(datatype=datatype, name=name))
                     var["_datatype"] = datatype
                 else:
                     raise ValidationError("No data type information for variable '{name}'".format(name=name))
@@ -247,30 +247,38 @@ class DatasetTemplate(NetCDFGroupDict):
                     )
                 )
 
-    def _create_var_opts(self, vdict):
+    def _create_var_opts(self, vname, vdict):
         """Return a dictionary of attributes required for the creation of variable
-        defined by :vdict: This include creation/special options like:
-            `zlib`
-            `least_significant_digit`
-            `fill_value`
-            etc
+        defined by :vdict:. This includes creation/special options like `zlib`,
+        `least_significant_digit`, `fill_value`, etc...
+
+        Also check that only one fill value attribute is provided, and map it to
+        the `fill_value` option for createVariable. If both `fill_value` and `FillValue`
+        are specified:
+        * If they have exactly the same value, print a warning and proceed;
+        * If they have different values, raise ValueError.
+
+        :vname: is only used for reporting the variable name in error/warning message
         """
-        metadata_dict = metadata_attributes(vdict)
         special_dict = special_attributes(vdict)
         struct_keys = self.cattrs.intersection(special_dict.keys())
         fill_aliases = self.fill_aliases.intersection(special_dict.keys())
-        fill_aliases.update(
-            self.fill_aliases.intersection(metadata_dict.keys())  # in case fill value was specified without underscore
-        )
 
         if len(fill_aliases) > 1:
-            raise ValueError('You can only provide one missing value alias!')
+            fill_dict = {f: special_dict[f] for f in fill_aliases}
+            unique_values = set(fill_dict.values())
+            msg = "Multiple fill value options specified for variable '{vname}': {fill_dict}.".format(
+                vname=vname, fill_dict=fill_dict
+            )
+            if len(unique_values) == 1:
+                warn(msg)
+            else:
+                raise ValueError(msg)
 
-        struct_keys = struct_keys.union(fill_aliases)
-        return {k: v
-                for k, v in special_dict.items()
-                if k in struct_keys
-                }
+        var_opts = {k: special_dict[k] for k in struct_keys}
+        if fill_aliases:
+            var_opts['fill_value'] = special_dict[fill_aliases.pop()]
+        return var_opts
 
     def create_dimensions(self):
         """Create the dimensions on the netcdf file"""
@@ -289,7 +297,7 @@ class DatasetTemplate(NetCDFGroupDict):
             if not dimensions:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, datatype)
             else:
-                var_c_opts = self._create_var_opts(varattr)
+                var_c_opts = self._create_var_opts(varname, varattr)
 
                 ureq_fillvalue = [
                     x for x in cwargs.keys() if x in self.fill_aliases

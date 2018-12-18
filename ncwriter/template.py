@@ -96,8 +96,12 @@ class NetCDFGroupDict(object):
     def __add__(self, other):
         self_copy = deepcopy(self)
         self_copy.dimensions.update(other.dimensions)
-        self_copy.variables.update(other.variables)
         self_copy.global_attributes.update(other.global_attributes)
+        for k, v in other.variables.items():
+            if k in self_copy.variables:
+                self_copy.variables[k].update(v)
+            else:
+                self_copy.variables[k] = v
         return self_copy
 
     @property

@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -13,6 +14,7 @@ from ncwriter import DatasetTemplate, ValidationError, metadata_attributes, spec
 TEST_ROOT = os.path.dirname(__file__)
 TEMPLATE_JSON = os.path.join(TEST_ROOT, 'template1.json')
 TEMPLATE_PARTIAL_JSON = os.path.join(TEST_ROOT, 'template_partial.json')
+BAD_JSON = os.path.join(TEST_ROOT, 'bad.json')
 
 
 class TestUtils(unittest.TestCase):
@@ -92,6 +94,10 @@ class TestDatasetTemplate(unittest.TestCase):
             DatasetTemplate(global_attributes='title')
         with self.assertRaises(ValidationError):
             DatasetTemplate(global_attributes={'title': None})
+
+    def test_invalid_json(self):
+        error_pattern = r"invalid JSON file '{}'".format(re.escape(BAD_JSON))
+        self.assertRaisesRegexp(ValueError, error_pattern, DatasetTemplate.from_json, BAD_JSON)
 
     def test_init_from_json(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)

@@ -156,7 +156,10 @@ class DatasetTemplate(NetCDFGroupDict):
         """Load template from a JSON file"""
 
         with open(path) as f:
-            template = json.load(f, object_pairs_hook=OrderedDict)
+            try:
+                template = json.load(f, object_pairs_hook=OrderedDict)
+            except ValueError as e:
+                raise ValueError("invalid JSON file '{path}' ({e})".format(path=path, e=e))
 
         return cls(dimensions=template.get('_dimensions'),
                    variables=template.get('_variables'),

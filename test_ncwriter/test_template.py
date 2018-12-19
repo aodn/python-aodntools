@@ -115,6 +115,30 @@ class TestDatasetTemplate(BaseTestCase):
         self.assertEqual(tdict['_variables'], template.variables)
         self.assertEqual(metadata_attributes(tdict), template.global_attributes)
 
+    def test_add_method(self):
+        template1 = DatasetTemplate(dimensions={'ONE': 1},
+                                    variables={'X': {'_dimensions': ['ONE'], '_datatype': 'float32'},
+                                               'Y': {'_dimensions': ['ONE'], '_datatype': 'float32'}
+                                               },
+                                    global_attributes={'title': 'First template', 'comment': 'one'}
+                                    )
+        template2 = DatasetTemplate(dimensions={'TWO': 2},
+                                    variables={'Y': {'_dimensions': ['TWO'], 'comment': 'updated'},
+                                               'Z': {'name': 'new'}
+                                               },
+                                    global_attributes={'title': 'Second template', 'version': 2}
+                                    )
+        template = template1 + template2
+
+        self.assertEqual({'ONE': 1, 'TWO': 2}, template.dimensions)
+        self.assertEqual({'title': 'Second template', 'comment': 'one', 'version': 2}, template.global_attributes)
+
+        self.assertSetEqual({'X', 'Y', 'Z'}, set(template.variables.keys()))
+        self.assertEqual({'_dimensions': ['ONE'], '_datatype': 'float32'}, template.variables['X'])
+        self.assertEqual({'_dimensions': ['TWO'], '_datatype': 'float32', 'comment': 'updated'},
+                         template.variables['Y'])
+        self.assertEqual({'name': 'new'}, template.variables['Z'])
+
     # TODO: def test_json_validation(self):
 
     # TODO: create template from other formats (later...)

@@ -150,8 +150,8 @@ class DatasetTemplate(NetCDFGroupDict):
 
     def __init__(self, *args, **kwargs):
         super(DatasetTemplate, self).__init__(*args, **kwargs)
-        self.cattrs = {'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous', 'chunksizes', 'endian',
-                       'least_significant_digit'}
+        self.cattrs = {'datatype', 'dimensions', 'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous',
+                       'chunksizes', 'endian', 'least_significant_digit'}
         self.fill_aliases = {'fill_value', 'FillValue'}
         self.outfile = None
         self.ncobj = None
@@ -295,16 +295,13 @@ class DatasetTemplate(NetCDFGroupDict):
         like `zlib` and friends.
         """
         for varname, varattr in self.variables.items():
-            datatype = varattr['_datatype']
-            dimensions = tuple(varattr['_dimensions'])
-            if not dimensions:  # no kwargs in createVariable
-                ncvar = self.ncobj.createVariable(varname, datatype)
+            if not varattr['_dimensions']:  # no kwargs in createVariable
+                ncvar = self.ncobj.createVariable(varname, varattr['_datatype'])
             else:
                 var_c_opts = self._create_var_opts(varname, varattr)
                 var_c_opts.update(kwargs)
 
-                ncvar = self.ncobj.createVariable(
-                    varname, datatype, dimensions=dimensions, **var_c_opts)
+                ncvar = self.ncobj.createVariable(varname, **var_c_opts)
 
             # add variable values
             if varattr['_data'] is not None:

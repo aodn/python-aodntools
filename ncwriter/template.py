@@ -148,11 +148,12 @@ class NetCDFGroupDict(object):
 class DatasetTemplate(NetCDFGroupDict):
     """Template object used for creating netCDF files"""
 
+    STRUCTURAL_ATTRIBUTES = {'datatype', 'dimensions', 'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous',
+                             'chunksizes', 'endian', 'least_significant_digit'}
+    FILL_VALUE_ALIASES = {'fill_value', 'FillValue'}
+
     def __init__(self, *args, **kwargs):
         super(DatasetTemplate, self).__init__(*args, **kwargs)
-        self.cattrs = {'datatype', 'dimensions', 'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous',
-                       'chunksizes', 'endian', 'least_significant_digit'}
-        self.fill_aliases = {'fill_value', 'FillValue'}
         self.outfile = None
         self.ncobj = None
 
@@ -265,8 +266,8 @@ class DatasetTemplate(NetCDFGroupDict):
         :vname: is only used for reporting the variable name in error/warning message
         """
         special_dict = special_attributes(vdict)
-        struct_keys = self.cattrs.intersection(special_dict.keys())
-        fill_aliases = self.fill_aliases.intersection(special_dict.keys())
+        struct_keys = self.STRUCTURAL_ATTRIBUTES.intersection(special_dict.keys())
+        fill_aliases = self.FILL_VALUE_ALIASES.intersection(special_dict.keys())
 
         if len(fill_aliases) > 1:
             fill_dict = {f: special_dict[f] for f in fill_aliases}

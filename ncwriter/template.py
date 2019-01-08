@@ -148,11 +148,12 @@ class NetCDFGroupDict(object):
 class DatasetTemplate(NetCDFGroupDict):
     """Template object used for creating netCDF files"""
 
+    STRUCTURAL_ATTRIBUTES = {'datatype', 'dimensions', 'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous',
+                             'chunksizes', 'endian', 'least_significant_digit'}
+    FILL_VALUE_ALIASES = {'fill_value', 'FillValue'}
+
     def __init__(self, *args, **kwargs):
         super(DatasetTemplate, self).__init__(*args, **kwargs)
-        self.cattrs = {'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous', 'chunksizes', 'endian',
-                       'least_significant_digit'}
-        self.fill_aliases = {'fill_value', 'FillValue'}
         self.outfile = None
         self.ncobj = None
 
@@ -265,8 +266,8 @@ class DatasetTemplate(NetCDFGroupDict):
         :vname: is only used for reporting the variable name in error/warning message
         """
         special_dict = special_attributes(vdict)
-        struct_keys = self.cattrs.intersection(special_dict.keys())
-        fill_aliases = self.fill_aliases.intersection(special_dict.keys())
+        struct_keys = self.STRUCTURAL_ATTRIBUTES.intersection(special_dict.keys())
+        fill_aliases = self.FILL_VALUE_ALIASES.intersection(special_dict.keys())
 
         if len(fill_aliases) > 1:
             fill_dict = {f: special_dict[f] for f in fill_aliases}
@@ -295,39 +296,13 @@ class DatasetTemplate(NetCDFGroupDict):
         like `zlib` and friends.
         """
         for varname, varattr in self.variables.items():
-            datatype = varattr['_datatype']
-            dimensions = tuple(varattr['_dimensions'])
-            cwargs = kwargs.copy()
-            if not dimensions:  # no kwargs in createVariable
-                ncvar = self.ncobj.createVariable(varname, datatype)
+            if not varattr['_dimensions']:  # no kwargs in createVariable
+                ncvar = self.ncobj.createVariable(varname, varattr['_datatype'])
             else:
                 var_c_opts = self._create_var_opts(varname, varattr)
+                var_c_opts.update(kwargs)
 
-                ureq_fillvalue = [
-                    x for x in cwargs.keys() if x in self.fill_aliases
-                ]
-
-                vreq_fillvalue = [
-                    x for x in var_c_opts.keys() if x in self.fill_aliases
-                ]
-
-                var_c_opts.update(cwargs)
-
-                # user precedence
-                if ureq_fillvalue and vreq_fillvalue:
-                    [var_c_opts.pop(x) for x in vreq_fillvalue]
-                    fv_val = [var_c_opts.pop(x) for x in ureq_fillvalue]
-                    var_c_opts['fill_value'] = fv_val[-1]
-                elif ureq_fillvalue and not vreq_fillvalue:
-                    fv_val = [var_c_opts.pop(x) for x in ureq_fillvalue]
-                    var_c_opts['fill_value'] = fv_val[-1]
-                else:
-                    fv_val = [var_c_opts.pop(x) for x in vreq_fillvalue]
-                    if fv_val:
-                        var_c_opts['fill_value'] = fv_val[-1]
-
-                ncvar = self.ncobj.createVariable(
-                    varname, datatype, dimensions=dimensions, **var_c_opts)
+                ncvar = self.ncobj.createVariable(varname, **var_c_opts)
 
             # add variable values
             if varattr['_data'] is not None:

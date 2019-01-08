@@ -26,6 +26,14 @@
                 "_datatype": {"$ref": "#/definitions/dataTypeDefinition"},
                 "_FillValue": {"type": ["number", "string"]},
                 "_fill_value": {"type": ["number", "string"]},
+                "_zlib": {"type":  "boolean"},
+                "_complevel": {"enum": [1, 2, 3, 4, 5, 6, 7, 8, 9]},
+                "_shuffle": {"type":  "boolean"},
+                "_fletcher32": {"type":  "boolean"},
+                "_contiguous": {"type":  "boolean"},
+                "_chunksizes": {},
+                "_endian": {"enum": ["little", "big", "native"]},
+                "_least_significant_digit": {"type": "integer"},
                 "_data": {"type": ["null", "number", "array"]}
             },
             "patternProperties": {

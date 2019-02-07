@@ -48,6 +48,10 @@
         }
     },
     "title": "Sample data from Rottnest Island NRS",
-    "Conventions": "CF-1.6,IMOS-1.4",
-    "naming_authority": "IMOS"
+    "abstract": "Sample data from Rottnest Island NRS",
+    "author": "Me",
+    "author_email": "me@mine.org",
+    "principal_investigator": "Nobody",
+    "principal_investigator_email": "nobody@nowhere.org",
+    "standard_name_vocabulary": "NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table v60"
 }

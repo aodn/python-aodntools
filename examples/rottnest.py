@@ -6,21 +6,28 @@ and writes it to a netCDF file.
 """
 
 import os
+from datetime import datetime
 
 import pandas as pd
 from netCDF4 import date2num
 
+import ncwriter
 from ncwriter.template import DatasetTemplate
 
+IMOS_GLOBAL_JSON = os.path.join(ncwriter.__path__[0], 'imos_global.json')
 EXAMPLES_PATH = os.path.dirname(__file__)
 TEMPLATE_JSON = os.path.join(EXAMPLES_PATH, 'rottnest.json')
 DATA_CSV = os.path.join(EXAMPLES_PATH, 'rottnest.csv')
+
+TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 # read data from CSV
 df = pd.read_csv(DATA_CSV, parse_dates=['TIME'])
 
 # create template
-template = DatasetTemplate.from_json(TEMPLATE_JSON)
+template = (DatasetTemplate.from_json(IMOS_GLOBAL_JSON) +
+            DatasetTemplate.from_json(TEMPLATE_JSON)
+            )
 
 # update attributes
 for att in ('site_code', 'platform_code', 'deployment_code', 'instrument_nominal_depth'):
@@ -37,6 +44,19 @@ template.variables['LONGITUDE']['_data'] = df['LONGITUDE'].unique()[0]
 for name, var in template.variables.items():
     if '_data' not in var:
         var['_data'] = df[name].values
+
+# update range attributes
+template.global_attributes['time_coverage_start'] = t_data.min().strftime(TIMESTAMP_FORMAT)
+template.global_attributes['time_coverage_end'] = t_data.max().strftime(TIMESTAMP_FORMAT)
+for varname, shortname in [('LATITUDE', 'lat'), ('LONGITUDE', 'lon')]:
+    for stat in (min, max):
+        attname = "geospatial_{shortname}_{stat.__name__}".format(shortname=shortname, stat=stat)
+        template.global_attributes[attname] = stat(df[varname])
+
+# add creation date
+date_created = datetime.utcnow().strftime(TIMESTAMP_FORMAT)
+template.global_attributes['date_created'] = date_created
+template.global_attributes['history'] = "{}: File created".format(date_created)
 
 # generate file name
 outfile = 'rottnest.nc'

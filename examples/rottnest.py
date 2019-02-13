@@ -8,6 +8,7 @@ and writes it to a netCDF file.
 import os
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 from netCDF4 import date2num
 
@@ -45,7 +46,16 @@ for name, var in template.variables.items():
     if '_data' not in var:
         var['_data'] = df[name].values
 
+# convert valid_min/max attributes to match variable type
+# TODO: make this a template method
+for name, var in template.variables.items():
+    var_type = var['_datatype']
+    for attr in ('valid_min', 'valid_max'):
+        if attr in var:
+            var[attr] = np.cast[var_type](var[attr])
+
 # update range attributes
+# TODO: make this a template method
 template.global_attributes['time_coverage_start'] = t_data.min().strftime(TIMESTAMP_FORMAT)
 template.global_attributes['time_coverage_end'] = t_data.max().strftime(TIMESTAMP_FORMAT)
 for varname, shortname in [('LATITUDE', 'lat'), ('LONGITUDE', 'lon')]:
@@ -54,6 +64,7 @@ for varname, shortname in [('LATITUDE', 'lat'), ('LONGITUDE', 'lon')]:
         template.global_attributes[attname] = stat(df[varname])
 
 # add creation date
+# TODO: make this a template method
 date_created = datetime.utcnow().strftime(TIMESTAMP_FORMAT)
 template.global_attributes['date_created'] = date_created
 template.global_attributes['history'] = "{}: File created".format(date_created)

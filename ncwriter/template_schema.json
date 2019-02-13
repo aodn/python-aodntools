@@ -46,7 +46,7 @@
             "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*$"}
         },
         "attributeDefinition": {
-            "type": ["string", "number", "array"]
+            "type": ["null","string", "number", "array"]
         },
         "dataTypeDefinition": {
             "anyOf": [

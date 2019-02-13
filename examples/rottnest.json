@@ -7,44 +7,65 @@
             "_dimensions": ["TIME"],
             "_datatype": "float64",
             "standard_name": "time",
+            "long_name": "time",
             "units": "days since 1950-01-01 00:00:00 UTC",
             "calendar": "gregorian",
-            "axis": "T"
+            "axis": "T",
+            "valid_min": 0.0,
+            "valid_max": 90000.0
         },
         "LATITUDE": {
-            "_datatype": "float32",
+            "_datatype": "float64",
             "standard_name": "latitude",
+            "long_name": "latitude",
             "units": "degrees_north",
-            "axis": "Y"
+            "reference_datum": "WGS84 geographic coordinate system",
+            "axis": "Y",
+            "valid_min": -90.0,
+            "valid_max": 90.0
         },
         "LONGITUDE": {
-            "_datatype": "float32",
+            "_datatype": "float64",
             "standard_name": "longitude",
+            "long_name": "longitude",
             "units": "degrees_east",
-            "axis": "X"
+            "reference_datum": "WGS84 geographic coordinate system",
+            "axis": "X",
+            "valid_min": -180.0,
+            "valid_max": 180.0
         },
         "DEPTH": {
             "_dimensions": ["TIME"],
             "_datatype": "float32",
             "standard_name": "depth",
+            "long_name": "depth",
             "units": "m",
             "reference_datum": "sea surface",
             "positive": "down",
-            "axis": "Z"
+            "axis": "Z",
+            "valid_min": -5.0,
+            "valid_max": 12000.0
         },
         "PRES_REL": {
             "_dimensions": ["TIME"],
             "_datatype": "float32",
             "standard_name": "sea_water_pressure_due_to_sea_water",
-            "units": "dbar"
+            "long_name": "sea_water_pressure_due_to_sea_water",
+            "units": "dbar",
+            "_FillValue": 999999.0,
+            "valid_min": -15.0,
+            "valid_max": 12000.0
         },
         "TEMP": {
             "_dimensions": ["TIME"],
             "_datatype": "float32",
             "standard_name": "sea_water_temperature",
+            "long_name": "sea_water_temperature",
             "units": "degC",
-            "valid_min": 0.0,
-            "valid_max": 42.00
+            "coordinates": "TIME PRES_REL DEPTH LATITUDE LONGITUDE",
+            "_FillValue": 999999.0,
+            "valid_min": -2.5,
+            "valid_max": 40.0
         }
     },
     "title": "Sample data from Rottnest Island NRS",

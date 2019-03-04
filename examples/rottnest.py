@@ -6,29 +6,23 @@ and writes it to a netCDF file.
 """
 
 import os
-from datetime import datetime
 
 import numpy as np
 import pandas as pd
 from netCDF4 import date2num
 
-import ncwriter
-from ncwriter.template import DatasetTemplate
+from ncwriter.imos_template import ImosTemplate, TIMESTAMP_FORMAT
 
-IMOS_GLOBAL_JSON = os.path.join(ncwriter.__path__[0], 'imos_global.json')
 EXAMPLES_PATH = os.path.dirname(__file__)
 TEMPLATE_JSON = os.path.join(EXAMPLES_PATH, 'rottnest.json')
 DATA_CSV = os.path.join(EXAMPLES_PATH, 'rottnest.csv')
 
-TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 # read data from CSV
 df = pd.read_csv(DATA_CSV, parse_dates=['TIME'])
 
 # create template
-template = (DatasetTemplate.from_json(IMOS_GLOBAL_JSON) +
-            DatasetTemplate.from_json(TEMPLATE_JSON)
-            )
+template = ImosTemplate.from_json(TEMPLATE_JSON)
 
 # update attributes
 for att in ('site_code', 'platform_code', 'deployment_code', 'instrument_nominal_depth'):
@@ -64,10 +58,8 @@ for varname, shortname in [('LATITUDE', 'lat'), ('LONGITUDE', 'lon')]:
         template.global_attributes[attname] = stat(df[varname])
 
 # add creation date
-# TODO: make this a template method
-date_created = datetime.utcnow().strftime(TIMESTAMP_FORMAT)
-template.global_attributes['date_created'] = date_created
-template.global_attributes['history'] = "{}: File created".format(date_created)
+template.add_date_created_attribute()
+template.global_attributes['history'] = "{}: File created".format(template.date_created.strftime(TIMESTAMP_FORMAT))
 
 # generate file name
 outfile = 'rottnest.nc'

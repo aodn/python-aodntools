@@ -1,6 +1,11 @@
 from datetime import datetime
+from pkg_resources import resource_filename
 
 from ncwriter import DatasetTemplate
+
+
+IMOS_GLOBAL_JSON = resource_filename(__name__, 'imos_global.json')
+IMOS_GLOBAL_ATTRIBUTES = DatasetTemplate.from_json(IMOS_GLOBAL_JSON).global_attributes
 
 
 class ImosTemplate(DatasetTemplate):
@@ -8,8 +13,12 @@ class ImosTemplate(DatasetTemplate):
 
     TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
-    def __init__(self, *args, **kwargs):
-        super(ImosTemplate, self).__init__(*args, **kwargs)
+    def __init__(self, global_attributes=None, *args, **kwargs):
+        # add standard IMOS global attributes first
+        combined_attributes = IMOS_GLOBAL_ATTRIBUTES.copy()
+        if global_attributes is not None:
+            combined_attributes.update(global_attributes)
+        super(ImosTemplate, self).__init__(global_attributes=combined_attributes, *args, **kwargs)
         self._date_created = None
 
     @property

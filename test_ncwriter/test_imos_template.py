@@ -1,9 +1,10 @@
 import unittest
-
 from datetime import datetime, timedelta
 
-from ncwriter.template import DatasetTemplate
+import numpy as np
+
 from ncwriter.imos_template import ImosTemplate
+from ncwriter.template import DatasetTemplate
 from test_ncwriter.test_template import BaseTestCase
 
 
@@ -36,6 +37,47 @@ class TestImosTemplate(BaseTestCase):
         self.template.add_date_created_attribute()
         parsed_date_created = datetime.strptime(self.template.global_attributes['date_created'], '%Y-%m-%dT%H:%M:%SZ')
         self.assertTrue(self.template.date_created - parsed_date_created < timedelta(seconds=1))
+
+    def test_add_extent_attributes(self):
+        self.template.variables = {
+            'TIME': {
+                '_dimensions': ['TIME'],
+                '_datatype': 'float64',
+                '_data': np.array([0, 1, 2, np.nan, 25261.375]),
+                'units': 'days since 1950-01-01 00:00:00 UTC'
+            },
+            'LATITUDE': {
+                '_dimensions': ['TIME'],
+                '_datatype': 'float32',
+                '_FillValue': -999.,
+                '_data': np.array([-999., -999., -42, -43, 12])
+            },
+            'LONGITUDE': {
+                '_dimensions': ['TIME'],
+                '_datatype': 'float32',
+                '_data': np.arange(10)
+            },
+            'NOMINAL_DEPTH': {
+                '_datatype': 'float32',
+                '_data': 20
+            },
+            'DEPTH': {
+                '_dimensions': ['TIME'],
+                '_datatype': 'float32',
+                '_data': np.repeat(np.nan, 5)
+            }
+        }
+        self.template.add_extent_attributes(vert_var='NOMINAL_DEPTH')
+        self.assertEqual('1950-01-01T00:00:00Z', self.template.global_attributes['time_coverage_start'])
+        self.assertEqual('2019-03-01T09:00:00Z', self.template.global_attributes['time_coverage_end'])
+        self.assertEqual(-43, self.template.global_attributes['geospatial_lat_min'])
+        self.assertEqual(12, self.template.global_attributes['geospatial_lat_max'])
+        self.assertEqual(0, self.template.global_attributes['geospatial_lon_min'])
+        self.assertEqual(9, self.template.global_attributes['geospatial_lon_max'])
+        self.assertEqual(20, self.template.global_attributes['geospatial_vertical_min'])
+        self.assertEqual(20, self.template.global_attributes['geospatial_vertical_max'])
+
+        self.assertRaises(ValueError, self.template.add_extent_attributes)
 
 
 if __name__ == '__main__':

@@ -49,13 +49,7 @@ for name, var in template.variables.items():
             var[attr] = np.cast[var_type](var[attr])
 
 # update range attributes
-# TODO: make this a template method
-template.global_attributes['time_coverage_start'] = t_data.min().strftime(TIMESTAMP_FORMAT)
-template.global_attributes['time_coverage_end'] = t_data.max().strftime(TIMESTAMP_FORMAT)
-for varname, shortname in [('LATITUDE', 'lat'), ('LONGITUDE', 'lon')]:
-    for stat in (min, max):
-        attname = "geospatial_{shortname}_{stat.__name__}".format(shortname=shortname, stat=stat)
-        template.global_attributes[attname] = stat(df[varname])
+template.add_extent_attributes()
 
 # add creation date
 template.add_date_created_attribute()

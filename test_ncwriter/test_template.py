@@ -328,23 +328,28 @@ class TestDatasetTemplate(BaseTestCase):
                                 )
 
 
-class TestFillValues(BaseTestCase):
+class TestDataValues(BaseTestCase):
     def setUp(self):
-        super(TestFillValues, self).setUp()
+        super(TestDataValues, self).setUp()
         self.data_array = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])
         self.data_masked = np.ma.masked_array([-4, -3, -2, -1, 0, 1., 2., 3., 4., 5],
                                               mask=[True, True, True, True, True, False, False, False, False, False])
         self.template = DatasetTemplate(
-            dimensions={'X': 10},
+            dimensions={'TIME': 10},
             variables={
+                'TIME': {
+                    '_dimensions': ['TIME'],
+                    '_datatype': 'float32',
+                    '_data': np.array([np.nan, np.nan, 1, 2, 3, 4, 5, 6, 7, 8])
+                },
                 'X': {
-                    '_dimensions': ['X'],
+                    '_dimensions': ['TIME'],
                     '_datatype': 'float32',
                     '_FillValue': -999.,
                     '_data': self.data_array
                 },
                 'Y': {
-                    '_dimensions': ['X'],
+                    '_dimensions': ['TIME'],
                     '_datatype': 'float32',
                     '_fill_value': -999.,
                     '_data': self.data_masked
@@ -373,6 +378,10 @@ class TestFillValues(BaseTestCase):
         self.template.variables['X']['_fill_value'] = -666.  # now they're different, which is an error
         self.assertRaises(ValueError, self.template.to_netcdf, self.temp_nc_file)
 
+    def test_get_data_range(self):
+        self.assertEqual((1, 8), self.template.get_data_range('TIME'))
+        self.assertEqual((1, 5), self.template.get_data_range('X'))
+        self.assertEqual((1, 5), self.template.get_data_range('Y'))
 
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)

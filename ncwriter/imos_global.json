@@ -19,6 +19,8 @@
     "date_created": "",
     "time_coverage_start": "",
     "time_coverage_end": "",
+    "geospatial_vertical_min": "",
+    "geospatial_vertical_max": "",
     "geospatial_lat_min": "",
     "geospatial_lat_max": "",
     "geospatial_lon_min": "",

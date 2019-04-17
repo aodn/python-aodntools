@@ -7,6 +7,14 @@ from ncwriter.imos_template import ImosTemplate
 from ncwriter.template import DatasetTemplate
 from test_ncwriter.test_template import BaseTestCase
 
+TEST_FIXED_GLOBALS = {
+    "Conventions": "CF-1.6,IMOS-1.4",
+    "project": "Integrated Marine Observing System (IMOS)",
+    "naming_authority": "IMOS",
+    "data_centre": "Australian Ocean Data Network (AODN)",
+    "data_centre_email": "info@aodn.org.au"
+}
+
 
 class TestImosTemplate(BaseTestCase):
 
@@ -18,15 +26,19 @@ class TestImosTemplate(BaseTestCase):
         self.assertIsInstance(self.template, DatasetTemplate)
 
     def test_fixed_global_attributes(self):
-        global_attr = {
-            "Conventions": "CF-1.6,IMOS-1.4",
-            "project": "Integrated Marine Observing System (IMOS)",
-            "naming_authority": "IMOS",
-            "data_centre": "Australian Ocean Data Network (AODN)",
-            "data_centre_email": "info@aodn.org.au"
-        }
-        for name, value in global_attr.items():
+        for name, value in TEST_FIXED_GLOBALS.items():
             self.assertEqual(value, self.template.global_attributes[name])
+
+    def test_combine_global_attributes(self):
+        my_globals = {"title": "This is a test",
+                      "project": "Test project"
+                      }
+        expected = TEST_FIXED_GLOBALS.copy()
+        expected.update(my_globals)
+        template = ImosTemplate(global_attributes=my_globals)
+
+        for name, value in expected.items():
+            self.assertEqual(value, template.global_attributes[name])
 
     def test_date_created(self):
         now = datetime.now()
@@ -39,6 +51,11 @@ class TestImosTemplate(BaseTestCase):
         self.assertTrue(self.template.date_created - parsed_date_created < timedelta(seconds=1))
 
     def test_add_extent_attributes(self):
+        self.template.add_extent_attributes(time_var=None, vert_var=None, lat_var=None, lon_var=None)
+        for att in ('time_coverage_start', 'time_coverage_end', 'geospatial_vertical_min', 'geospatial_vertical_max',
+                    'geospatial_lat_min', 'geospatial_lat_max', 'geospatial_lon_min', 'geospatial_lon_max'):
+            self.assertEqual('', self.template.global_attributes[att])
+
         self.template.variables = {
             'TIME': {
                 '_dimensions': ['TIME'],

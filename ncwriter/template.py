@@ -345,3 +345,29 @@ class DatasetTemplate(NetCDFGroupDict):
             self.ncobj.close()
 
         self.ncobj = netCDF4.Dataset(self.outfile, 'a')
+
+    def get_data_range(self, varname):
+        """
+        Return the minimum and maximum values assigned to the given variable, ignoring fill values and NaNs.
+        Raises ValueError if the variable doesn't exist, or has no valid data attached to it.
+
+        :param varname: Name of the variable
+        :return: (min, max) value
+        :rtype: tuple
+        """
+        var = self.variables.get(varname)
+        if var is None:
+            raise ValueError("Variable '{varname}' does not exist".format(varname=varname))
+        data = var.get('_data', [])
+
+        # mask out the fillvalues
+        fill_value = var.get('_FillValue') or var.get('_fill_value')
+        if fill_value is None:
+            mask = np.isnan(data)
+        else:
+            mask = np.logical_or(data == fill_value, np.isnan(data))
+        data_masked = np.ma.array(data, mask=mask)
+        if data_masked.mask.all():
+            raise ValueError("No valid data for variable '{varname}'".format(varname=varname))
+
+        return data_masked.min(), data_masked.max()

@@ -1,8 +1,5 @@
 FROM ubuntu:16.04
 
-COPY . /app
-WORKDIR /app
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python-pip \
     python-dev \
@@ -19,6 +16,3 @@ RUN pip install \
     wheel \
     setuptools \
     numpy
-
-COPY . /app
-WORKDIR /app

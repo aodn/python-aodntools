@@ -17,6 +17,9 @@ pipeline {
                     args '-v ${HOME}/.eggs:${WORKSPACE}/.eggs'
                 }
             }
+            environment {
+                HOME = '.'
+            }
             stages {
                 stage('version') {
                     steps {

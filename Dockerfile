@@ -18,8 +18,7 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py \
     && rm -rf get-pip.py
 
 RUN pip install \
-    Cython \
-    numpy
+    Cython==0.29
 
 RUN useradd --create-home --no-log-init --shell /bin/bash --uid $BUILDER_UID builder
 USER builder

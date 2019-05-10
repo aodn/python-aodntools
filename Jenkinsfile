@@ -1,7 +1,7 @@
 #!groovy
 
 pipeline {
-    agent { label 'master' }
+    agent { label 'agent' }
 
     stages {
         stage('clean') {

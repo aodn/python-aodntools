@@ -25,9 +25,9 @@ class ImosTemplate(DatasetTemplate):
 
     @property
     def date_created(self):
-        """Read-only property to return the creation date of the netCDF file as a datetime object"""
+        """Read-only property to return the UTC creation time of the netCDF file as a datetime object"""
         if self._date_created is None:
-            self._date_created = datetime.now()
+            self._date_created = datetime.utcnow()
         return self._date_created
 
     def add_date_created_attribute(self):

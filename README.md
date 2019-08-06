@@ -5,7 +5,7 @@
 
 Repository for templates and code relating to generating standard NetCDF files for the Australia Ocean Data Network
 
-## ncwrwiter
+## ncwriter
 
 This module provides a basic templating tool for creating netCDF files based on templates.
 

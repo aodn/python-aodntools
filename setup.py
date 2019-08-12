@@ -10,8 +10,8 @@ PACKAGE_DATA = {
     'ncwriter': ['*.json']
 }
 
-PACKAGE_EXCLUDES = ['test_ncwrwiter.*', 'test_ncwriter']
-PACKAGE_NAME = 'ncwriter'
+PACKAGE_EXCLUDES = ['ncwriter.*', 'ncwriter']
+PACKAGE_NAME = 'aodntools'
 
 setup(
     name=PACKAGE_NAME,
@@ -22,8 +22,8 @@ setup(
     license='GPLv3',
     author='AODN',
     author_email='projectofficers@emii.org.au',
-    description='AODN netCDF tools library',
+    description='AODN data tools library',
     zip_safe=False,
     install_requires=INSTALL_REQUIRES,
-    test_suite='test_ncwriter'
+    test_suite='test_aodntools'
 )

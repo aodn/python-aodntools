@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from ncwriter.imos_template import ImosTemplate
-from ncwriter.template import DatasetTemplate
-from test_ncwriter.test_template import BaseTestCase
+from aodntools.ncwriter import ImosTemplate
+from aodntools.ncwriter import DatasetTemplate
+from test_aodntools.ncwriter.test_template import BaseTestCase
 
 TEST_FIXED_GLOBALS = {
     "Conventions": "CF-1.6,IMOS-1.4",

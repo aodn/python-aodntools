@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from netCDF4 import date2num
 
-from ncwriter.imos_template import ImosTemplate, TIMESTAMP_FORMAT
+from aodntools.ncwriter import ImosTemplate, TIMESTAMP_FORMAT
 
 EXAMPLES_PATH = os.path.dirname(__file__)
 TEMPLATE_JSON = os.path.join(EXAMPLES_PATH, 'rottnest.json')

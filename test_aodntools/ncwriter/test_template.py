@@ -9,7 +9,7 @@ from collections import OrderedDict
 import numpy as np
 from netCDF4 import Dataset
 
-from ncwriter import DatasetTemplate, ValidationError, metadata_attributes, special_attributes
+from aodntools.ncwriter import DatasetTemplate, ValidationError, metadata_attributes, special_attributes
 
 TEST_ROOT = os.path.dirname(__file__)
 TEMPLATE_JSON = os.path.join(TEST_ROOT, 'template1.json')

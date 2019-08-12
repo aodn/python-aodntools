@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from ncwriter.schema import (validate_template, validate_dimensions, validate_variables, validate_global_attributes,
-                             ValidationError)
+from aodntools.ncwriter.schema import (validate_template, validate_dimensions, validate_variables,
+                                       validate_global_attributes, ValidationError)
 
 
 class TestSchema(unittest.TestCase):

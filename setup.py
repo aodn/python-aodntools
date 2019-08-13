@@ -7,10 +7,10 @@ INSTALL_REQUIRES = [
 ]
 
 PACKAGE_DATA = {
-    'ncwriter': ['*.json']
+    'aodntools.ncwriter': ['*.json']
 }
 
-PACKAGE_EXCLUDES = ['ncwriter.*', 'ncwriter']
+PACKAGE_EXCLUDES = ['test_aodntools.*', 'test_aodntools']
 PACKAGE_NAME = 'aodntools'
 
 setup(

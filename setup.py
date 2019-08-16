@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
 
-import versioneer
-
 INSTALL_REQUIRES = [
     'jsonschema==2.6.0',
     'numpy>=1.13.0',
@@ -17,7 +15,7 @@ PACKAGE_NAME = 'ncwriter'
 
 setup(
     name=PACKAGE_NAME,
-    version=versioneer.get_version(),
+    version='0.2.1',
     packages=find_packages(exclude=PACKAGE_EXCLUDES),
     package_data=PACKAGE_DATA,
     url='https://github.com/aodn',

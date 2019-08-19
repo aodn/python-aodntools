@@ -4,6 +4,7 @@ ARG BUILDER_UID=9999
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
+    git \
     python-dev \
     libxml2-dev \
     libxslt-dev \
@@ -18,7 +19,8 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py \
     && rm -rf get-pip.py
 
 RUN pip install \
-    Cython==0.29
+    Cython==0.29 \
+    bump2version==0.5.10
 
 RUN useradd --create-home --no-log-init --shell /bin/bash --uid $BUILDER_UID builder
 USER builder

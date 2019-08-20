@@ -3,8 +3,7 @@ from pkg_resources import resource_filename
 
 from netCDF4 import num2date
 
-from ncwriter import DatasetTemplate
-
+from .template import DatasetTemplate
 
 IMOS_GLOBAL_JSON = resource_filename(__name__, 'imos_global.json')
 IMOS_GLOBAL_ATTRIBUTES = DatasetTemplate.from_json(IMOS_GLOBAL_JSON).global_attributes

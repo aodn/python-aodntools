@@ -1,6 +1,6 @@
-# aodn-netcdf-tools
-[![build](https://travis-ci.org/aodn/aodn-netcdf-tools.png?branch=master)](https://travis-ci.org/aodn/aodn-netcdf-tools)
-[![coverage](https://codecov.io/gh/aodn/aodn-netcdf-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/aodn/aodn-netcdf-tools)
+# python-aodntools
+[![build](https://travis-ci.org/aodn/python-aodntools.png?branch=master)](https://travis-ci.org/aodn/python-aodntools)
+[![coverage](https://codecov.io/gh/aodn/python-aodntools/branch/master/graph/badge.svg)](https://codecov.io/gh/aodn/python-aodntools)
 
 
 Repository for code used to generate and manipulate data products for the Australia Ocean Data Network (AODN).

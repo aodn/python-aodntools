@@ -1,10 +1,9 @@
 [run]
 branch = True
-source = ncwriter
+source = aodntools
 omit =
-    test_ncwriter/*
-    ncwriter/_version.py
-    versioneer.py
+    examples/*
+    test_aodntools/*
 
 [report]
 exclude_lines =

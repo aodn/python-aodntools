@@ -281,7 +281,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
 
     ## constants
     FILLVALUE = 999999.0
-    variable_attributes_templatefile = 'TSagg_metadata.json'
+    variable_attributes_templatefile = 'aggregated_timeseries_template.json'
 
     ## sort the file URL in chronological order of deployment
     files_to_agg = sort_files_to_aggregate(files_to_agg)
@@ -434,7 +434,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
 
 
     ## Set global attrs
-    globalattr_file = 'TSagg_metadata.json'
+    globalattr_file = 'aggregated_timeseries_template.json'
     add_attribute = {'rejected_files': "\n".join(rejected_files)}
     agg_dataset.attrs = set_globalattr(agg_dataset, globalattr_file, var_to_agg, site_code, add_attribute)
 

@@ -11,9 +11,6 @@ import numpy as np
 import xarray as xr
 import pandas as pd
 
-from geoserverCatalog import get_moorings_urls
-
-
 
 def sort_files_to_aggregate(files_to_agg):
     """

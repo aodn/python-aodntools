@@ -1,0 +1,343 @@
+{
+    "_variables": {
+        "TIME": {
+            "axis": "T",
+            "comment": "time aggregated from all files excluding out-of-water records",
+            "long_name": "time",
+            "standard_name": "time",
+            "valid_max": 90000.0,
+            "valid_min": 0.0,
+            "units": "days since 1950-01-01 00:00:00 UTC",
+            "calendar": "gregorian"
+            },
+        "LATITUDE":{
+            "axis": "Y",
+            "long_name": "latitude",
+            "reference_datum": "WGS84 geographic coordinate system",
+            "standard_name": "latitude",
+            "units": "degrees_north",
+            "valid_max": 90.0,
+            "valid_min": -90.0
+            },
+        "LONGITUDE": {
+            "axis": "X",
+            "long_name": "longitude",
+            "reference_datum": "WGS84 geographic coordinate system",
+            "standard_name": "longitude",
+            "units": "degrees_east",
+            "valid_max": 180.0,
+            "valid_min": -180.0
+            },
+        "DEPTH": {
+            "ancillary_variables": "DEPTH_quality_control",
+            "coordinates": "TIME LATITUDE LONGITUDE NOMINAL_DEPTH",
+            "long_name": "actual depth",
+            "positive": "down",
+            "reference_datum": "sea surface",
+            "standard_name": "depth",
+            "units": "m",
+            "valid_max": 12000.0,
+            "valid_min": -5.0
+            },
+        "DEPTH_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for depth",
+            "standard_name": "depth status_flag"
+            },
+        "NOMINAL_DEPTH": {
+            "axis": "Z",
+            "long_name": "nominal depth",
+            "positive": "down",
+            "reference_datum": "sea surface",
+            "standard_name": "depth",
+            "units": "m",
+            "valid_max": 12000.0,
+            "valid_min": -5.0
+            },
+        "PRES": {
+            "ancillary_variables": "PRES_quality_control",
+            "long_name": "sea_water_pressure_due_to_sea_water",
+            "standard_name": "sea_water_pressure_due_to_sea_water",
+            "units": "dbar",
+            "valid_max": 12000.0,
+            "valid_min": -15.0,
+            "_FillValue": 999999.0
+            },
+        "PRES_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "sea_water_pressure status_flag",
+            "standard_name": "depth status_flag",
+            "_FillValue": 99
+            },
+        "PRES_REL": {
+            "ancillary_variables": "PRES_REL_quality_control",
+            "long_name": "sea_water_pressure_due_to_sea_water",
+            "standard_name": "sea_water_pressure_due_to_sea_water",
+            "units": "dbar",
+            "valid_max": 12000.0,
+            "valid_min": -15.0,
+            "_FillValue": 999999.0
+            },
+        "PRES_REL_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "sea_water_pressure_due_to_sea_water status_flag",
+            "standard_name": "depth status_flag",
+            "_FillValue": 99
+            },
+        "instrument_index": {
+            "long_name": "which instrument this obs is for",
+            "instance_dimension": "INSTRUMENT"
+            },
+        "instrument_id": {
+            "long_name": "source deployment code, instrument make, model, serial_number"
+            },
+        "source_file": {
+            "long_name": "source file for this instrument"
+            },
+        "TEMP": {
+            "ancillary_variables": "TEMP_quality_control",
+            "_FillValue": 999999.0,
+            "long_name": "sea_water_temperature",
+            "standard_name": "sea_water_temperature",
+            "units": "degrees_Celsius",
+            "valid_max": 40.0,
+            "valid_min": -2.5
+            },
+        "TEMP_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for sea_water_temperature",
+            "standard_name": "sea_water_temperature status_flag"
+        },
+        "PSAL": {
+            "ancillary_variables": "PSAL_quality_control",
+            "_FillValue": 999999.0,
+            "long_name": "sea_water_practical_salinity",
+            "standard_name": "sea_water_practical_salinity",
+            "units": 1,
+            "valid_max": 41.0,
+            "valid_min": 2.0
+            },
+        "PSAL_quality_control": {
+           "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for sea_water_practical_salinity",
+            "standard_name": "sea_water_practical_salinity status_flag"
+            },
+        "CPHL": {
+            "comment": "Artificial chlorophyll data computed from bio-optical sensor raw counts measurements.",
+            "long_name": "mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water",
+            "units": "mg m-3",
+            "valid_min": 0.0,
+            "valid_max": 100.0,
+            "_FillValue": 999999.0,
+            "ancillary_variables": "CPHL_quality_control"
+            },
+        "CPHL_quality_control": {
+            "_Unsigned": "false",
+            "long_name": "quality flag for mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water",
+            "_FillValue": 99,
+            "quality_control_conventions": "IMOS standard flags",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value", "quality_control_global_conventions": "Argo reference table 2a (see http://www.cmar.csiro.au/argo/dmqc/user_doc/QC_flags.html), applied on data in position only (between global attributes time_deployment_start and time_deployment_end)"
+            },
+        "CHLF": {
+            "ancillary_variables": "CHLF_quality_control",
+            "comment": "Artificial chlorophyll data",
+            "_FillValue": 999999.0,
+            "long_name": "mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water",
+            "units": "mg m-3",
+            "valid_max": 100.0,
+            "valid_min": 0.0
+            },
+        "CHLF_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water"
+            },
+        "CHLU": {
+            "comment": "Artificial chlorophyll data",
+            "long_name": "mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water",
+            "units": "mg m-3",
+            "valid_min": 0.0,
+            "valid_max": 100.0,
+            "_FillValue": 999999.0,
+            "ancillary_variables": "CHLU_quality_control"
+            },
+        "CHLU_quality_control": {
+            "_Unsigned": "false",
+            "long_name": "quality flag for mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water",
+            "_FillValue": 99,
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value"
+            },
+        "DOX1": {
+            "ancillary_variables": "DOX1_quality_control",
+            "comment": "oxygenPP.m: DOX1 derived using DOX1 = DOX * 44.6596.",
+            "_FillValue": 999999.0,
+            "long_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+            "standard_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+            "units": "umol l-1",
+            "valid_max": 1000.0,
+            "valid_min": 0.0
+            },
+        "DOX1_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+            "standard_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water status_flag"
+            },
+      "DOX1_2": {
+           "ancillary_variables": "DOX1_2_quality_control",
+           "comment": "Originally expressed in ml/l, 1ml/l = 44.660umol/l was assumed.",
+           "_FillValue": 999999.0,
+           "long_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+           "standard_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+           "units": "umol l-1",
+           "valid_max": 1000.0,
+           "valid_min": 0.0
+           },
+       "DOX1_2_quality_control": {
+           "_Unsigned": "false",
+           "_FillValue": 99,
+           "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+           "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+           "long_name": "quality flag for mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+           "standard_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water status_flag"
+           },
+
+       "DOX1_3": {
+            "ancillary_variables": "DOX1_3_quality_control",
+            "comment": "Originally expressed in mg/l, O2 density = 1.429kg/m3 and 1ml/l = 44.660umol/l were assumed.",
+            "_FillValue": 999999.0,
+            "long_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+            "standard_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+            "units": "umol l-1",
+            "valid_max": 1000.0,
+            "valid_min": 0.0
+            },
+        "DOX1_3_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+            "standard_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water status_flag"
+            },
+        "DOX2": {
+            "ancillary_variables": "DOX2_quality_control",
+            "comment": "Originally expressed in ml/l, assuming 1ml/l = 44.660umol/l and using density computed from Temperature, Salinity and Pressure with the CSIRO SeaWater library (EOS-80) v1.1.",
+            "_FillValue": 999999.0,
+            "long_name": "moles_of_oxygen_per_unit_mass_in_sea_water",
+            "standard_name": "moles_of_oxygen_per_unit_mass_in_sea_water",
+            "units": "umol kg-1",
+            "valid_max": 1000.0,
+            "valid_min": 0.0
+            },
+        "DOX2_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for moles_of_oxygen_per_unit_mass_in_sea_water",
+            "standard_name": "moles_of_oxygen_per_unit_mass_in_sea_water status_flag"
+            },
+        "DOXS": {
+            "ancillary_variables": "DOXS_quality_control",
+            "comment": "oxygenPP.m: \"DOXS derived using DOXS = 100 * DOX2 / OXSOL_SURFACE. OXSOL_SURFACE derived from TEMP, PSAL, PRES_REL , LATITUDE and LONGITUDE using gsw_O2sol_SP_pt, gsw_pt0_from_t and gsw_SA_from_SP from the Gibbs-SeaWater toolbox (TEOS-10) v3.06. See SeaBird data processing manual (http://www.seabird.com/document/sbe-data-processing-manual).",
+            "_FillValue": 999999.0,
+            "long_name": "fractional_saturation_of_oxygen_in_sea_water",
+            "standard_name": "fractional_saturation_of_oxygen_in_sea_water",
+            "units": "%"
+            },
+        "DOXS_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for fractional_saturation_of_oxygen_in_sea_water",
+            "standard_name": "fractional_saturation_of_oxygen_in_sea_water status_flag"
+            },
+        "DOXY": {
+            "ancillary_variables": "DOXY_quality_control",
+             "_FillValue": 999999.0,
+            "long_name": "mass_concentration_of_oxygen_in_sea_water",
+            "standard_name": "mass_concentration_of_oxygen_in_sea_water",
+            "units": "mg l-1"
+            },
+        "DOXY_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for mass_concentration_of_oxygen_in_sea_water",
+            "standard_name": "mass_concentration_of_oxygen_in_sea_water status_flag"
+            },
+        "TURB": {
+            "ancillary_variables": "TURB_quality_control",
+            "_FillValue": 999999.0,
+            "long_name": "sea_water_turbidity",
+            "standard_name": "sea_water_turbidity",
+            "units": 1,
+            "valid_max": 1000.0,
+            "valid_min": 0.0
+            },
+        "TURB_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for sea_water_turbidity",
+            "standard_name": "sea_water_turbidity status_flag"
+            },
+       "PAR": {
+            "ancillary_variables": "PAR_quality_control",
+            "_FillValue": 999999.0,
+            "long_name": "downwelling_photosynthetic_photon_flux_in_sea_water",
+            "standard_name": "downwelling_photosynthetic_photon_flux_in_sea_water",
+            "units": "umole m-2 s-1"
+            },
+        "PAR_quality_control": {
+            "_Unsigned": "false",
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for downwelling_photosynthetic_photon_flux_in_sea_water",
+            "standard_name": "downwelling_photosynthetic_photon_flux_in_sea_water status_flag"
+        }
+    },
+    "_global":{
+        "abstract": "Aggregated Time-series Product: This file contains all measurements of the selected variable from all instruments deployed at the selected site. Timestamps are chronologically ordered, but may not be at uniform intervals. Instrument details are stored as a variable in order to keep a record of the origin of each measurement. The quality control flags of the variable of interest and DEPTH are preserved. Out-of-water measurements have been excluded, but no other filtering has been applied to the input data.",
+        "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
+        "author": "Klein, Eduardo",
+        "author_email": "eduardo.kleinsalas@utas.edu.au",
+        "citation": "The citation in a list of references is: \"IMOS [year-of-data-download], [Title], [data-access-URL], accessed [date-of-access].\".",
+        "Conventions": "CF-1.6,IMOS-1.4",
+        "data_centre": "Australian Ocean Data Network (AODN)",
+        "data_centre_email": "info@aodn.org.au",
+        "disclaimer": "Data, products and services from IMOS are provided \"as is\" without any warranty as to fitness for a particular purpose.",
+        "featureType": "timeSeries",
+        "file_version": "Level 1 - Quality Controlled Data",
+        "file_version_quality_control": "Quality controlled data have been through quality assurance procedures such as automated routines and sensor calibration or visual inspection and flag of obvious errors. The data are in physical units using standard SI metric units with calibration and other pre-processing routines applied, all time and location values are in absolute coordinates to comply with standards and datum. Data includes flags for each measurement to indicate the estimated quality of the measurement. Metadata exists for the data or for the higher level dataset that the data belongs to. This is the standard IMOS data level and is what should be made available to AODN and to the IMOS community.",
+        "institution_references": "http://imos.org.au/facilities/aodn/",
+        "keywords_vocabulary": "IMOS parameter names. See https://github.com/aodn/imos-toolbox/blob/master/IMOS/imosParameters.txt",
+        "license": "http://creativecommons.org/licenses/by/4.0/",
+        "naming_authority": "IMOS",
+        "project": "Integrated Marine Observing System (IMOS)",
+        "references": "http://www.imos.org.au",
+        "source": "Mooring",
+        "standard_name_vocabulary": "NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table 45",
+        "lineage": "The variable of interest (VoI) is produced by sequentially concatenating the individual values in each of the input files. The resulting variable has dimension OBSERVATION. The VoI's ancillary_variables, in particular the corresponding quality-control flags, are also included, with dimension OBSERVATION. If the quality control variable is absent in any input file, the corresponding flags in the output file will be set to 0 ('no QC performed'). The variable TIME from input files is concatenated into a variable TIME(OBSERVATION). This could result in a non-uniform time interval. The DEPTH variable from input files is concatenated into a variable DEPTH(OBSERVATION). If not present, fill values are stored. DEPTH_quality_control, if present, is also included. Where  the DEPTH variable is absent, the corresponding DEPTH_quality_control values are set to 9 ('missing value'). The variables PRES (sea_water_pressure) and PRES_REL (sea_water_pressure_due_to_sea_water) are aggregated in exactly the same way as DEPTH. All output variables with the INSTRUMENT dimension are sorted in chronological order. In order to keep track of the provenance of VoI in the aggregated file, accessory variables are created. "
+        }
+}

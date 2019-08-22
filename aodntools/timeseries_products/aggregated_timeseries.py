@@ -192,6 +192,7 @@ def get_data_code(VoI):
                  'PSAL':        'S',
                  'PAR':         'F',
                  'TURB':        'U',
+                 'TURBF':       'U',
                  'DOX1':        'O',
                  'DOX1_2':      'O',
                  'DOX1_3':      'O',

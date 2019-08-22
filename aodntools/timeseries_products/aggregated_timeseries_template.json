@@ -107,7 +107,6 @@
             "valid_min": -2.5
             },
         "TEMP_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -124,7 +123,6 @@
             "valid_min": 2.0
             },
         "PSAL_quality_control": {
-           "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -141,7 +139,6 @@
             "ancillary_variables": "CPHL_quality_control"
             },
         "CPHL_quality_control": {
-            "_Unsigned": "false",
             "long_name": "quality flag for mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water",
             "_FillValue": 99,
             "quality_control_conventions": "IMOS standard flags",
@@ -158,7 +155,6 @@
             "valid_min": 0.0
             },
         "CHLF_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -174,7 +170,6 @@
             "ancillary_variables": "CHLU_quality_control"
             },
         "CHLU_quality_control": {
-            "_Unsigned": "false",
             "long_name": "quality flag for mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water",
             "_FillValue": 99,
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -191,7 +186,6 @@
             "valid_min": 0.0
             },
         "DOX1_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -209,7 +203,6 @@
            "valid_min": 0.0
            },
        "DOX1_2_quality_control": {
-           "_Unsigned": "false",
            "_FillValue": 99,
            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -228,7 +221,6 @@
             "valid_min": 0.0
             },
         "DOX1_3_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -246,7 +238,6 @@
             "valid_min": 0.0
             },
         "DOX2_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -262,7 +253,6 @@
             "units": "%"
             },
         "DOXS_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -277,7 +267,6 @@
             "units": "mg l-1"
             },
         "DOXY_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -294,7 +283,6 @@
             "valid_min": 0.0
             },
         "TURB_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
@@ -305,19 +293,16 @@
             "ancillary_variables": "TURBF_quality_control",
             "_FillValue": 999999.0,
             "long_name": "sea_water_turbidity_in_FTU",
-            "standard_name": "sea_water_turbidity_in_FTU",
             "units": "1",
             "valid_max": 1000.0,
             "valid_min": 0.0
             },
         "TURBF_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
-            "long_name": "quality flag for sea_water_turbidity_in_FTU",
-            "standard_name": "sea_water_turbidity_in_FTU status_flag"
-            },
+            "long_name": "quality flag for sea_water_turbidity_in_FTU"
+             },
        "PAR": {
             "ancillary_variables": "PAR_quality_control",
             "_FillValue": 999999.0,
@@ -326,7 +311,6 @@
             "units": "umole m-2 s-1"
             },
         "PAR_quality_control": {
-            "_Unsigned": "false",
             "_FillValue": 99,
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
             "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",

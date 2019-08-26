@@ -9,6 +9,7 @@ from collections import OrderedDict
 import numpy as np
 from netCDF4 import Dataset
 
+from test_aodntools.base_test import BaseTestCase
 from aodntools.ncwriter import DatasetTemplate, ValidationError, metadata_attributes, special_attributes
 
 TEST_ROOT = os.path.dirname(__file__)
@@ -17,7 +18,7 @@ TEMPLATE_PARTIAL_JSON = os.path.join(TEST_ROOT, 'template_partial.json')
 BAD_JSON = os.path.join(TEST_ROOT, 'bad.json')
 
 
-class TestUtils(unittest.TestCase):
+class TestUtils(BaseTestCase):
     def test_metadata_attributes(self):
         self.assertEqual({}, metadata_attributes({}))
         self.assertEqual({}, metadata_attributes({'_dimensions': {}, '_fill_value': -999}))
@@ -38,7 +39,7 @@ class TestUtils(unittest.TestCase):
                          special_attributes({'title': 'Title', '_fill_value': -999}))
 
 
-class BaseTestCase(unittest.TestCase):
+class TemplateTestCase(unittest.TestCase):
     with open(TEMPLATE_JSON) as t:
         template_dict = json.load(t, object_pairs_hook=OrderedDict)
     dimensions = template_dict['_dimensions']
@@ -66,7 +67,7 @@ class BaseTestCase(unittest.TestCase):
             shutil.rmtree(self._temp_dir)
 
 
-class TestDatasetTemplate(BaseTestCase):
+class TestDatasetTemplate(TemplateTestCase):
     def test_init_empty(self):
         template = DatasetTemplate()
         self.assertEqual({}, template.dimensions)
@@ -328,7 +329,7 @@ class TestDatasetTemplate(BaseTestCase):
                                 )
 
 
-class TestDataValues(BaseTestCase):
+class TestDataValues(TemplateTestCase):
     def setUp(self):
         super(TestDataValues, self).setUp()
         self.data_array = np.array([-999., -999., -999., -999., -999., 1., 2., 3., 4., 5])

@@ -5,7 +5,7 @@ import numpy as np
 
 from aodntools.ncwriter import ImosTemplate
 from aodntools.ncwriter import DatasetTemplate
-from test_aodntools.ncwriter.test_template import BaseTestCase
+from test_aodntools.ncwriter.test_template import TemplateTestCase
 
 TEST_FIXED_GLOBALS = {
     "Conventions": "CF-1.6,IMOS-1.4",
@@ -16,7 +16,7 @@ TEST_FIXED_GLOBALS = {
 }
 
 
-class TestImosTemplate(BaseTestCase):
+class TestImosTemplate(TemplateTestCase):
 
     def setUp(self):
         super(TestImosTemplate, self).setUp()

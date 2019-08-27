@@ -6,10 +6,14 @@ from datetime import datetime
 import json
 from netCDF4 import Dataset
 import argparse
+from pkg_resources import resource_filename
 
 import numpy as np
 import xarray as xr
 import pandas as pd
+
+
+TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
 
 def sort_files_to_aggregate(files_to_agg):
@@ -250,18 +254,18 @@ def create_empty_dataframe(columns):
     return pd.DataFrame({k: pd.Series(dtype=t) for k, t in columns})
 
 
-def write_netCDF_aggfile(agg_dataset, ncout_filename, encoding, base_path):
+def write_netCDF_aggfile(agg_dataset, output_path, encoding):
     """
     write netcdf file
 
     :param agg_dataset: aggregated xarray dataset
-    :param ncout_filename: name of the netCDF file to be written
+    :param output_path: full path of the netCDF file to be written
     :return: name of the netCDf file written
     """
 
-    agg_dataset.to_netcdf(os.path.join(base_path, ncout_filename), encoding=encoding, format='NETCDF4_CLASSIC')
+    agg_dataset.to_netcdf(output_path, encoding=encoding, format='NETCDF4_CLASSIC')
 
-    return ncout_filename
+    return output_path
 
 ## MAIN FUNCTION
 def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
@@ -273,13 +277,12 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
     :param var_to_agg: Name of variable to aggregate.
     :param site_code: code of the mooring site.
     :param base_path: path where the result file will be written
-    :return: File name of the aggregated product
+    :return: File path of the aggregated product
     :rtype: string
     """
 
     ## constants
     FILLVALUE = 999999.0
-    variable_attributes_templatefile = 'aggregated_timeseries_template.json'
 
     ## sort the file URL in chronological order of deployment
     files_to_agg = sort_files_to_aggregate(files_to_agg)
@@ -309,7 +312,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
     ## main loop
 
     ## get the variables attribute dictionary
-    with open(variable_attributes_templatefile) as json_file:
+    with open(TEMPLATE_JSON) as json_file:
         variable_attribute_dictionary = json.load(json_file)['_variables']
 
     fileIndex = 0
@@ -432,9 +435,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
 
 
     ## Set global attrs
-    globalattr_file = 'aggregated_timeseries_template.json'
     add_attribute = {'rejected_files': "\n".join(rejected_files)}
-    agg_dataset.attrs = set_globalattr(agg_dataset, globalattr_file, var_to_agg, site_code, add_attribute)
+    agg_dataset.attrs = set_globalattr(agg_dataset, TEMPLATE_JSON, var_to_agg, site_code, add_attribute)
 
     ## add version
     github_comment = ' Product created with https://github.com/aodn/data-services/blob/master/ANMN/LTSP/TSaggregator/aggregated_timeseries.py'
@@ -447,6 +449,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
     product_type='aggregated-time-series'
     file_version=1
     ncout_filename = generate_netcdf_output_filename(nc=agg_dataset, facility_code=facility_code, data_code=data_code, VoI=var_to_agg, site_code=site_code, product_type=product_type, file_version=file_version)
+    ncout_path = os.path.join(base_path, ncout_filename)
 
     encoding = {'TIME':                     {'_FillValue': False,
                                              'units': time_units,
@@ -456,9 +459,9 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
                 'instrument_id':            {'dtype': '|S256'},
                 'source_file':              {'dtype': '|S256'}}
 
-    write_netCDF_aggfile(agg_dataset, ncout_filename, encoding, base_path)
+    write_netCDF_aggfile(agg_dataset, ncout_path, encoding)
 
-    return ncout_filename, bad_files
+    return ncout_path, bad_files
 
 
 if __name__ == "__main__":

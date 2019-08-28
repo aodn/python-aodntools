@@ -74,7 +74,7 @@ The `DEPTH` variable from input files is concatenated into a variable `DEPTH(OBS
 
 The variables `PRES` (sea_water_pressure) and `PRES_REL` (sea_water_pressure_due_to_sea_water) will be aggregated in exactly the same way as `DEPTH`. Every aggregated file will contain `DEPTH`, `PRES`, and `PRES_REL`, and corresponding quality control flags.
 
-All output variables with the `OBSERVATION` dimension are sorted in chronological order.
+All output variables with the `INSTRUMENT` dimension are sorted in chronological order, and the input files aggregated chronologically, according to the global attribute `time_deployment_start`.
 
 In order to keep track of the provenance of VoI in the aggregated file, accessory variables are created:
 

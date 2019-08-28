@@ -1,3 +1,3 @@
-# Time-series Products
+# IMOS Moorings Long Time Series Products
 
-Here be code for generating time-series products.
+- [Aggregated time series (non-velocity)](Documentation/aggregated_timeseries.md)

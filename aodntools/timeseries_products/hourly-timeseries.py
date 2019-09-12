@@ -433,7 +433,10 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
                 ## get PRES_REl offset, if exits
                 if 'PRES_REL' in parameter_names:
-                    applied_offset.append(nc.PRES_REL.applied_offset)
+                    try:
+                        applied_offset.append(nc.PRES_REL.applied_offset)
+                    except:
+                        applied_offset.append('NaN')
 
                 ## get data codes
                 for parameter in parameter_names:
@@ -527,14 +530,15 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
 
 
-    return ncout_path
+    return ncout_path, bad_files
 
 
 if __name__ == "__main__":
 
 
     site_code = 'GBRPPS'
-    fnames = 'files_local.txt'
+    #fnames = 'files_local5.txt'
+    fnames = 'QLDPPS.txt'
     with open(fnames, 'r') as file:
         files_to_aggregate = [i.strip() for i in file.readlines()]
 

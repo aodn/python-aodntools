@@ -2,6 +2,7 @@
   "TIME": "mean",
   "TEMP": "mean",
   "CNDC": "mean",
+  "PRES": "mean",
   "PRES_REL": "mean",
   "DEPTH": "mean",
   "PSAL": "mean",

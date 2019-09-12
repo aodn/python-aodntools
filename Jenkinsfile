@@ -7,7 +7,7 @@ pipeline {
         stage('container') {
             agent {
                 dockerfile {
-                    additionalBuildArgs '--build-arg BUILDER_UID=${JENKINS_UID:-9999}'
+                    additionalBuildArgs '--build-arg BUILDER_UID=$(id -u)'
                 }
             }
             stage('set_version') {

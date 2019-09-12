@@ -169,10 +169,11 @@ def get_nominal_depth(nc):
     return nominal_depth
 
 
-def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute):
+def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parameter_names):
     """
     global attributes from a reference nc file and nc file
 
+    :param parameter_names: list of aggregated parameters
     :param site_code: code of the mooring site
     :param nc_aggregated: aggregated xarray dataset
     :param templatefile: name of the attributes JSON file
@@ -199,7 +200,7 @@ def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute):
                 'geospatial_lon_max': nc_aggregated.LONGITUDE.values.max(),
                 'date_created': datetime.utcnow().strftime(timeformat),
                 'history': datetime.utcnow().strftime(timeformat) + ': Hourly aggregated file created.',
-                'keywords': ', '.join(list(nc_aggregated.variables) + ['HOURLY', 'AGGREGATED'])}
+                'keywords': ', '.join(parameter_names + ['HOURLY', 'AGGREGATED'])}
     global_metadata.update(agg_attr)
     global_metadata.update(add_attribute)
 
@@ -480,7 +481,7 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
     ## add global attributes
     add_attribute = {'rejected_files': "\n".join(rejected_files)}
-    nc_aggregated.attrs = set_globalattr(nc_aggregated, globalattr_file, site_code, add_attribute)
+    nc_aggregated.attrs = set_globalattr(nc_aggregated, globalattr_file, site_code, add_attribute, parameter_names)
 
 
     ## add variable attributes

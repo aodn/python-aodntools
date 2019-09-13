@@ -400,6 +400,10 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
     function_stats = ['min', 'max', 'std', 'count']
 
+    parameter_names = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'CNDC', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2', 'DOX2_1',
+                       'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
+
+
     ## get the variables attribute dictionary
     globalattr_file = 'hourlyTS_metadata.json'
     with open(globalattr_file) as json_file:
@@ -436,7 +440,7 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
                     try:
                         applied_offset.append(nc.PRES_REL.applied_offset)
                     except:
-                        applied_offset.append('NaN')
+                        applied_offset.append(np.nan)
 
                 ## get data codes
                 for parameter in parameter_names:

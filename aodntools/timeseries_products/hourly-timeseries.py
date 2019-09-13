@@ -35,7 +35,7 @@ def sort_files_to_aggregate(files_to_aggregate):
     return list(file_list_dataframe['url'])
 
 
-def check_file(nc, site_code):
+def check_file(nc, site_code, parameter_names_accepted):
     """
     Return True the file pass all the following tests:
     VoI is present
@@ -48,6 +48,7 @@ def check_file(nc, site_code):
     if LATITUDE is a dimension has length 1
     if LONGITUDE is a dimension has length 1
 
+    :param parameter_names_accepted: list of names of accepted parameters
     :param nc: xarray dataset
     :param site_code: code of the mooring site
     :return: dictionary with the file name and list of failed tests
@@ -58,8 +59,10 @@ def check_file(nc, site_code):
     allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE']
     error_list = []
 
-    ## get param list
-    param_list = get_parameter_names(nc)
+    if not any([i in parameter_names_accepted for i in variables]):
+        error_list.append('no variable to aggregate')
+
+    param_list = list(set(variables) & set(parameter_names_accepted))
 
     nc_site_code = getattr(nc, 'site_code', '')
     if nc_site_code != site_code:
@@ -400,7 +403,7 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
     function_stats = ['min', 'max', 'std', 'count']
 
-    parameter_names = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'CNDC', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2', 'DOX2_1',
+    parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'CNDC', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2', 'DOX2_1',
                        'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
 
 
@@ -430,9 +433,11 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
     for file in files_to_aggregate:
         print(file_index)
         with xr.load_dataset(file, use_cftime=False) as nc:
-            file_problems = check_file(nc, site_code)
+            file_problems = check_file(nc, site_code, parameter_names_accepted)
             if not file_problems:
-                parameter_names = get_parameter_names(nc)
+                parameter_names = list(set(list(nc.variables)) & set(parameter_names_accepted))
+                #parameter_names = get_parameter_names(nc)
+
                 parameter_names_all += parameter_names
 
                 ## get PRES_REl offset, if exits
@@ -542,7 +547,7 @@ if __name__ == "__main__":
 
     site_code = 'GBRPPS'
     #fnames = 'files_local5.txt'
-    fnames = 'QLDPPS.txt'
+    fnames = 'files_local5.txt'
     with open(fnames, 'r') as file:
         files_to_aggregate = [i.strip() for i in file.readlines()]
 

@@ -189,7 +189,6 @@ def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parame
                           site_code + " between " + pd.to_datetime(nc_aggregated.TIME.values.min()).strftime(timeformat) +
                           " and " + pd.to_datetime(nc_aggregated.TIME.values.max()).strftime(timeformat)),
                 'site_code': site_code,
-                'local_time_zone': '',
                 'time_coverage_start': pd.to_datetime(nc_aggregated.TIME.values.min()).strftime(timeformat),
                 'time_coverage_end': pd.to_datetime(nc_aggregated.TIME.values.max()).strftime(timeformat),
                 'geospatial_vertical_min': float(nc_aggregated.DEPTH.min()),

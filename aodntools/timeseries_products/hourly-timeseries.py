@@ -1,6 +1,7 @@
 from __future__ import print_function
 import sys
 import os.path
+from collections import OrderedDict
 from dateutil.parser import parse
 from datetime import datetime
 import json
@@ -96,9 +97,6 @@ def check_file(nc, site_code, parameter_names_accepted):
             if VoIdimensions[d] not in allowed_dimensions:
                 error_list.append('not allowed dimensions: ' + VoIdimensions[d])
                 break
-        # test the units. not used. To be implemented in the future
-        # if nc[VoI].attrs['units'] != variable_attribute_dictionary[VoI]['units']:
-        #     error_list.append('Wrong units: ' + nc[VoI].attrs['units'])
 
     return error_list
 
@@ -111,7 +109,7 @@ def get_qc_variable_names(nc):
     :return: list of names
     """
     varlist = list(nc.variables)
-    return [varlist[i] for i in range(len(varlist)) if '_quality_control' in varlist[i]]
+    return [v for v in varlist if '_quality_control' in v]
 
 
 def get_parameter_names(nc):
@@ -129,7 +127,6 @@ def get_parameter_names(nc):
 def in_water(nc):
     """
     cut data to in-water only timestamps, dropping resulting NaN.
-    QC flags are not retained in the output
 
     :param nc: xarray dataset
     :return: xarray dataset
@@ -176,11 +173,11 @@ def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parame
     """
     global attributes from a reference nc file and nc file
 
-    :param parameter_names: list of aggregated parameters
-    :param site_code: code of the mooring site
     :param nc_aggregated: aggregated xarray dataset
     :param templatefile: name of the attributes JSON file
+    :param site_code: code of the mooring site
     :param add_attribute: dictionary of additional attributes to add name:value
+    :param parameter_names: list of aggregated parameters
     :return: dictionary of global attributes
     """
 
@@ -207,7 +204,7 @@ def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parame
     global_metadata.update(agg_attr)
     global_metadata.update(add_attribute)
 
-    return dict(sorted(global_metadata.items()))
+    return OrderedDict(sorted(global_metadata.items()))
 
 
 def set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute):
@@ -372,7 +369,7 @@ def PDresample_by_hour(df, function_dict, function_stats):
 
     for variable in varnames:
         ds_var = df[variable]
-        ds_var_mean = ds_var.resample('1H', base=30, loffset='30min').apply(function_dict[varnames[0]])
+        ds_var_mean = ds_var.resample('1H', base=30, loffset='30min').apply(function_dict[variable])
         df_data = pd.concat([df_data, ds_var_mean], axis=1, sort=False)
         for stat_method in function_stats:
             ds_var_stat = ds_var.resample('1H', base=30, loffset='30min').apply(stat_method)
@@ -544,11 +541,13 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(description="Concatenate ALL variables from ALL instruments from ALL deployments from ONE site at 1hr time bin")
+    parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
+    parser.add_argument('-files', dest='filenames', help='name of the file that contains the source URLs', required=True)
+    parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default ./', default='./', required=False)
+    args = parser.parse_args()
 
-    site_code = 'GBRPPS'
-    #fnames = 'files_local5.txt'
-    fnames = 'files_local5.txt'
-    with open(fnames, 'r') as file:
+    with open(filenames, 'r') as file:
         files_to_aggregate = [i.strip() for i in file.readlines()]
 
-    hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=site_code, file_path='./')
+    hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, file_path=args.output_path)

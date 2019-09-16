@@ -21,7 +21,5 @@
   "CHLF": "median",
   "TURB": "median",
   "TURBF": "median",
-  "DENS": "mean",
-  "PAR": "median",
-  "VOLT": "mean"
+  "PAR": "median"
 }

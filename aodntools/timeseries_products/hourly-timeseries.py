@@ -363,19 +363,23 @@ def PDresample_by_hour(df, function_dict, function_stats):
     :param df: pandas dataframe with ancillary variables and coords removed but with TIME as index
     :return: pandas dataframe
     """
+    ## back the index 30min
+    df.index = df.index - pd.Timedelta(30, units='m')
 
     varnames = df.columns
     df_data = pd.DataFrame()
 
     for variable in varnames:
         ds_var = df[variable]
-        ds_var_mean = ds_var.resample('1H', base=30, loffset='30min').apply(function_dict[variable])
+        ds_var_mean = ds_var.resample('1H').apply(function_dict[variable])
         df_data = pd.concat([df_data, ds_var_mean], axis=1, sort=False)
         for stat_method in function_stats:
-            ds_var_stat = ds_var.resample('1H', base=30, loffset='30min').apply(stat_method)
+            ds_var_stat = ds_var.resample('1H').apply(stat_method)
             ds_var_stat = ds_var_stat.rename("_".join([variable, stat_method]))
             df_data = pd.concat([df_data, ds_var_stat], axis=1, sort=False)
 
+    ##forward the index 30min
+    df_data.index = df_data.index + pd.Timedelta(30, units='m')
     return df_data
 
 
@@ -411,6 +415,7 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
     df_data = pd.DataFrame()
 
+
     ## create empty DF with dtypes
     metadata_df_types = [('source_file', str),
                          ('instrument_id', str),
@@ -438,8 +443,6 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
                 continue
 
             parameter_names = list(set(list(nc.variables)) & set(parameter_names_accepted))
-            #parameter_names = get_parameter_names(nc)
-
             parameter_names_all += parameter_names
 
             ## get PRES_REl offset, if exits
@@ -549,7 +552,7 @@ if __name__ == "__main__":
     parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default ./', default='./', required=False)
     args = parser.parse_args()
 
-    with open(filenames, 'r') as file:
+    with open(args.filenames, 'r') as file:
         files_to_aggregate = [i.strip() for i in file.readlines()]
 
     hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, file_path=args.output_path)

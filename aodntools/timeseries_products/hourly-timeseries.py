@@ -28,8 +28,9 @@ def sort_files_to_aggregate(files_to_aggregate):
                                                                   'deployment_date': parse(
                                                                       nc.getncattr('time_deployment_start'))},
                                                                  ignore_index=True)
-            except:
-                print(file)
+            except ValueError as e:
+                raise ValueError("File rejected: no time_deployment_start attr in '{path}' ({e})".format(path=file, e=e))
+
 
     file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
 
@@ -383,11 +384,11 @@ def PDresample_by_hour(df, function_dict, function_stats):
 ### MAIN FUNCTION
 def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
     """
-    Aggregate a dataset in 1 hour intervals and calculate related statistics
+    Aggregate a dataset into 1 hour intervals and calculate related statistics
 
     :param files_to_aggregate: list of file URLs
-    :param file_path: path to save the output file
     :param site_code: code of the mooring site
+    :param file_path: path to save the output file
     :return: str path of hte resulting aggregated file
     """
     # sort file list by deployment date
@@ -399,8 +400,8 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
     function_stats = ['min', 'max', 'std', 'count']
 
-    parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'CNDC', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2', 'DOX2_1',
-                       'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
+    parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'CNDC', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
+                                'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
 
 
     ## get the variables attribute dictionary
@@ -430,45 +431,47 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
         print(file_index)
         with xr.load_dataset(file, use_cftime=False) as nc:
             file_problems = check_file(nc, site_code, parameter_names_accepted)
-            if not file_problems:
-                parameter_names = list(set(list(nc.variables)) & set(parameter_names_accepted))
-                #parameter_names = get_parameter_names(nc)
 
-                parameter_names_all += parameter_names
-
-                ## get PRES_REl offset, if exits
-                if 'PRES_REL' in parameter_names:
-                    try:
-                        applied_offset.append(nc.PRES_REL.applied_offset)
-                    except:
-                        applied_offset.append(np.nan)
-
-                ## get data codes
-                for parameter in parameter_names:
-                    data_codes.append(get_data_code(parameter))
-
-                nc_clean = in_water(nc)  # in water only
-                nc_clean = good_data_only(nc_clean, qclevel=2)  # good quality data only
-                df_metadata = df_metadata.append({'source_file': file,
-                                                  'instrument_id': nc.attrs['deployment_code'] + '; ' + nc.attrs[
-                                                      'instrument'] + '; ' + nc.attrs['instrument_serial_number'],
-                                                  'LONGITUDE': nc.LONGITUDE.squeeze().values,
-                                                  'LATITUDE': nc.LATITUDE.squeeze().values,
-                                                  'NOMINAL_DEPTH': get_nominal_depth(nc)},
-                                                 ignore_index=True)
-
-                df_temp = nc_clean.to_dataframe()
-
-                ## keep TIME as the only index
-                df_temp = df_temp.reset_index().set_index('TIME')
-                df_temp = df_temp[parameter_names]
-
-                df_temp = PDresample_by_hour(df_temp, function_dict, function_stats)  # do the magic
-                df_temp['instrument_index'] = np.repeat(file_index, len(df_temp)).astype('int32')
-                df_data = pd.concat([df_data, df_temp.reset_index()], ignore_index=True, sort=False)
-            else:
+            if file_problems:
                 rejected_files.append(file)
                 bad_files.update({file: file_problems})
+                continue
+
+            parameter_names = list(set(list(nc.variables)) & set(parameter_names_accepted))
+            #parameter_names = get_parameter_names(nc)
+
+            parameter_names_all += parameter_names
+
+            ## get PRES_REl offset, if exits
+            if 'PRES_REL' in parameter_names:
+                try:
+                    applied_offset.append(nc.PRES_REL.applied_offset)
+                except:
+                    applied_offset.append(np.nan)
+
+            ## get data codes
+            for parameter in parameter_names:
+                data_codes.append(get_data_code(parameter))
+
+            nc_clean = in_water(nc)  # in water only
+            nc_clean = good_data_only(nc_clean, qclevel=2)  # good quality data only
+            df_metadata = df_metadata.append({'source_file': file,
+                                              'instrument_id': nc.attrs['deployment_code'] + '; ' + nc.attrs[
+                                                  'instrument'] + '; ' + nc.attrs['instrument_serial_number'],
+                                              'LONGITUDE': nc.LONGITUDE.squeeze().values,
+                                              'LATITUDE': nc.LATITUDE.squeeze().values,
+                                              'NOMINAL_DEPTH': get_nominal_depth(nc)},
+                                             ignore_index=True)
+
+            df_temp = nc_clean.to_dataframe()
+
+            ## keep TIME as the only index
+            df_temp = df_temp.reset_index().set_index('TIME')
+            df_temp = df_temp[parameter_names]
+
+            df_temp = PDresample_by_hour(df_temp, function_dict, function_stats)  # do the magic
+            df_temp['instrument_index'] = np.repeat(file_index, len(df_temp)).astype('int32')
+            df_data = pd.concat([df_data, df_temp.reset_index()], ignore_index=True, sort=False)
 
         file_index += 1
 

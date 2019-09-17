@@ -427,7 +427,6 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
     ## containers
     parameter_names_all = []
     data_codes = []
-    rejected_files = []
     bad_files = {}
     applied_offset = []
 
@@ -438,7 +437,6 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
             file_problems = check_file(nc, site_code, parameter_names_accepted)
 
             if file_problems:
-                rejected_files.append(file)
                 bad_files.update({file: file_problems})
                 continue
 
@@ -494,7 +492,7 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
     nc_aggregated = xr.merge([nc_metadata, nc_data])
 
     ## add global attributes
-    add_attribute = {'rejected_files': "\n".join(rejected_files)}
+    add_attribute = {'rejected_files': "\n".join(list(bad_files))}
     nc_aggregated.attrs = set_globalattr(nc_aggregated, globalattr_file, site_code, add_attribute, parameter_names)
 
 

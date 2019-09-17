@@ -37,7 +37,8 @@
             "standard_name": "depth",
             "units": "m",
             "valid_max": 12000.0,
-            "valid_min": -5.0
+            "valid_min": -5.0,
+            "_FillValue": 999999.0
             },
         "DEPTH_quality_control": {
             "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",

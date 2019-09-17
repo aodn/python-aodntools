@@ -430,8 +430,7 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
     bad_files = {}
     applied_offset = []
 
-    file_index = 0
-    for file in files_to_aggregate:
+    for file_index, file in enumerate(files_to_aggregate):
         print(file_index)
         with xr.load_dataset(file, use_cftime=False) as nc:
             file_problems = check_file(nc, site_code, parameter_names_accepted)
@@ -499,7 +498,8 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
     ## add variable attributes
     add_variable_attribute = {'PRES_REL': {'applied_offset_by_instrument': applied_offset}}
     parameter_names_all = list(set(parameter_names_all))
-    variable_attributes = set_variableattr(parameter_names_all + ['TIME'], variable_attribute_dictionary, add_variable_attribute)
+    variable_attributes = set_variableattr(parameter_names_all + ['TIME'], variable_attribute_dictionary,
+                                           add_variable_attribute)
 
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')

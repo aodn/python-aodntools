@@ -411,7 +411,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
 
     ## get the variables attribute dictionary
-    globalattr_file = 'hourlyTS_metadata.json'
+    globalattr_file = 'hourly_timeseries_template.json'
     with open(globalattr_file) as json_file:
         variable_attribute_dictionary = json.load(json_file)['_variables']
 

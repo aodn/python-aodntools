@@ -499,13 +499,19 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
 
     ## add variable attributes
+    variablenames_others = ['TIME', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH',
+                            'instrument_index', 'instrument_id', 'source_file']
     add_variable_attribute = {'PRES_REL': {'applied_offset_by_instrument': applied_offset}}
     parameter_names_all = list(set(parameter_names_all))
-    variable_attributes = set_variableattr(parameter_names_all + ['TIME'], variable_attribute_dictionary,
+    variable_attributes = set_variableattr(parameter_names_all + variablenames_others, variable_attribute_dictionary,
                                            add_variable_attribute)
 
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')
+
+    ## add attributes to TIME, LAT/LON, and index variables
+    for variable in variablenames_others:
+        nc_aggregated[variable].attrs = variable_attributes[variable]
 
     for variable in parameter_names_all:
         ancillary_variables_attr = []
@@ -515,10 +521,25 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
         for stat_method in function_stats:
             variable_stat_name = variable + "_" + stat_method
             ancillary_variables_attr += [variable_stat_name]
-            nc_aggregated[variable_stat_name].attrs = nc_aggregated[variable].attrs
+            try:
+                nc_aggregated[variable_stat_name].attrs['standard_name'] = nc_aggregated[variable].attrs['standard_name']
+            except:
+                pass
             nc_aggregated[variable_stat_name].attrs['long_name'] = stat_method + ' data value in the bin, after rejection of flagged data'
+            if stat_method == 'count':
+                nc_aggregated[variable_stat_name].attrs['units'] = 1
+                try:
+                    nc_aggregated[variable_stat_name].attrs['standard_name'] = nc_aggregated[variable].attrs[
+                        'standard_name'] + '_number_of_observations'
+                except:
+                    pass
+
+            else:
+                nc_aggregated[variable_stat_name].attrs['units'] = variable_attributes[variable]['units']
             nc_aggregated[variable_stat_name].attrs['cell_methods'] = 'TIME:' +  stat_method
+            nc_aggregated[variable_stat_name].attrs['_FillValue'] = 999999.0
         nc_aggregated[variable].attrs.update({'ancillary_variables': " ".join(ancillary_variables_attr)})
+
 
     ## create the output file name and write the aggregated product as netCDF
     facility_code = get_facility_code(files_to_aggregate[0])

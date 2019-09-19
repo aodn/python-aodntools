@@ -138,24 +138,25 @@ def in_water(nc):
     return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)
 
 
-def good_data_only(nc, qclevel):
+def good_data_only(nc, qcflags):
     """
     mask all the variables with QC for QC value less or equal than the specified
 
     :param nc: xarray dataset
-    :param qclevel: maximun value of the QC flag allowed
+    :param qcflags: list of QCflags indicating what variables to keep
     :return: xarray Dataset
     """
+
     varnames = get_parameter_names(nc)
-    nc_masked = nc[varnames[0]].where(nc[varnames[0] + '_quality_control'] <= qclevel).to_dataset(name=varnames[0])
+    nc_masked = nc[varnames[0]].where(nc[varnames[0] + '_quality_control'].isin(qcflags)).to_dataset(name=varnames[0])
     for variable in varnames[1:]:
-        nc_masked[variable] = nc[variable].where(nc[variable + '_quality_control'] <= qclevel)
+        nc_masked[variable] = nc[variable].where(nc[variable + '_quality_control'].isin(qcflags))
     return nc_masked
 
 
 def get_nominal_depth(nc):
     """
-    retunr nominal depth from NOMINAL_DEPTH variable or
+    return nominal depth from NOMINAL_DEPTH variable or
     if it is not present from instrument_nominal_depth global attribute
 
     :param nc: xarray dataset
@@ -239,6 +240,7 @@ def get_data_code(VoI):
                  'PRES_REL': 'Z',
                  'TEMP': 'T',
                  'PSAL': 'S',
+                 'CNDC': 'C',
                  'PAR': 'F',
                  'TURB': 'U',
                  'TURBF': 'U',
@@ -321,7 +323,7 @@ def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding, file_path):
     """
     ## sort the variables in the data set
     variables_all = list(nc_aggregated.variables)
-    variables_head = ['OBSERVATION', 'instrument_index', 'instrument_id', 'source_file', 'TIME', 'LONGITUDE', 'LATITUDE',
+    variables_head = ['instrument_index', 'instrument_id', 'source_file', 'TIME', 'LONGITUDE', 'LATITUDE',
                       'NOMINAL_DEPTH', 'DEPTH', 'DEPTH_count', 'DEPTH_min', 'DEPTH_max', 'DEPTH_std', ]
     variables_rest = sorted(list(set(variables_all) - set(variables_head)))
     variables_all = variables_head + variables_rest
@@ -368,7 +370,6 @@ def PDresample_by_hour(df, function_dict, function_stats):
 
     varnames = df.columns
     df_data = pd.DataFrame()
-
     for variable in varnames:
         ds_var = df[variable]
         ds_var_mean = ds_var.resample('1H').apply(function_dict[variable])
@@ -386,12 +387,13 @@ def PDresample_by_hour(df, function_dict, function_stats):
 
 
 ### MAIN FUNCTION
-def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
+def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     """
     Aggregate a dataset into 1 hour intervals and calculate related statistics
 
     :param files_to_aggregate: list of file URLs
     :param site_code: code of the mooring site
+    :param qcflags: list of QCflags indicating what values of the variables to keep
     :param file_path: path to save the output file
     :return: str path of hte resulting aggregated file
     """
@@ -454,7 +456,7 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
                 data_codes.append(get_data_code(parameter))
 
             nc_clean = in_water(nc)  # in water only
-            nc_clean = good_data_only(nc_clean, qclevel=2)  # good quality data only
+            nc_clean = good_data_only(nc_clean, qcflags)  # good quality data only
             df_metadata = df_metadata.append({'source_file': file,
                                               'instrument_id': nc.attrs['deployment_code'] + '; ' + nc.attrs[
                                                   'instrument'] + '; ' + nc.attrs['instrument_serial_number'],
@@ -489,6 +491,7 @@ def hourly_aggregator(files_to_aggregate, site_code, file_path ='./'):
 
     nc_data = xr.Dataset.from_dataframe(df_data)
     nc_aggregated = xr.merge([nc_metadata, nc_data])
+
 
     ## add global attributes
     add_attribute = {'rejected_files': "\n".join(list(bad_files))}
@@ -547,10 +550,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Concatenate ALL variables from ALL instruments from ALL deployments from ONE site at 1hr time bin")
     parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
     parser.add_argument('-files', dest='filenames', help='name of the file that contains the source URLs', required=True)
+    parser.add_argument('-qc', dest='qcflags', help='list of QC flags to select variable values to keep', nargs='+', required=True)
     parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default ./', default='./', required=False)
     args = parser.parse_args()
 
     with open(args.filenames, 'r') as file:
         files_to_aggregate = [i.strip() for i in file.readlines()]
+    qcflags = [int(i) for i in args.qcflags]
 
-    hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, file_path=args.output_path)
+    hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, qcflags=qcflags, file_path=args.output_path)

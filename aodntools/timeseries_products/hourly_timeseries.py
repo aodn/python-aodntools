@@ -28,8 +28,8 @@ def sort_files_to_aggregate(files_to_aggregate):
                                                                   'deployment_date': parse(
                                                                       nc.getncattr('time_deployment_start'))},
                                                                  ignore_index=True)
-            except ValueError as e:
-                raise ValueError("File rejected: no time_deployment_start attr in '{path}' ({e})".format(path=file, e=e))
+            except KeyError as e:
+                raise KeyError("File rejected: no time_deployment_start attr in '{path}' ({e})".format(path=file, e=e))
 
 
     file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
@@ -448,7 +448,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
             if 'PRES_REL' in parameter_names:
                 try:
                     applied_offset.append(nc.PRES_REL.applied_offset)
-                except:
+                except KeyError:
                     applied_offset.append(np.nan)
 
             ## get data codes
@@ -523,7 +523,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
             ancillary_variables_attr += [variable_stat_name]
             try:
                 nc_aggregated[variable_stat_name].attrs['standard_name'] = nc_aggregated[variable].attrs['standard_name']
-            except:
+            except KeyError:
                 pass
             nc_aggregated[variable_stat_name].attrs['long_name'] = stat_method + ' data value in the bin, after rejection of flagged data'
             if stat_method == 'count':
@@ -531,7 +531,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                 try:
                     nc_aggregated[variable_stat_name].attrs['standard_name'] = nc_aggregated[variable].attrs[
                         'standard_name'] + '_number_of_observations'
-                except:
+                except KeyError:
                     pass
 
             else:

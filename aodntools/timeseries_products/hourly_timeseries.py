@@ -15,16 +15,7 @@ import pandas as pd
 
 def check_files(file_list, site_code, parameter_names_accepted):
     """
-    Return True the file pass all the following tests:
-    VoI is present
-    TIME is present
-    LATITUDE is present
-    LONGITUDE is present
-    NOMINAL_DEPTH is present as variable or attribute
-    file_version is FV01
-    Return False if at least one of the tests fail
-    if LATITUDE is a dimension has length 1
-    if LONGITUDE is a dimension has length 1
+    Return a chronologically sorted file_list and a dictionary if the file fails one or more of the tests
 
     :param parameter_names_accepted: list of names of accepted parameters
     :param nc: xarray dataset

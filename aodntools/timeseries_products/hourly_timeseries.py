@@ -22,14 +22,17 @@ def sort_files_to_aggregate(files_to_aggregate):
     """
     file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
     for file in files_to_aggregate:
+
         with Dataset(file) as nc:
-            try:
+            global_attributes = nc.ncattrs()
+            if 'time_deployment_start' in global_attributes:
+                deployment_date = nc.getncattr('time_deployment_start')
                 file_list_dataframe = file_list_dataframe.append({'url': file,
-                                                                  'deployment_date': parse(
-                                                                      nc.getncattr('time_deployment_start'))},
+                                                                  'deployment_date': parse(deployment_date)},
                                                                  ignore_index=True)
-            except KeyError as e:
-                raise KeyError("File rejected: no time_deployment_start attr in '{path}' ({e})".format(path=file, e=e))
+            else:
+                print('NO time_deployment_start attribute in file ' + file)
+
 
 
     file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
@@ -446,9 +449,9 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
             ## get PRES_REl offset, if exits
             if 'PRES_REL' in parameter_names:
-                try:
+                if 'applied_offset' in nc.PRES_REL.attrs:
                     applied_offset.append(nc.PRES_REL.applied_offset)
-                except KeyError:
+                else:
                     applied_offset.append(np.nan)
 
             ## get data codes
@@ -521,21 +524,17 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
         for stat_method in function_stats:
             variable_stat_name = variable + "_" + stat_method
             ancillary_variables_attr += [variable_stat_name]
-            try:
-                nc_aggregated[variable_stat_name].attrs['standard_name'] = nc_aggregated[variable].attrs['standard_name']
-            except KeyError:
-                pass
-            nc_aggregated[variable_stat_name].attrs['long_name'] = stat_method + ' data value in the bin, after rejection of flagged data'
+
             if stat_method == 'count':
                 nc_aggregated[variable_stat_name].attrs['units'] = 1
-                try:
-                    nc_aggregated[variable_stat_name].attrs['standard_name'] = nc_aggregated[variable].attrs[
-                        'standard_name'] + '_number_of_observations'
-                except KeyError:
-                    pass
-
             else:
                 nc_aggregated[variable_stat_name].attrs['units'] = variable_attributes[variable]['units']
+
+            if 'standard_name' in nc_aggregated[variable].attrs:
+                nc_aggregated[variable_stat_name].attrs['standard_name'] = nc_aggregated[variable].attrs['standard_name']
+                nc_aggregated[variable+'_count'].attrs['standard_name'] = nc_aggregated[variable].attrs['standard_name'] + '_number_of_observations'
+
+            nc_aggregated[variable_stat_name].attrs['long_name'] = stat_method + ' data value in the bin, after rejection of flagged data'
             nc_aggregated[variable_stat_name].attrs['cell_methods'] = 'TIME:' +  stat_method
             nc_aggregated[variable_stat_name].attrs['_FillValue'] = 999999.0
         nc_aggregated[variable].attrs.update({'ancillary_variables': " ".join(ancillary_variables_attr)})

@@ -13,34 +13,7 @@ import xarray as xr
 import pandas as pd
 
 
-def sort_files_to_aggregate(files_to_aggregate):
-    """
-    sort the list of files to aggregate by time_deployment start attribute
-
-    :param files_to_aggregate: list of file URLs
-    :return: list of file URLs
-    """
-    file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
-    for file in files_to_aggregate:
-
-        with Dataset(file) as nc:
-            global_attributes = nc.ncattrs()
-            if 'time_deployment_start' in global_attributes:
-                deployment_date = nc.getncattr('time_deployment_start')
-                file_list_dataframe = file_list_dataframe.append({'url': file,
-                                                                  'deployment_date': parse(deployment_date)},
-                                                                 ignore_index=True)
-            else:
-                print('NO time_deployment_start attribute in file ' + file)
-
-
-
-    file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
-
-    return list(file_list_dataframe['url'])
-
-
-def check_file(nc, site_code, parameter_names_accepted):
+def check_files(file_list, site_code, parameter_names_accepted):
     """
     Return True the file pass all the following tests:
     VoI is present
@@ -56,53 +29,73 @@ def check_file(nc, site_code, parameter_names_accepted):
     :param parameter_names_accepted: list of names of accepted parameters
     :param nc: xarray dataset
     :param site_code: code of the mooring site
-    :return: dictionary with the file name and list of failed tests
+    :return: dictionary with the file name and list of failed tests, list good files chronologically ordered
     """
 
-    attributes = list(nc.attrs)
-    variables = list(nc.variables)
-    allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE']
-    error_list = []
+    file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
+    error_dict = {}
 
-    if not any([i in parameter_names_accepted for i in variables]):
-        error_list.append('no variable to aggregate')
+    for file in file_list:
+        with xr.open_dataset(file) as nc:
+            attributes = list(nc.attrs)
+            variables = list(nc.variables)
+            allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE']
+            error_list = []
 
-    param_list = list(set(variables) & set(parameter_names_accepted))
+            if not any([i in parameter_names_accepted for i in variables]):
+                error_list.append('no variable to aggregate')
 
-    nc_site_code = getattr(nc, 'site_code', '')
-    if nc_site_code != site_code:
-        error_list.append('Wrong site_code: ' + nc_site_code)
+            if 'time_deployment_start' not in attributes:
+                error_list.appen('no time_deployment_start attribute')
 
-    nc_file_version = getattr(nc, 'file_version', '')
-    if 'Level 1' not in nc_file_version:
-        error_list.append('Wrong file version: ' + nc_file_version)
+            if 'time_deployment_end'not in attributes:
+                error_list.append('no time_deployment_end attribute')
 
-    if 'TIME' not in variables:
-        error_list.append('TIME variable missing')
+            nc_site_code = getattr(nc, 'site_code', '')
+            if nc_site_code != site_code:
+                error_list.append('Wrong site_code: ' + nc_site_code)
 
-    if 'LATITUDE' not in variables:
-        error_list.append('LATITUDE variable missing')
+            nc_file_version = getattr(nc, 'file_version', '')
+            if 'Level 1' not in nc_file_version:
+                error_list.append('Wrong file version: ' + nc_file_version)
 
-    if 'LONGITUDE' not in variables:
-        error_list.append('LONGITUDE variable missing')
+            if 'TIME' not in variables:
+                error_list.append('TIME variable missing')
 
-    if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
-        error_list.append('no NOMINAL_DEPTH')
+            if 'LATITUDE' not in variables:
+                error_list.append('LATITUDE variable missing')
 
-    for param in param_list:
-        VoIdimensions = list(nc[param].dims)
-        if 'TIME' not in VoIdimensions:
-            error_list.append('TIME is not a dimension')
-        if 'LATITUDE' in VoIdimensions and len(nc.LATITUDE) > 1:
-            error_list.append('more than one LATITUDE')
-        if 'LONGITUDE' in VoIdimensions and len(nc.LONGITUDE) > 1:
-            error_list.append('more than one LONGITUDE')
-        for d in range(len(VoIdimensions)):
-            if VoIdimensions[d] not in allowed_dimensions:
-                error_list.append('not allowed dimensions: ' + VoIdimensions[d])
-                break
+            if 'LONGITUDE' not in variables:
+                error_list.append('LONGITUDE variable missing')
 
-    return error_list
+            if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
+                error_list.append('no NOMINAL_DEPTH')
+
+            param_list = list(set(variables) & set(parameter_names_accepted))
+            for param in param_list:
+                VoIdimensions = list(nc[param].dims)
+                if 'TIME' not in VoIdimensions:
+                    error_list.append('TIME is not a dimension')
+                if 'LATITUDE' in VoIdimensions and len(nc.LATITUDE) > 1:
+                    error_list.append('more than one LATITUDE')
+                if 'LONGITUDE' in VoIdimensions and len(nc.LONGITUDE) > 1:
+                    error_list.append('more than one LONGITUDE')
+                for dimension in VoIdimensions:
+                    if dimension not in allowed_dimensions:
+                        error_list.append('not allowed dimensions: ' + dimension)
+                        break
+            if error_list:
+                error_dict.update({file: error_list})
+            else:
+                file_list_dataframe = file_list_dataframe.append({'url': file,
+                                                                  'deployment_date': parse(nc.time_deployment_start)},
+                                                                 ignore_index=True)
+
+    file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
+    file_list = file_list_dataframe['url'].to_list()
+
+    return file_list, error_dict
+
 
 
 def get_qc_variable_names(nc):
@@ -400,17 +393,17 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     :param file_path: path to save the output file
     :return: str path of hte resulting aggregated file
     """
-    # sort file list by deployment date
-    files_to_aggregate = sort_files_to_aggregate(files_to_aggregate)
+
+    parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'CNDC', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
+                                'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
+    function_stats = ['min', 'max', 'std', 'count']
+
+    # Check files and sort chronologically
+    files_to_aggregate, bad_files = check_files(files_to_aggregate, site_code, parameter_names_accepted)
 
     ## get binning function dictionary
     with open("binningMethod.json") as json_file:
         function_dict = json.load(json_file)
-
-    function_stats = ['min', 'max', 'std', 'count']
-
-    parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'CNDC', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
-                                'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
 
 
     ## get the variables attribute dictionary
@@ -432,18 +425,11 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     ## containers
     parameter_names_all = []
     data_codes = []
-    bad_files = {}
     applied_offset = []
 
     for file_index, file in enumerate(files_to_aggregate):
         print(file_index)
         with xr.load_dataset(file, use_cftime=False) as nc:
-            file_problems = check_file(nc, site_code, parameter_names_accepted)
-
-            if file_problems:
-                bad_files.update({file: file_problems})
-                continue
-
             parameter_names = list(set(list(nc.variables)) & set(parameter_names_accepted))
             parameter_names_all += parameter_names
 

@@ -532,7 +532,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
             if 'standard_name' in nc_aggregated[variable].attrs:
                 nc_aggregated[variable_stat_name].attrs['standard_name'] = nc_aggregated[variable].attrs['standard_name']
-                nc_aggregated[variable+'_count'].attrs['standard_name'] = nc_aggregated[variable].attrs['standard_name'] + '_number_of_observations'
+                nc_aggregated[variable+'_count'].attrs['standard_name'] = nc_aggregated[variable].attrs['standard_name'] + ' number_of_observations'
 
             nc_aggregated[variable_stat_name].attrs['long_name'] = stat_method + ' data value in the bin, after rejection of flagged data'
             nc_aggregated[variable_stat_name].attrs['cell_methods'] = 'TIME:' +  stat_method

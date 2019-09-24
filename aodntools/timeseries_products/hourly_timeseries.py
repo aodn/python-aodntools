@@ -17,9 +17,9 @@ def check_files(file_list, site_code, parameter_names_accepted):
     """
     Return a chronologically sorted file_list and a dictionary if the file fails one or more of the tests
 
-    :param parameter_names_accepted: list of names of accepted parameters
-    :param nc: xarray dataset
+    :param file_list: list or file URLs
     :param site_code: code of the mooring site
+    :param parameter_names_accepted: list of names of accepted parameters
     :return: dictionary with the file name and list of failed tests, list good files chronologically ordered
     """
 
@@ -193,24 +193,6 @@ def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parame
     global_metadata.update(add_attribute)
 
     return OrderedDict(sorted(global_metadata.items()))
-
-
-def set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute):
-    """
-    set variables variables atributes
-
-    :param varlist: list of variable names
-    :param variable_attribute_dictionary: dictionary of the variable attributes
-    :param add_variable_attribute: additional attributes to add
-    :return: dictionary of attributes
-    """
-
-    variable_attributes = {key: variable_attribute_dictionary[key] for key in varlist}
-    if len(add_variable_attribute) > 0:
-        for key in add_variable_attribute.keys():
-            variable_attributes[key].update(add_variable_attribute[key])
-
-    return variable_attributes
 
 
 def get_data_code(VoI):
@@ -483,8 +465,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                             'instrument_index', 'instrument_id', 'source_file']
     add_variable_attribute = {'PRES_REL': {'applied_offset_by_instrument': applied_offset}}
     parameter_names_all = list(set(parameter_names_all))
-    variable_attributes = set_variableattr(parameter_names_all + variablenames_others, variable_attribute_dictionary,
-                                           add_variable_attribute)
+    variable_attributes = variable_attribute_dictionary
 
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')

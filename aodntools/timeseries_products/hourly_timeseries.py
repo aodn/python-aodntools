@@ -37,7 +37,7 @@ def check_files(file_list, site_code, parameter_names_accepted):
                 error_list.append('no variable to aggregate')
 
             if 'time_deployment_start' not in attributes:
-                error_list.appen('no time_deployment_start attribute')
+                error_list.append('no time_deployment_start attribute')
 
             if 'time_deployment_end'not in attributes:
                 error_list.append('no time_deployment_end attribute')

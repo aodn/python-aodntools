@@ -131,14 +131,74 @@ def good_data_only(nc, qcflags):
 
     :param nc: xarray dataset
     :param qcflags: list of QCflags indicating what variables to keep
-    :return: xarray Dataset
+    :return: xarray masked Dataset, dictionary of % of qced values per variable
     """
-
     varnames = get_parameter_names(nc)
     nc_masked = nc[varnames[0]].where(nc[varnames[0] + '_quality_control'].isin(qcflags)).to_dataset(name=varnames[0])
     for variable in varnames[1:]:
         nc_masked[variable] = nc[variable].where(nc[variable + '_quality_control'].isin(qcflags))
+
     return nc_masked
+
+
+def get_QCcount (nc, qcflags):
+    """
+    count the number of qced values in the file
+    :param nc: xarray dataset
+    :param qcflags: QCflags to count
+    :return: dictionary with % of registers QCed
+    """
+    qced_percent = {}
+    if 0 in qcflags and len(qcflags)>1:
+        ## make sure that the list of qflags is sorted
+        qcflags = sorted(qcflags)
+        varnames = get_parameter_names(nc)
+
+        for variable in varnames:
+            flag_count = []
+            for flag in qcflags:
+                flag_count.append(int(np.sum(nc[variable+'_quality_control']==flag)))
+            if sum(flag_count[1:len(flag_count)]) > 0:
+                qcpercent = {'qc0_count': flag_count[0]}
+            else:
+                qcpercent = {'qc0_count': 0.0}
+            qced_percent[variable] = qcpercent
+            qced_percent[variable].update({'qcnon0_count': sum(flag_count[1:len(flag_count)])})
+
+    return qced_percent
+
+def update_QCcount(qc_count_all, qc_count):
+    """
+    Update qc count dictionary
+    :param qc_count_all: dictionary with all variables qc count to be updated
+    :param qc_count: dictionary of all variable qc count from one file
+    :return: dictionary of qc proportions per variable
+    """
+    for variable in qc_count.keys():
+        if variable in qc_count_all.keys():
+            qc_count_all[variable]['qc0_count'] += qc_count[variable]['qc0_count']
+            qc_count_all[variable]['qcnon0_count'] += qc_count[variable]['qcnon0_count']
+        else:
+            qc_count_all[variable] = qc_count[variable]
+
+    return qc_count_all
+
+def get_QC_percent(qc_count):
+    """
+    Calculate the % of qc values in the variables of a file
+    :param qc_count: dictionary of qc counts
+    :return: dictionary of % of qc values per variable
+    """
+    qc_percent = {}
+    if len(qc_count) > 0:
+        for variable in qc_count.keys():
+            if qc_count[variable]['qcnon0_count'] > 0:
+                qc_percent[variable] = {'QCed_values_percent': round(100*(1-qc_count[variable]['qc0_count']/qc_count[variable]['qcnon0_count']),4)}
+            else:
+                qc_percent[variable] = {'QCed_values_percent': 0.00}
+
+    return qc_percent
+
 
 
 def get_nominal_depth(nc):
@@ -174,7 +234,7 @@ def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parame
     with open(templatefile) as json_file:
         global_metadata = json.load(json_file)["_global"]
 
-    agg_attr = {'title': ("Long Timeseries Hourly Aggregated product:" + " all available non-velocity variables at " +
+    agg_attr = {'title': ("Long time series Hourly Aggregated product: all available non-velocity variables at " +
                           site_code + " between " + pd.to_datetime(nc_aggregated.TIME.values.min()).strftime(timeformat) +
                           " and " + pd.to_datetime(nc_aggregated.TIME.values.max()).strftime(timeformat)),
                 'site_code': site_code,
@@ -399,6 +459,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     parameter_names_all = []
     data_codes = []
     applied_offset = []
+    qc_count_all = {}
 
     for file_index, file in enumerate(files_to_aggregate):
         print(file_index)
@@ -418,6 +479,8 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                 data_codes.append(get_data_code(parameter))
 
             nc_clean = in_water(nc)  # in water only
+            qc_count = get_QCcount(nc_clean, qcflags)
+            qc_count_all = update_QCcount(qc_count_all, qc_count)
             nc_clean = good_data_only(nc_clean, qcflags)  # good quality data only
             df_metadata = df_metadata.append({'source_file': file,
                                               'instrument_id': nc.attrs['deployment_code'] + '; ' + nc.attrs[
@@ -442,9 +505,11 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     ## rename index to TIME
     df_data.rename(columns={'index': 'TIME'}, inplace=True)
 
+    qc_proportion_all = get_QC_percent(qc_count_all)
 
-    nc_metadata = xr.Dataset({'LONGITUDE': (['INSTRUMENT'], df_metadata['LONGITUDE'].astype('float32')),
-                              'LATITUDE': (['INSTRUMENT'], df_metadata['LATITUDE'].astype('float32')),
+
+    nc_metadata = xr.Dataset({'LONGITUDE': (['INSTRUMENT'], df_metadata['LONGITUDE'].astype('float64')),
+                              'LATITUDE': (['INSTRUMENT'], df_metadata['LATITUDE'].astype('float64')),
                               'NOMINAL_DEPTH': (['INSTRUMENT'], df_metadata['NOMINAL_DEPTH'].astype('float32')),
                               'instrument_id': (['INSTRUMENT'], df_metadata['instrument_id'].astype('|S256')),
                               'source_file': (['INSTRUMENT'], df_metadata['source_file'].astype('|S256'))})
@@ -492,6 +557,10 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
         nc_aggregated[variable].attrs = variable_attributes[variable]
         nc_aggregated[variable].attrs['long_name'] = function_dict[variable] + " " + nc_aggregated[variable].attrs['long_name']
         nc_aggregated[variable].attrs.update({'cell_methods': 'TIME:' + function_dict[variable] + ' (interval: 1 hr comment: time mid point)'})
+
+        ## add percent of QCed values
+        if qc_proportion_all:
+            nc_aggregated[variable].attrs.update(qc_proportion_all[variable])
 
         for stat_method in function_stats:
             variable_stat_name = variable + "_" + stat_method

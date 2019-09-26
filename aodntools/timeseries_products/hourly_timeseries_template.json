@@ -251,7 +251,6 @@
            "long_name": "quality flag for mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
            "standard_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water status_flag"
            },
-
        "DOX1_3": {
             "ancillary_variables": "DOX1_3_quality_control",
             "comment": "Originally expressed in mg/l, O2 density = 1.429kg/m3 and 1ml/l = 44.660umol/l were assumed.",

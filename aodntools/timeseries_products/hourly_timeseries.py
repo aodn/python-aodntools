@@ -44,7 +44,7 @@ def check_files(file_list, site_code, parameter_names_accepted):
 
             nc_site_code = getattr(nc, 'site_code', '')
             if nc_site_code != site_code:
-                error_list.append('Wrong site_code: ' + nc_site_code)
+                error_list.append('Wrong site_code: ' + site_code)
 
             nc_file_version = getattr(nc, 'file_version', '')
             if 'Level 1' not in nc_file_version:

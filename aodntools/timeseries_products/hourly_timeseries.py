@@ -367,7 +367,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     :return: str path of hte resulting aggregated file
     """
 
-    parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'CNDC', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
+    parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
                                 'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
     function_stats = ['min', 'max', 'std', 'count']
 
@@ -437,8 +437,6 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
             df_temp['instrument_index'] = np.repeat(file_index, len(df_temp)).astype('int32')
             df_data = pd.concat([df_data, df_temp.reset_index()], ignore_index=True, sort=False)
 
-        file_index += 1
-
     df_metadata.index.rename('INSTRUMENT', inplace=True)
     df_data.index.rename('OBSERVATION', inplace=True)
     ## rename index to TIME
@@ -463,28 +461,43 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     ## add variable attributes
     variablenames_others = ['TIME', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH',
                             'instrument_index', 'instrument_id', 'source_file']
-    add_variable_attribute = {'PRES_REL': {'applied_offset_by_instrument': applied_offset}}
     parameter_names_all = list(set(parameter_names_all))
     variable_attributes = variable_attribute_dictionary
+    variable_attributes['PRES_REL'].update({'applied_offset_by_instrument': applied_offset})
 
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')
+    encoding = {'TIME': {'_FillValue': None,
+                         'units': time_units,
+                         'calendar': time_calendar},
+                'LONGITUDE': {'_FillValue': None},
+                'LATITUDE': {'_FillValue': None},
+                'NOMINAL_DEPTH': {'_FillValue': None},
+                'instrument_id': {'dtype': '|S256'},
+                'source_file': {'dtype': '|S256'}}
 
-    ## add attributes to TIME, LAT/LON, and index variables
+
+## add attributes to TIME, LAT/LON, and index variables
     for variable in variablenames_others:
         nc_aggregated[variable].attrs = variable_attributes[variable]
 
     for variable in parameter_names_all:
         ancillary_variables_attr = []
+        ## remove the _FillValue attribute
+        fill_value = variable_attributes[variable].pop('_FillValue')
+        encoding.update({variable: {'_FillValue': fill_value}})
+        ## replace nan by FillValue
+        nc_aggregated[variable] = nc_aggregated[variable].fillna(fill_value)
+
         nc_aggregated[variable].attrs = variable_attributes[variable]
         nc_aggregated[variable].attrs['long_name'] = function_dict[variable] + " " + nc_aggregated[variable].attrs['long_name']
         nc_aggregated[variable].attrs.update({'cell_methods': 'TIME:' + function_dict[variable] + ' (interval: 1 hr comment: time mid point)'})
+
         for stat_method in function_stats:
             variable_stat_name = variable + "_" + stat_method
             ancillary_variables_attr += [variable_stat_name]
-
             if stat_method == 'count':
-                nc_aggregated[variable_stat_name].attrs['units'] = 1
+                nc_aggregated[variable_stat_name].attrs['units'] = "1"
             else:
                 nc_aggregated[variable_stat_name].attrs['units'] = variable_attributes[variable]['units']
 
@@ -494,7 +507,8 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
             nc_aggregated[variable_stat_name].attrs['long_name'] = stat_method + ' data value in the bin, after rejection of flagged data'
             nc_aggregated[variable_stat_name].attrs['cell_methods'] = 'TIME:' +  stat_method
-            nc_aggregated[variable_stat_name].attrs['_FillValue'] = 999999.0
+            nc_aggregated[variable_stat_name].attrs['_FillValue'] = fill_value
+            nc_aggregated[variable_stat_name] = nc_aggregated[variable_stat_name].fillna(fill_value)
         nc_aggregated[variable].attrs.update({'ancillary_variables': " ".join(ancillary_variables_attr)})
 
 
@@ -507,14 +521,6 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                                                      VoI="all-variables", site_code=site_code,
                                                      product_type=product_type, file_version=file_version)
     ncout_path = os.path.join(file_path, ncout_filename)
-
-    encoding = {'TIME': {'_FillValue': False,
-                         'units': time_units,
-                         'calendar': time_calendar},
-                'LONGITUDE': {'_FillValue': False},
-                'LATITUDE': {'_FillValue': False},
-                'instrument_id': {'dtype': '|S256'},
-                'source_file': {'dtype': '|S256'}}
 
     write_netCDF_aggfile(nc_aggregated, ncout_path, encoding, file_path)
 

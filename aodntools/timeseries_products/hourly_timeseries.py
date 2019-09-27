@@ -516,6 +516,8 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
     nc_data = xr.Dataset.from_dataframe(df_data)
     nc_aggregated = xr.merge([nc_metadata, nc_data])
+    nc_aggregated = nc_aggregated.drop('OBSERVATION')
+
 
 
     ## add global attributes

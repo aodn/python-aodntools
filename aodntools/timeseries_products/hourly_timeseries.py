@@ -401,10 +401,10 @@ def PDresample_by_hour(df, function_dict, function_stats):
     df_data = pd.DataFrame()
     for variable in varnames:
         ds_var = df[variable]
-        ds_var_mean = ds_var.resample('1H').apply(function_dict[variable])
+        ds_var_mean = ds_var.resample('1H').apply(function_dict[variable]).astype(np.float64)
         df_data = pd.concat([df_data, ds_var_mean], axis=1, sort=False)
         for stat_method in function_stats:
-            ds_var_stat = ds_var.resample('1H').apply(stat_method)
+            ds_var_stat = ds_var.resample('1H').apply(stat_method).astype(np.float64)
             ds_var_stat = ds_var_stat.rename("_".join([variable, stat_method]))
             df_data = pd.concat([df_data, ds_var_stat], axis=1, sort=False)
 
@@ -497,7 +497,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
             df_temp = df_temp[parameter_names]
 
             df_temp = PDresample_by_hour(df_temp, function_dict, function_stats)  # do the magic
-            df_temp['instrument_index'] = np.repeat(file_index, len(df_temp)).astype('int32')
+            df_temp['instrument_index'] = np.repeat(file_index, len(df_temp)).astype(np.int32)
             df_data = pd.concat([df_data, df_temp.reset_index()], ignore_index=True, sort=False)
 
     df_metadata.index.rename('INSTRUMENT', inplace=True)
@@ -517,8 +517,6 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     nc_data = xr.Dataset.from_dataframe(df_data)
     nc_aggregated = xr.merge([nc_metadata, nc_data])
     nc_aggregated = nc_aggregated.drop('OBSERVATION')
-
-
 
     ## add global attributes
     add_attribute = {'rejected_files': "\n".join(list(bad_files))}

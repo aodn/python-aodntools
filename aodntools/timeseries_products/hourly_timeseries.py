@@ -26,7 +26,9 @@ def check_files(file_list, site_code, parameter_names_accepted):
     file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
     error_dict = {}
 
-    for file in file_list:
+
+    for file_index, file in enumerate(file_list):
+    #for file in file_list:
         with xr.open_dataset(file) as nc:
             attributes = list(nc.attrs)
             variables = list(nc.variables)
@@ -44,7 +46,7 @@ def check_files(file_list, site_code, parameter_names_accepted):
 
             nc_site_code = getattr(nc, 'site_code', '')
             if nc_site_code != site_code:
-                error_list.append('Wrong site_code: ' + site_code)
+                error_list.append('Wrong site_code: ' + nc_site_code)
 
             nc_file_version = getattr(nc, 'file_version', '')
             if 'Level 1' not in nc_file_version:
@@ -148,24 +150,18 @@ def get_QCcount (nc, qcflags):
     :param qcflags: QCflags to count
     :return: dictionary with % of registers QCed
     """
-    qced_percent = {}
+    qc_total_count = {}
     if 0 in qcflags and len(qcflags)>1:
-        ## make sure that the list of qflags is sorted
-        qcflags = sorted(qcflags)
         varnames = get_parameter_names(nc)
 
         for variable in varnames:
             flag_count = []
             for flag in qcflags:
                 flag_count.append(int(np.sum(nc[variable+'_quality_control']==flag)))
-            if sum(flag_count[1:len(flag_count)]) > 0:
-                qcpercent = {'qc0_count': flag_count[0]}
-            else:
-                qcpercent = {'qc0_count': 0.0}
-            qced_percent[variable] = qcpercent
-            qced_percent[variable].update({'qcnon0_count': sum(flag_count[1:len(flag_count)])})
+            qc_total_count[variable] = {'qc0_count': flag_count[0]}
+            qc_total_count[variable].update({'qcnon0_count': sum(flag_count[1:])})
 
-    return qced_percent
+    return qc_total_count
 
 def update_QCcount(qc_count_all, qc_count):
     """
@@ -193,7 +189,7 @@ def get_QC_percent(qc_count):
     if len(qc_count) > 0:
         for variable in qc_count.keys():
             if qc_count[variable]['qcnon0_count'] > 0:
-                qc_percent[variable] = {'QCed_values_percent': round(100*(1-qc_count[variable]['qc0_count']/qc_count[variable]['qcnon0_count']),4)}
+                qc_percent[variable] = {'QCed_values_percent': round(100*(1-qc_count[variable]['qc0_count']/(qc_count[variable]['qcnon0_count'] + qc_count[variable]['qc0_count'])),2)}
             else:
                 qc_percent[variable] = {'QCed_values_percent': 0.00}
 
@@ -401,10 +397,10 @@ def PDresample_by_hour(df, function_dict, function_stats):
     df_data = pd.DataFrame()
     for variable in varnames:
         ds_var = df[variable]
-        ds_var_mean = ds_var.resample('1H').apply(function_dict[variable]).astype(np.float64)
+        ds_var_mean = ds_var.resample('1H').apply(function_dict[variable]).astype(np.float32)
         df_data = pd.concat([df_data, ds_var_mean], axis=1, sort=False)
         for stat_method in function_stats:
-            ds_var_stat = ds_var.resample('1H').apply(stat_method).astype(np.float64)
+            ds_var_stat = ds_var.resample('1H').apply(stat_method).astype(np.float32)
             ds_var_stat = ds_var_stat.rename("_".join([variable, stat_method]))
             df_data = pd.concat([df_data, ds_var_stat], axis=1, sort=False)
 
@@ -430,6 +426,9 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
                                 'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
     function_stats = ['min', 'max', 'std', 'count']
+
+    ## make sure that the list of qflags is sorted
+    qcflags = sorted(qcflags)
 
     # Check files and sort chronologically
     files_to_aggregate, bad_files = check_files(files_to_aggregate, site_code, parameter_names_accepted)

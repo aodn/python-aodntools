@@ -308,14 +308,13 @@ def create_empty_dataframe(columns):
     return pd.DataFrame({k: pd.Series(dtype=t) for k, t in columns})
 
 
-def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code, product_type, file_version):
+def generate_netcdf_output_filename(nc, facility_code, data_code, site_code, product_type, file_version):
     """
     generate the output filename for the VoI netCDF file
 
     :param nc: aggregated dataset
     :param facility_code: facility code from file name
     :param data_code: data code sensu IMOS convention
-    :param VoI: name of the variable to aggregate
     :param site_code: site code
     :param product_type: name of the product
     :param file_version: version of the output file
@@ -324,13 +323,11 @@ def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code
 
     file_timeformat = '%Y%m%d'
 
-    if '_' in VoI:
-        VoI = VoI.replace('_', '-')
     t_start = pd.to_datetime(nc.TIME.min().values).strftime(file_timeformat)
     t_end = pd.to_datetime(nc.TIME.max().values).strftime(file_timeformat)
 
     output_name = '_'.join(
-        ['IMOS', facility_code, data_code, t_start, site_code, ('FV0' + str(file_version)), (VoI + "-" + product_type),
+        ['IMOS', facility_code, data_code, t_start, site_code, ('FV0' + str(file_version)), product_type,
          ('END-' + t_end), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
 
     return output_name
@@ -586,7 +583,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     product_type = 'hourly-timeseries'
     file_version = 2
     ncout_filename = generate_netcdf_output_filename(nc=nc_aggregated, facility_code=facility_code, data_code=data_code,
-                                                     VoI="all-variables", site_code=site_code,
+                                                     site_code=site_code,
                                                      product_type=product_type, file_version=file_version)
     ncout_path = os.path.join(file_path, ncout_filename)
 

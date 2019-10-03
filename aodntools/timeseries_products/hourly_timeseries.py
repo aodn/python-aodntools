@@ -1,16 +1,19 @@
 from __future__ import print_function
-import sys
+
+import argparse
+import json
 import os.path
 from collections import OrderedDict
-from dateutil.parser import parse
 from datetime import datetime
-import json
-from netCDF4 import Dataset
-import argparse
 
 import numpy as np
-import xarray as xr
 import pandas as pd
+import xarray as xr
+from dateutil.parser import parse
+from pkg_resources import resource_filename
+
+TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
+BINNING_METHOD_JSON = resource_filename(__name__, 'binningMethod.json')
 
 
 def check_files(file_list, site_code, parameter_names_accepted):
@@ -431,13 +434,12 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     files_to_aggregate, bad_files = check_files(files_to_aggregate, site_code, parameter_names_accepted)
 
     ## get binning function dictionary
-    with open("binningMethod.json") as json_file:
+    with open(BINNING_METHOD_JSON) as json_file:
         function_dict = json.load(json_file)
 
 
     ## get the variables attribute dictionary
-    globalattr_file = 'hourly_timeseries_template.json'
-    with open(globalattr_file) as json_file:
+    with open(TEMPLATE_JSON) as json_file:
         variable_attribute_dictionary = json.load(json_file)['_variables']
 
     df_data = pd.DataFrame()
@@ -516,7 +518,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
     ## add global attributes
     add_attribute = {'rejected_files': "\n".join(list(bad_files))}
-    nc_aggregated.attrs = set_globalattr(nc_aggregated, globalattr_file, site_code, add_attribute, parameter_names)
+    nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
 
 
     ## add variable attributes

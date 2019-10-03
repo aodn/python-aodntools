@@ -13,7 +13,7 @@ from dateutil.parser import parse
 from pkg_resources import resource_filename
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
-BINNING_METHOD_JSON = resource_filename(__name__, 'binningMethod.json')
+BINNING_METHOD_JSON = resource_filename(__name__, 'binning_method.json')
 
 
 def check_files(file_list, site_code, parameter_names_accepted):

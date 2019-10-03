@@ -461,7 +461,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
     for file_index, file in enumerate(files_to_aggregate):
         print(file_index)
-        with xr.load_dataset(file, use_cftime=False, mask_and_scale=True) as nc:
+        with xr.open_dataset(file, use_cftime=False, mask_and_scale=True) as nc:
             parameter_names = list(set(list(nc.variables)) & set(parameter_names_accepted))
             parameter_names_all += parameter_names
 

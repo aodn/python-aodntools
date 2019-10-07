@@ -352,7 +352,7 @@
         }
     },
     "_global":{
-        "abstract": "Hourly Time-series Product: This file contains all measurements of all the variables from all instruments deployed at the selected site. The values are binned to a fixed 1 hour interval. Instrument details are stored as a variable in order to keep a record of the origin of each measurement. Out-of-water measurements have been excluded, and only values with qc flags 0, 1, or 2 are retained.",
+        "abstract": "Hourly Time-series Product: This file contains all measurements of all the variables from all instruments deployed at the selected site. The values are binned to a fixed 1 hour interval. Instrument details are stored as a variable in order to keep a record of the origin of each measurement. Out-of-water measurements have been excluded. ",
         "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
         "author": "Klein, Eduardo",
         "author_email": "eduardo.kleinsalas@utas.edu.au",

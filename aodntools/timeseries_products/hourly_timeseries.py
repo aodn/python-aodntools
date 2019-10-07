@@ -426,6 +426,8 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
                                 'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
     function_stats = ['min', 'max', 'std', 'count']
+    qcflags_names = {0: 'Non_qc_performed', 1: 'Good_data', 2: 'Probably_good_data',
+                     3: 'Bad_data_that_are_potentially_correctable', 4: 'Bad_data'}
 
 
 
@@ -519,9 +521,10 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     nc_aggregated = nc_aggregated.drop('OBSERVATION')
 
     ## add global attributes
-    add_attribute = {'rejected_files': "\n".join(list(bad_files))}
+    add_attribute = {'rejected_files': "\n".join(list(bad_files)),
+                     'values_retained':  ", ".join([qcflags_names[flag] for flag in qcflags])}
     nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
-
+    nc_aggregated.attrs['abstract'] += 'Only values flagged as ' +  ", ".join([qcflags_names[flag] for flag in qcflags]) + ' are retained in the aggregation'
 
     ## add variable attributes
     variablenames_others = ['TIME', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH',

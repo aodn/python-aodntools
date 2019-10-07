@@ -159,7 +159,7 @@ structured according to the [indexed ragged array representation](http://cfconve
 
 ## Sample Files
 
-Sample files could be downloaded from AODN THREDDS(add link) server.
+Sample files could be downloaded from [AODN THREDDS](http://thredds.aodn.org.au/thredds/catalog/IMOS/catalog.html) server.
 
 
 ## Distribution

@@ -124,11 +124,18 @@ Attributes specific to each aggregated product, are added as follows:
 - `keywords`: set to a comma-separated list of the main variable names (“<VoI>, TIME, DEPTH, LATITUDE, LONGITUDE”);
 - `lineage`: a statement about how the file was created, including a link to the code used, and any input parameters (except the input files, which are listed in the source_file variable)
 - `title`: "Long time series Hourly Aggregated product: all available non-velocity variables at <site_code> between <time_coverage_start> and <time_coverage_end>"
-
+- `values_retained`: indicates what values are used according to its qc control flags
 
 ## Output
 
 The output from a single run of the code will be an aggregated file of all available measurements of all non-velocity variable at one mooring site.
+
+Two different files could be produced according to the values retained for the aggregation. One with values flagged as "Good_data" or "Probably_good_data" will have *"hourly-timeseries"* as product type. 
+e.g. *IMOS_ABOS-DA_STZ_20120421_EAC1_FV02_hourly-timeseries_END-20130823_C-20191007.nc* 
+
+The product that also includes "Non_QC_performed" values will have *"hourly-timeseries-including-non-QC"* as product type. 
+e.g. *IMOS_ABOS-DA_STZ_20120421_EAC1_FV02_hourly-timeseries-including-non-QC_END-20130823_C-20191007.nc*
+
 
 The product will be delivered, in netCDF4 format, compliant with the CF-1.6 and IMOS-1.4 conventions, and
 structured according to the [indexed ragged array representation](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_indexed_ragged_array_representation).
@@ -143,7 +150,7 @@ Sample files could be downloaded from [AODN THREDDS](http://thredds.aodn.org.au/
 
 All product files are made available via the AODN THREDDS server. This enables preview of file metadata and data subsetting via the OPeNDAP protocol, and file download via HTTP. The files will be discoverable under specific site/product directories.
 For ANMN files, the path within the THREDDS catalogue follows the template "IMOS/ANMN/<sub-facility>/<site_code>/hourly_timeseries/" for each site, for example http://thredds.aodn.org.au/thredds/catalog/IMOS/ANMN/NRS/NRSMAI/hourly_timeseries/catalog.html
-For ABOS, the products are not separated by site, so the path is "IMOS/ABOS/<sub-facility>/hourly_timeseries/", e.g.  http://thredds.aodn.org.au/thredds/catalog/IMOS/ABOS/DA/aggregated_timeseries/catalog.html
+For ABOS, the products are not separated by site, so the path is "IMOS/ABOS/<sub-facility>/hourly_timeseries/", e.g.  http://thredds.aodn.org.au/thredds/catalog/IMOS/ABOS/DA/hourly_timeseries/catalog.html
 
 ### Maintenance
 

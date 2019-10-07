@@ -427,6 +427,8 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                                 'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
     function_stats = ['min', 'max', 'std', 'count']
 
+
+
     ## make sure that the list of qflags is sorted
     qcflags = sorted(qcflags)
 
@@ -582,7 +584,10 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     ## create the output file name and write the aggregated product as netCDF
     facility_code = get_facility_code(files_to_aggregate[0])
     data_code = "".join(sorted(list(set(data_codes))))
-    product_type = 'hourly-timeseries'
+    if 0 in qcflags:
+        product_type = 'hourly-timeseries-including-non-QC'
+    else:
+        product_type = 'hourly-timeseries'
     file_version = 2
     ncout_filename = generate_netcdf_output_filename(nc=nc_aggregated, facility_code=facility_code, data_code=data_code,
                                                      site_code=site_code,

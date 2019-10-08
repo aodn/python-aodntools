@@ -31,7 +31,7 @@ def check_files(file_list, site_code, parameter_names_accepted):
 
 
     for file_index, file in enumerate(file_list):
-    #for file in file_list:
+
         with xr.open_dataset(file) as nc:
             attributes = list(nc.attrs)
             variables = list(nc.variables)

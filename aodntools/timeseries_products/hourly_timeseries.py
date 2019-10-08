@@ -337,7 +337,7 @@ def generate_netcdf_output_filename(nc, facility_code, data_code, site_code, pro
 
 
 
-def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding, file_path):
+def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding):
     """
     write netcdf file
     :param file_path: path where to write the file
@@ -353,7 +353,7 @@ def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding, file_path):
     variables_rest = sorted(list(set(variables_all) - set(variables_head)))
     variables_all = variables_head + variables_rest
 
-    nc_aggregated[variables_all].to_netcdf(os.path.join(file_path, ncout_filename), encoding=encoding,
+    nc_aggregated[variables_all].to_netcdf(ncout_filename, encoding=encoding,
                                            format='NETCDF4_CLASSIC')
     return ncout_filename
 
@@ -426,7 +426,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
                                 'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
     function_stats = ['min', 'max', 'std', 'count']
-    qcflags_names = {0: 'Non_qc_performed', 1: 'Good_data', 2: 'Probably_good_data',
+    qcflags_names = {0: 'No_QC_performed', 1: 'Good_data', 2: 'Probably_good_data',
                      3: 'Bad_data_that_are_potentially_correctable', 4: 'Bad_data'}
 
 
@@ -524,7 +524,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     add_attribute = {'rejected_files': "\n".join(list(bad_files)),
                      'values_retained':  ", ".join([qcflags_names[flag] for flag in qcflags])}
     nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
-    nc_aggregated.attrs['abstract'] += 'Only values flagged as ' +  ", ".join([qcflags_names[flag] for flag in qcflags]) + ' are retained in the aggregation'
+    nc_aggregated.attrs['abstract'] += 'Only values flagged as ' + ", ".join([qcflags_names[flag] for flag in qcflags]) + ' are retained in the aggregation'
 
     ## add variable attributes
     variablenames_others = ['TIME', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH',
@@ -596,9 +596,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                                                      site_code=site_code,
                                                      product_type=product_type, file_version=file_version)
     ncout_path = os.path.join(file_path, ncout_filename)
-
-    write_netCDF_aggfile(nc_aggregated, ncout_path, encoding, file_path)
-
+    write_netCDF_aggfile(nc_aggregated, ncout_path, encoding)
 
 
     return ncout_path, bad_files

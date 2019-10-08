@@ -595,11 +595,9 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     ncout_filename = generate_netcdf_output_filename(nc=nc_aggregated, facility_code=facility_code, data_code=data_code,
                                                      site_code=site_code,
                                                      product_type=product_type, file_version=file_version)
+
+    write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding, file_path)
     ncout_path = os.path.join(file_path, ncout_filename)
-
-    write_netCDF_aggfile(nc_aggregated, ncout_path, encoding, file_path)
-
-
 
     return ncout_path, bad_files
 

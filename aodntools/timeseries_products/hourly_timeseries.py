@@ -340,10 +340,10 @@ def generate_netcdf_output_filename(nc, facility_code, data_code, site_code, pro
 def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding):
     """
     write netcdf file
-    :param file_path: path where to write the file
-    :param encoding: encoding dictionary
+
     :param nc_aggregated: aggregated xarray dataset
-    :param ncout_filename: name of the netCDF file to be written
+    :param ncout_filename: path/name of the netCDF file to be written
+    :param encoding: encoding dictionary
     :return: name of the netCDf file written
     """
     ## sort the variables in the data set

@@ -243,7 +243,7 @@
            "valid_max": 1000.0,
            "valid_min": 0.0
            },
-       "DOX1_2_quality_control": {
+        "DOX1_2_quality_control": {
            "_Unsigned": "false",
            "_FillValue": 99,
            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
@@ -251,7 +251,7 @@
            "long_name": "quality flag for mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
            "standard_name": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water status_flag"
            },
-       "DOX1_3": {
+        "DOX1_3": {
             "ancillary_variables": "DOX1_3_quality_control",
             "comment": "Originally expressed in mg/l, O2 density = 1.429kg/m3 and 1ml/l = 44.660umol/l were assumed.",
             "_FillValue": 999999.0,
@@ -335,7 +335,7 @@
             "long_name": "quality flag for sea_water_turbidity",
             "standard_name": "sea_water_turbidity status_flag"
             },
-       "PAR": {
+        "PAR": {
             "ancillary_variables": "PAR_quality_control",
             "_FillValue": 999999.0,
             "long_name": "downwelling_photosynthetic_photon_flux_in_sea_water",
@@ -352,7 +352,7 @@
         }
     },
     "_global":{
-        "abstract": "Hourly Time-series Product: This file contains all measurements of all the variables from all instruments deployed at the selected site. The values are binned to a fixed 1 hour interval. Instrument details are stored as a variable in order to keep a record of the origin of each measurement. Out-of-water measurements have been excluded, and only values with qc flags 0, 1, or 2 are retained.",
+        "abstract": "Hourly Time Series Product: This file contains selected variables from all instruments deployed at the {site_code} mooring site. The values are binned to a fixed 1-hour interval. Instrument details are stored as variables in order to keep a record of the origin of each measurement. Out-of-water measurements have been excluded. Only values flagged as {flags} are retained in the aggregation.",
         "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
         "author": "Klein, Eduardo",
         "author_email": "eduardo.kleinsalas@utas.edu.au",

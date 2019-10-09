@@ -31,7 +31,7 @@ def check_files(file_list, site_code, parameter_names_accepted):
 
 
     for file_index, file in enumerate(file_list):
-    #for file in file_list:
+
         with xr.open_dataset(file) as nc:
             attributes = list(nc.attrs)
             variables = list(nc.variables)
@@ -192,9 +192,9 @@ def get_QC_percent(qc_count):
     if len(qc_count) > 0:
         for variable in qc_count.keys():
             if qc_count[variable]['qcnon0_count'] > 0:
-                qc_percent[variable] = {'QCed_values_percent': round(100*(1-qc_count[variable]['qc0_count']/(qc_count[variable]['qcnon0_count'] + qc_count[variable]['qc0_count'])),2)}
+                qc_percent[variable] = {'percent_quality_controlled': round(100*(1-qc_count[variable]['qc0_count']/(qc_count[variable]['qcnon0_count'] + qc_count[variable]['qc0_count'])),2)}
             else:
-                qc_percent[variable] = {'QCed_values_percent': 0.00}
+                qc_percent[variable] = {'percent_quality_controlled': 0.00}
 
     return qc_percent
 
@@ -337,13 +337,13 @@ def generate_netcdf_output_filename(nc, facility_code, data_code, site_code, pro
 
 
 
-def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding, file_path):
+def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding):
     """
     write netcdf file
-    :param file_path: path where to write the file
-    :param encoding: encoding dictionary
+
     :param nc_aggregated: aggregated xarray dataset
-    :param ncout_filename: name of the netCDF file to be written
+    :param ncout_filename: path/name of the netCDF file to be written
+    :param encoding: encoding dictionary
     :return: name of the netCDf file written
     """
     ## sort the variables in the data set
@@ -353,7 +353,7 @@ def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding, file_path):
     variables_rest = sorted(list(set(variables_all) - set(variables_head)))
     variables_all = variables_head + variables_rest
 
-    nc_aggregated[variables_all].to_netcdf(os.path.join(file_path, ncout_filename), encoding=encoding,
+    nc_aggregated[variables_all].to_netcdf(ncout_filename, encoding=encoding,
                                            format='NETCDF4_CLASSIC')
     return ncout_filename
 
@@ -426,6 +426,10 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
                                 'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
     function_stats = ['min', 'max', 'std', 'count']
+    qcflags_names = {0: 'No_QC_performed', 1: 'Good_data', 2: 'Probably_good_data',
+                     3: 'Bad_data_that_are_potentially_correctable', 4: 'Bad_data'}
+
+
 
     ## make sure that the list of qflags is sorted
     qcflags = sorted(qcflags)
@@ -455,7 +459,6 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
     ## containers
     parameter_names_all = []
-    data_codes = []
     applied_offset = []
     qc_count_all = {}
 
@@ -471,10 +474,6 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                     applied_offset.append(nc.PRES_REL.applied_offset)
                 else:
                     applied_offset.append(np.nan)
-
-            ## get data codes
-            for parameter in parameter_names:
-                data_codes.append(get_data_code(parameter))
 
             nc_clean = in_water(nc)  # in water only
             qc_count = get_QCcount(nc_clean, qcflags)
@@ -512,14 +511,34 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                               'instrument_id': (['INSTRUMENT'], df_metadata['instrument_id'].astype('|S256')),
                               'source_file': (['INSTRUMENT'], df_metadata['source_file'].astype('|S256'))})
 
+    ## Check and drop all nan columns
+    column_remove_list = []
+    parameter_remove_list = []
+    for parameter in parameter_names_all:
+        if df_data[parameter].isna().all():
+            column_remove_list.append(parameter)
+            parameter_remove_list.append(parameter)
+            for method in function_stats:
+                column_remove_list.append(parameter+'_'+method)
+    df_data.drop(columns=column_remove_list, inplace=True)
+    ## remove the drop names from the parameter_names_all list
+    parameter_names_all = list(set(parameter_names_all) - set(parameter_remove_list))
+
     nc_data = xr.Dataset.from_dataframe(df_data)
     nc_aggregated = xr.merge([nc_metadata, nc_data])
     nc_aggregated = nc_aggregated.drop('OBSERVATION')
 
     ## add global attributes
-    add_attribute = {'rejected_files': "\n".join(list(bad_files))}
+    add_attribute = {'rejected_files': "\n".join(list(bad_files)),
+                     'included_values_flagged_as':  ", ".join([qcflags_names[flag] for flag in qcflags])}
     nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
-
+    nc_aggregated.attrs['abstract'] = nc_aggregated.attrs['abstract'].format(
+        site_code=site_code,
+        flags=", ".join(qcflags_names[flag] for flag in qcflags)
+    )
+    if 0 in qcflags:
+        nc_aggregated.attrs['lineage'] += ('The percentage of quality controlled values used in the aggregation is '
+                                           'indicated in the percent_quality_controlled variable attribute.')
 
     ## add variable attributes
     variablenames_others = ['TIME', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH',
@@ -581,16 +600,17 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
     ## create the output file name and write the aggregated product as netCDF
     facility_code = get_facility_code(files_to_aggregate[0])
-    data_code = "".join(sorted(list(set(data_codes))))
-    product_type = 'hourly-timeseries'
+    data_code = "".join(sorted(set(get_data_code(p) for p in parameter_names_all)))
+    if 0 in qcflags:
+        product_type = 'hourly-timeseries-including-non-QC'
+    else:
+        product_type = 'hourly-timeseries'
     file_version = 2
     ncout_filename = generate_netcdf_output_filename(nc=nc_aggregated, facility_code=facility_code, data_code=data_code,
                                                      site_code=site_code,
                                                      product_type=product_type, file_version=file_version)
     ncout_path = os.path.join(file_path, ncout_filename)
-
-    write_netCDF_aggfile(nc_aggregated, ncout_path, encoding, file_path)
-
+    write_netCDF_aggfile(nc_aggregated, ncout_path, encoding)
 
 
     return ncout_path, bad_files

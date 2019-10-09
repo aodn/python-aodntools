@@ -192,9 +192,9 @@ def get_QC_percent(qc_count):
     if len(qc_count) > 0:
         for variable in qc_count.keys():
             if qc_count[variable]['qcnon0_count'] > 0:
-                qc_percent[variable] = {'QCed_values_percent': round(100*(1-qc_count[variable]['qc0_count']/(qc_count[variable]['qcnon0_count'] + qc_count[variable]['qc0_count'])),2)}
+                qc_percent[variable] = {'percent_quality_controlled': round(100*(1-qc_count[variable]['qc0_count']/(qc_count[variable]['qcnon0_count'] + qc_count[variable]['qc0_count'])),2)}
             else:
-                qc_percent[variable] = {'QCed_values_percent': 0.00}
+                qc_percent[variable] = {'percent_quality_controlled': 0.00}
 
     return qc_percent
 
@@ -516,6 +516,19 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                               'instrument_id': (['INSTRUMENT'], df_metadata['instrument_id'].astype('|S256')),
                               'source_file': (['INSTRUMENT'], df_metadata['source_file'].astype('|S256'))})
 
+    ## Check and drop all nan columns
+    column_remove_list = []
+    parameter_remove_list = []
+    for parameter in parameter_names_all:
+        if df_data[parameter].isna().all():
+            column_remove_list.append(parameter)
+            parameter_remove_list.append(parameter)
+            for method in function_stats:
+                column_remove_list.append(parameter+'_'+method)
+    df_data.drop(columns=column_remove_list, inplace=True)
+    ## remove the drop names from the parameter_names_all list
+    parameter_names_all = list(set(parameter_names_all) - set(parameter_remove_list))
+
     nc_data = xr.Dataset.from_dataframe(df_data)
     nc_aggregated = xr.merge([nc_metadata, nc_data])
     nc_aggregated = nc_aggregated.drop('OBSERVATION')
@@ -525,6 +538,8 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                      'values_retained':  ", ".join([qcflags_names[flag] for flag in qcflags])}
     nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
     nc_aggregated.attrs['abstract'] += 'Only values flagged as ' + ", ".join([qcflags_names[flag] for flag in qcflags]) + ' are retained in the aggregation'
+    if 0 in qcflags:
+        nc_aggregated.attrs['lineage'] += 'The percent of quality controlled values used in the aggregation is indicated in the percent_quality_controlled variable attribute.'
 
     ## add variable attributes
     variablenames_others = ['TIME', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH',

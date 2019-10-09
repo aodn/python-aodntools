@@ -40,6 +40,10 @@ class TestHourlyTimeseries(BaseTestCase):
         print('Output file:', output_file)
         print('Bad files:', bad_files)
 
+        self.assertRegex(output_file,
+                         r'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-\d{8}\.nc'
+                         )
+
         self.assertEqual(1, len(bad_files))
         for path, errors in bad_files.items():
             self.assertEqual(os.path.join(TEST_ROOT, BAD_FILE), path)

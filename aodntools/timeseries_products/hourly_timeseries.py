@@ -459,7 +459,6 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
     ## containers
     parameter_names_all = []
-    data_codes = []
     applied_offset = []
     qc_count_all = {}
 
@@ -475,10 +474,6 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
                     applied_offset.append(nc.PRES_REL.applied_offset)
                 else:
                     applied_offset.append(np.nan)
-
-            ## get data codes
-            for parameter in parameter_names:
-                data_codes.append(get_data_code(parameter))
 
             nc_clean = in_water(nc)  # in water only
             qc_count = get_QCcount(nc_clean, qcflags)
@@ -605,7 +600,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
     ## create the output file name and write the aggregated product as netCDF
     facility_code = get_facility_code(files_to_aggregate[0])
-    data_code = "".join(sorted(list(set(data_codes))))
+    data_code = "".join(sorted(set(get_data_code(p) for p in parameter_names_all)))
     if 0 in qcflags:
         product_type = 'hourly-timeseries-including-non-QC'
     else:

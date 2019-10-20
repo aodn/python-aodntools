@@ -101,7 +101,7 @@ In order to keep track of the provenance of VoIs in the aggregated file, accesso
 
 The variable attributes will comply with the IMOS metadata standards.
 
-The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a JSON file that contains the {key:value} pairs for each of them. See the contents of this file at the end of this document. 
+The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](https://github.com/aodn/python-aodntools/blob/master/aodntools/timeseries_products/hourly_timeseries_template.json) that contains the {key:value} pairs for each of them.
 
 Attributes specific to each aggregated product, are added as follows:
 

@@ -46,18 +46,20 @@ The dimensions of the resulting file  are determined as follows:
 
 ### Variables
 
-The product will aggregate the following  non-velocity variables (standard/long name in brackets):
+The product will aggregate the following variables (standard/long name in brackets):
 
-`TEMP` (sea_water_temperature);  
-`PSAL` (sea_water_salinity);  
 `CPHL`, `CHLF`, `CHLU` (mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water) - considered as separate variables for now;  
- `TURB` (sea_water_turbidity);  
- `DOX1` (mole_concentration_of_dissolved_molecular_oxygen_in_sea_water);   
-`DOX2` (moles_of_oxygen_per_unit_mass_in_sea_water);  
- `DOXS` (fractional_saturation_of_oxygen_in_sea_water);  
- `PAR` (downwelling_photosynthetic_photon_flux_in_sea_water).  
-  
-
+`DOX`   (volume_concentration_of_dissolved_molecular_oxygen_in_sea_water);   
+`DOX1`  (mole_concentration_of_dissolved_molecular_oxygen_in_sea_water);   
+`DOX2`  (moles_of_oxygen_per_unit_mass_in_sea_water);  
+`DOXS`  (fractional_saturation_of_oxygen_in_sea_water);  
+`DOXY`  (mass_concentration_of_oxygen_in_sea_water);  
+`PAR`   (downwelling_photosynthetic_photon_flux_in_sea_water);  
+`PRES`  (sea_water_pressure);  
+`PRES_REL`  (sea_water_pressure_due_to_sea_water);  
+`PSAL`  (sea_water_salinity);  
+`TEMP`  (sea_water_temperature);  
+`TURB`  (sea_water_turbidity).   
 
 
 Each Variable of Interest (VoI) is produced by selecting only the “good” and “probably good” data (QC flags 1 and 2), binning the values to a one-hour interval, and concatenating the resulting values into a single file. The resulting variables have dimension OBSERVATION. The VoI's ancillary_variables, in particular the corresponding quality-control flags, are not included. 

@@ -1,6 +1,6 @@
 # Hourly Time Series Product (non-velocity)
 
-- [Objective](#objective)
+- [Output](#output)
 - [Scope](#scope)
 - [Output](#output)
 - [Method](#method)
@@ -8,15 +8,9 @@
 
 
 
-## Objective
+## Output
 
-The project will provide 
-
-- A comprehensive set of aggregated files for each IMOS mooring site parameters (excluding current velocity data) binned into one hour intervals, excluding out-of-water data and records not flagged as “good” or “probably good” in the input files. QC flags will not be included. Statistics related to the averaging process will be stored as variables (standard deviation, minimum and maximum values, number of records averaged)
-- An additional version of the previous product that also includes the non quality controlled variables (qc flag 0 -- no_QC_performed) in the aggregated files.
-- All the (Python) code used for the generation of the products openly available on GitHub.
-- Clear documentation on the code and the output file format. 
-
+The code will provide aggregated files for each IMOS mooring site parameters (excluding current velocity data) binned into one hour intervals, excluding out-of-water data and records not flagged as “good” or “probably good” in the input files. QC flags will not be included. Statistics related to the averaging process will be stored as variables (standard deviation, minimum and maximum values, number of records binned). An additional version of the product will be generated with the inclusion of the non quality controlled variables (qc flag 0 -- no_QC_performed).
 
 
 ## Input

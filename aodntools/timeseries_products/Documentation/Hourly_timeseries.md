@@ -49,6 +49,7 @@ The dimensions of the resulting file  are determined as follows:
 The product will aggregate the following variables (standard/long name in brackets):
 
 `CPHL`, `CHLF`, `CHLU` (mass_concentration_of_inferred_chlorophyll_from_relative_fluorescence_units_in_sea_water) - considered as separate variables for now;  
+`DEPTH` (depth);  
 `DOX`   (volume_concentration_of_dissolved_molecular_oxygen_in_sea_water);   
 `DOX1`  (mole_concentration_of_dissolved_molecular_oxygen_in_sea_water);   
 `DOX2`  (moles_of_oxygen_per_unit_mass_in_sea_water);  

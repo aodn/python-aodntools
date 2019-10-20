@@ -1,4 +1,4 @@
-# Hourly Non-Velocity time series Product
+# Hourly Time Series Product (non-velocity)
 
 - [Objective](#objective)
 - [Scope](#scope)
@@ -19,29 +19,23 @@ The project will provide
 
 
 
-## Scope
+## Input
 
 
-Files and variables to be aggregated by this project will meet the following requirements:
+Files and variables to be aggregated by this code will meet the following requirements:
 
 - File contains data from only one deployment of one instrument;
 - File is a delayed-mode product, with file version label FV01;
+- File contains, at the minimum, one of the variables to be aggregated (listed below), and variables TIME, LATITUDE, LONGITUDE, and either NOMINAL_DEPTH, or the global attribute instrument_nominal_depth;
 - File is in netCDF format, compliant with CF-1.6 and IMOS-1.4 conventions;
 - All files to be aggregated are from the same site, and have the same site_code attribute;
 - Variables to be aggregated have TIME as their only dimension in the netCDF file  (or if LATITUDE and LONGITUDE are included as dimensions, they have size 1);
 - Variables to be aggregated do not represent current velocity.
 - The in-water data are bounded by the global attributes time_deployment_start and time_deployment_end.
-- Variables have been quality-controlled and flagged using the IMOS standard flags (see IMOS NetCDF Conventions v1.4, p43, Reference Table B)
+- Variables have been quality-controlled and flagged using the IMOS standard flags (see [IMOS NetCDF Conventions v1.4](https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/IMOS/Conventions/IMOS_NetCDF_Conventions.pdf), p43, Reference Table B)
 
-This project will not make any corrections to or implement work-arounds for input files that do not meet these requirements. A report on files that cannot be aggregated will be produced. If any files are re-processed by the moorings facility to meet the requirements, these will be incorporated into future versions of the product.
 
 ## Method
-
-### Input file selection
-
-The input files can be accessed on the local file system, or remotely via the AODN THREDDS server using the OPeNDAP protocol.  A list of OPeNDAP URLs can be produced by the utility function get_moorings_url(), which queries an index of all published moorings files to obtain the files relevant for a given site. The list can also be filtered by feature type (e.g time-series or profile) temporal range, file version (FV01), processing mode (real-time/delayed) or a regular expression matched against the file name.
-
-
 
 ### Input file validation
 
@@ -53,7 +47,7 @@ The dimensions of the resulting file  are determined as follows:
 
 - `OBSERVATION`:  the total number of observation records, excluding out-of-the-water data, in all input files;
 - `INSTRUMENT`: the number of instruments (i.e. number of files); 
-- `strlen`: a fixed dimension of length 256 for string variables.
+- `string256`: a fixed dimension of length 256 for string variables.
 
 
 ### Variables
@@ -72,9 +66,9 @@ The product will aggregate the following  non-velocity variables (standard/long 
 
 
 
-Each of the VoIs are produced by selecting only the “good” and “probably good” data (QC flags 1 and 2), binning the values to a one-hour interval, and concatenating the resulting values into a single file. The resulting variables have dimension OBSERVATION. The VoI’s ancillary_variables, in particular the corresponding quality-control flags, are not included. 
+Each Variable of Interest (VoI) is produced by selecting only the “good” and “probably good” data (QC flags 1 and 2), binning the values to a one-hour interval, and concatenating the resulting values into a single file. The resulting variables have dimension OBSERVATION. The VoI's ancillary_variables, in particular the corresponding quality-control flags, are not included. 
 
-An additional version of the product will include “good”, “probably good” and “non QC performed” data. In this case and for each variable, the percentage of QCed values will be indicated as a variable attribute.
+The code can generate a version of the product that also includes values flagged "no QC performed". In this case and for each variable, the percentage of QCed values will be indicated as a variable attribute.
 
 The binning intervals will be one hour long, centred on the hour (i.e. HH:00:00). The binning method will depend on the type of variable being:
 
@@ -85,7 +79,7 @@ The binning intervals will be one hour long, centred on the hour (i.e. HH:00:00)
 
 The binned `TIME` values are concatenated into a variable `TIME(OBSERVATION)`.  As input files can have overlapping or non-contiguous time coverage, the TIME variable may have duplicate values or gaps.
 
-The binned `DEPTH` values from input files are concatenated into a variable `DEPTH(OBSERVATION)`. If not present, fill values are stored. The variables `PRES` (sea_water_pressure) and `PRES_REL` (sea_water_pressure_due_to_sea_water) will be aggregated in exactly the same way as `DEPTH`. Every aggregated file will contain `DEPTH`, `PRES`, and `PRES_REL`.
+The binned `DEPTH` values from input files are concatenated into a variable `DEPTH(OBSERVATION)`. If not present, fill values are stored. The variables `PRES` (sea_water_pressure) and `PRES_REL` (sea_water_pressure_due_to_sea_water) will be aggregated in exactly the same way as `DEPTH`. Every aggregated file will contain `DEPTH`, `PRES`, and `PRES_REL`. Other variables of interest are treated in a similar way, but will be excluded from the aggregated file if no valid values were found in any of the input files.
 
 Additional metadata variables (ancillary variables) will be included, derived from the binning process and the source files: 
 `VoI_std`: standard deviation per averaging bin;
@@ -102,9 +96,6 @@ In order to keep track of the provenance of VoIs in the aggregated file, accesso
 - `LONGITUDE(INSTRUMENT)`: LONGITUDE per instrument.
 - `NOMINAL_DEPTH(INSTRUMENT)`: nominal depth per instrument, from the input file’s variable NOMINAL_DEPTH or global attribute instrument_nominal_depth.
 
-The global metadata will be a set of IMOS standard attributes, and specific standard attributes concatenated from input file attributes
-
-Product files will be made available via the AODN THREDDS server, and regularly updated to include new data.
 
 ### Attributes
 
@@ -124,7 +115,7 @@ Attributes specific to each aggregated product, are added as follows:
 - `keywords`: set to a comma-separated list of the main variable names (“<VoI>, TIME, DEPTH, LATITUDE, LONGITUDE”);
 - `lineage`: a statement about how the file was created, including a link to the code used, and any input parameters (except the input files, which are listed in the source_file variable)
 - `title`: "Long time series Hourly Aggregated product: all available non-velocity variables at <site_code> between <time_coverage_start> and <time_coverage_end>"
-- `values_retained`: indicates what values are used according to its qc control flags
+- `included_values_flagged_as`: a list of the quality-control flags accepted for inclusion into the binning
 
 ## Output
 
@@ -133,25 +124,9 @@ The output from a single run of the code will be an aggregated file of all avail
 Two different files could be produced according to the values retained for the aggregation. One with values flagged as "Good_data" or "Probably_good_data" will have *"hourly-timeseries"* as product type. 
 e.g. *IMOS_ABOS-DA_STZ_20120421_EAC1_FV02_hourly-timeseries_END-20130823_C-20191007.nc* 
 
-The product that also includes "Non_QC_performed" values will have *"hourly-timeseries-including-non-QC"* as product type. 
+The product that also includes "No_QC_performed" values will have *"hourly-timeseries-including-non-QC"* as product type. 
 e.g. *IMOS_ABOS-DA_STZ_20120421_EAC1_FV02_hourly-timeseries-including-non-QC_END-20130823_C-20191007.nc*
 
 
 The product will be delivered, in netCDF4 format, compliant with the CF-1.6 and IMOS-1.4 conventions, and
 structured according to the [indexed ragged array representation](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_indexed_ragged_array_representation).
-
-## Sample Files
-
-Sample files could be downloaded from [AODN THREDDS](http://thredds.aodn.org.au/thredds/catalog/IMOS/catalog.html) server.
-
-## Distribution
-
-### Discovery and access
-
-All product files are made available via the AODN THREDDS server. This enables preview of file metadata and data subsetting via the OPeNDAP protocol, and file download via HTTP. The files will be discoverable under specific site/product directories.
-For ANMN files, the path within the THREDDS catalogue follows the template "IMOS/ANMN/<sub-facility>/<site_code>/hourly_timeseries/" for each site, for example http://thredds.aodn.org.au/thredds/catalog/IMOS/ANMN/NRS/NRSMAI/hourly_timeseries/catalog.html
-For ABOS, the products are not separated by site, so the path is "IMOS/ABOS/<sub-facility>/hourly_timeseries/", e.g.  http://thredds.aodn.org.au/thredds/catalog/IMOS/ABOS/DA/hourly_timeseries/catalog.html
-
-### Maintenance
-
-Product files will be re-processed (where necessary) to include any new input data.

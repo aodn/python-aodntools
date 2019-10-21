@@ -76,7 +76,7 @@ The binning intervals will be one hour long, centred on the hour (i.e. HH:00:00)
 
 The binned `TIME` values are concatenated into a variable `TIME(OBSERVATION)`.  As input files can have overlapping or non-contiguous time coverage, the TIME variable may have duplicate values or gaps.
 
-The binned `DEPTH` values from input files are concatenated into a variable `DEPTH(OBSERVATION)`. If not present, fill values are stored. The variables `PRES` (sea_water_pressure) and `PRES_REL` (sea_water_pressure_due_to_sea_water) will be aggregated in exactly the same way as `DEPTH`. Every aggregated file will contain `DEPTH`, `PRES`, and `PRES_REL`. Other variables of interest are treated in a similar way, but will be excluded from the aggregated file if no valid values were found in any of the input files.
+The binned `DEPTH` values from input files are concatenated into a variable `DEPTH(OBSERVATION)`. If not present, fill values are stored. `PRES`, `PRES_REL` and any other variables of interest are treated in a similar way, but will be excluded from the aggregated file if no valid values were found in any of the input files.
 
 Additional metadata variables (ancillary variables) will be included, derived from the binning process and the source files: 
 `VoI_std`: standard deviation per averaging bin;

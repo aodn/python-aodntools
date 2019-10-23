@@ -2,17 +2,23 @@ FROM ubuntu:16.04
 
 ARG BUILDER_UID=9999
 
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+ENV PATH /home/builder/.local/bin:$PATH
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     git \
-    python-dev \
     libxml2-dev \
     libxslt-dev \
     libhdf5-dev \
     libnetcdf-dev \
     libudunits2-dev \
+    python3-dev \
     wget \
     && rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py \
     && python get-pip.py pip==18.1 \

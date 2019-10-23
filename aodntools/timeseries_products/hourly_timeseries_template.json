@@ -361,7 +361,7 @@
         "data_centre": "Australian Ocean Data Network (AODN)",
         "data_centre_email": "info@aodn.org.au",
         "disclaimer": "Data, products and services from IMOS are provided \"as is\" without any warranty as to fitness for a particular purpose.",
-        "featureType": "timeSeries",
+        "feature_type": "timeSeries",
         "file_version": "Level 2 - Quality Controlled Data",
         "institution_references": "http://imos.org.au/facilities/aodn/",
         "keywords_vocabulary": "IMOS parameter names. See https://github.com/aodn/imos-toolbox/blob/master/IMOS/imosParameters.txt",

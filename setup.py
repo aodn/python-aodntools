@@ -9,7 +9,8 @@ INSTALL_REQUIRES = [
 ]
 
 PACKAGE_DATA = {
-    'aodntools.ncwriter': ['*.json']
+    'aodntools.ncwriter': ['*.json'],
+    'aodntools.timeseries_products': ['*.json']
 }
 
 PACKAGE_EXCLUDES = ['test_aodntools.*', 'test_aodntools']

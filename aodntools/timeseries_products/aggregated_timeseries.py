@@ -122,6 +122,36 @@ def get_nominal_depth(nc):
     return nominal_depth
 
 
+def get_contributors(files_to_agg):
+    """
+    get the autohr and principal investigator details for each file
+    
+    :param files_to_aggregate: list of files 
+    :return: list: contributor_name, email and role
+    """
+
+    contributors = []
+    contributor_name, contributor_email, contributor_role =[], [], []
+
+    for file in files_to_agg:
+        with xr.open_dataset(file) as nc:
+            try:
+                contributors.append((nc.author, nc.author_email, 'author'))
+            except:
+                continue
+            try:
+                contributors.append((nc.principal_investigator, nc.principal_investigator_email, 'principal_investigator'))
+            except:
+                continue
+
+        for item in set(contributors):
+            contributor_name.append(item[0])
+            contributor_email.append(item[1])
+            contributor_role.append(item[2])
+
+    return contributor_name, contributor_email, contributor_role
+
+
 def set_globalattr(agg_dataset, templatefile, varname, site, add_attribute):
     """
     global attributes from a reference nc file and nc file
@@ -435,7 +465,11 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
 
 
     ## Set global attrs
-    add_attribute = {'rejected_files': "\n".join(rejected_files)}
+    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg)
+    add_attribute = {'rejected_files': "\n".join(rejected_files),
+                     'contributor_name': ";".join(contributor_name),
+                     'contributor_email': ";".join(contributor_email),
+                     'contributor_role': ";".join(contributor_role)}
     agg_dataset.attrs = set_globalattr(agg_dataset, TEMPLATE_JSON, var_to_agg, site_code, add_attribute)
 
     ## add version

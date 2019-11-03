@@ -462,9 +462,9 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
     ## Set global attrs
     contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg)
     add_attribute = {'rejected_files': "\n".join(rejected_files),
-                     'contributor_name': ";".join(contributor_name),
-                     'contributor_email': ";".join(contributor_email),
-                     'contributor_role': ";".join(contributor_role)}
+                     'contributor_name': "; ".join(contributor_name),
+                     'contributor_email': "; ".join(contributor_email),
+                     'contributor_role': "; ".join(contributor_role)}
     agg_dataset.attrs = set_globalattr(agg_dataset, TEMPLATE_JSON, var_to_agg, site_code, add_attribute)
 
     ## add version

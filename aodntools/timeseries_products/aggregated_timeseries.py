@@ -129,21 +129,22 @@ def get_contributors(files_to_agg):
     :return: list: contributor_name, email and role
     """
 
-    contributors = []
+    contributors = set()
     contributor_name, contributor_email, contributor_role = [], [], []
 
     for file in files_to_agg:
         with xr.open_dataset(file) as nc:
             attributes = nc.attrs.keys()
             if all(att in attributes for att in ['author', 'author_email']):
-                contributors.append((nc.author, nc.author_email, 'author'))
+                contributors.add((nc.author, nc.author_email, 'author'))
             if all(att in attributes for att in ['principal_investigator', 'principal_investigator_email']):
-                contributors.append((nc.principal_investigator, nc.principal_investigator_email, 'principal_investigator'))
+                contributors.add((nc.principal_investigator, nc.principal_investigator_email, 'principal_investigator'))
 
-    for item in set(contributors):
+    for item in contributors:
         contributor_name.append(item[0])
         contributor_email.append(item[1])
         contributor_role.append(item[2])
+
 
     return contributor_name, contributor_email, contributor_role
 

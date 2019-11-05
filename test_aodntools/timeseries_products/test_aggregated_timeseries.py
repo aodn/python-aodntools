@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from netCDF4 import Dataset
+from netCDF4 import Dataset, chartostring
 
 from test_aodntools.base_test import BaseTestCase
 from aodntools.timeseries_products.aggregated_timeseries import main_aggregator
@@ -15,16 +15,16 @@ INPUT_FILES = [
     'IMOS_ANMN-NRS_TZ_20190313T144000Z_NRSROT_FV01_NRSROT-1903-SBE39-27_END-20190524T010000Z_C-20190827T000000Z.nc',
     BAD_FILE
 ]
-INPUT_PATHS = [os.path.join(TEST_ROOT, f) for f in INPUT_FILES]
 
 
 class TestAggregatedTimeseries(BaseTestCase):
     def test_main_aggregator(self):
-        output_file, bad_files = main_aggregator(INPUT_PATHS, 'TEMP', 'NRSROT', self.temp_dir)
+        output_file, bad_files = main_aggregator(INPUT_FILES, 'TEMP', 'NRSROT', input_dir=TEST_ROOT,
+                                                 output_dir='/tmp')
 
         self.assertEqual(1, len(bad_files))
-        for path, errors in bad_files.items():
-            self.assertEqual(os.path.join(TEST_ROOT, BAD_FILE), path)
+        for file, errors in bad_files.items():
+            self.assertEqual(BAD_FILE, file)
             self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH', 'Wrong file version: Level 0 - Raw Data'})
 
         dataset = Dataset(output_file)
@@ -39,6 +39,9 @@ class TestAggregatedTimeseries(BaseTestCase):
                     'PRES_REL', 'PRES_REL_quality_control', 'TEMP', 'TEMP_quality_control', 'instrument_index'}
         for var in obs_vars:
             self.assertEqual(dataset.variables[var].dimensions, ('OBSERVATION',))
+
+        for f in chartostring(dataset['source_file'][:]):
+            self.assertIn(f, INPUT_FILES)
 
 
 if __name__ == '__main__':

@@ -296,8 +296,29 @@ def write_netCDF_aggfile(agg_dataset, output_path, encoding):
     return output_path
 
 
+def source_file_attributes(download_url_prefix, opendap_url_prefix):
+    """
+    If relevant URL prefixes are specified, return attributes to add to the source_file variable to describe their use.
+
+    :param download_url_prefix: prefix string for download URLs
+    :param opendap_url_prefix: prefix string for OPENDAP URLs
+    :return: dictionary of attributes to add to the source_file variable
+    """
+    attributes = {'comment': "This variable lists the relative path of each input file."}
+    if download_url_prefix:
+        attributes['comment'] += (" To obain a download URL for a file, "
+                                  "append its path to the download_url_prefix attribute.")
+        attributes['download_url_prefix'] = download_url_prefix
+    if opendap_url_prefix:
+        attributes['comment'] += (" To interact with the file remotely via the OPENDAP protocol, "
+                                  "append its path to the opendap_url_prefix attribute.")
+        attributes['opendap_url_prefix'] = opendap_url_prefix
+    return attributes
+
+
 ## MAIN FUNCTION
-def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_dir='./'):
+def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_dir='./', download_url_prefix=None,
+                    opendap_url_prefix=None):
     """
     Aggregates the variable of interest, its coordinates, quality control and metadata variables, from each file in
     the list into a netCDF file and returns its file name.
@@ -308,6 +329,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     :param site_code: code of the mooring site.
     :param input_dir: base path where source files are stored
     :param output_dir: path where the result file will be written
+    :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_agg)
+    :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
     :return: File path of the aggregated product
     :rtype: string
     """
@@ -440,9 +463,10 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     ## get the list of variables
     varlist = list(variableMainDF.columns) + list(variableAuxDF.columns)
 
-
     ## set variable attributes
     add_variable_attribute = {'PRES_REL': {'applied_offset_by_instrument': applied_offset}}
+    if download_url_prefix or opendap_url_prefix:
+        add_variable_attribute['source_file'] = source_file_attributes(download_url_prefix, opendap_url_prefix)
     variable_attributes = set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute)
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')

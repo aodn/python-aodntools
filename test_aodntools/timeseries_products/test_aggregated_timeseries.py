@@ -43,6 +43,15 @@ class TestAggregatedTimeseries(BaseTestCase):
         for f in chartostring(dataset['source_file'][:]):
             self.assertIn(f, INPUT_FILES)
 
+    def test_source_file_attributes(self):
+        output_file, bad_files = main_aggregator(INPUT_FILES, 'PSAL', 'NRSROT', input_dir=TEST_ROOT,
+                                                 output_dir='/tmp', download_url_prefix='http://test.download.url',
+                                                 opendap_url_prefix='http://test.opendap.url'
+                                                 )
+        dataset = Dataset(output_file)
+        self.assertEqual(dataset['source_file'].download_url_prefix, 'http://test.download.url')
+        self.assertEqual(dataset['source_file'].opendap_url_prefix, 'http://test.opendap.url')
+
 
 if __name__ == '__main__':
     unittest.main()

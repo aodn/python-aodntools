@@ -217,6 +217,35 @@ def get_nominal_depth(nc):
     return nominal_depth
 
 
+def get_contributors(files_to_agg):
+    """
+    get the author and principal investigator details for each file
+
+    :param files_to_aggregate: list of files
+    :return: list: contributor_name, email and role
+    """
+
+    contributors = set()
+    contributor_name, contributor_email, contributor_role = [], [], []
+
+    for file in files_to_agg:
+        with xr.open_dataset(file) as nc:
+            attributes = nc.attrs.keys()
+            if all(att in attributes for att in ['author', 'author_email']):
+                contributors.add((nc.author, nc.author_email, 'author'))
+            if all(att in attributes for att in ['principal_investigator', 'principal_investigator_email']):
+                contributors.add((nc.principal_investigator, nc.principal_investigator_email, 'principal_investigator'))
+
+    for item in contributors:
+        contributor_name.append(item[0])
+        contributor_email.append(item[1])
+        contributor_role.append(item[2])
+
+
+    return contributor_name, contributor_email, contributor_role
+
+
+
 def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parameter_names):
     """
     global attributes from a reference nc file and nc file
@@ -529,7 +558,11 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     nc_aggregated = nc_aggregated.drop('OBSERVATION')
 
     ## add global attributes
-    add_attribute = {'rejected_files': "\n".join(list(bad_files)),
+    contributor_name, contributor_email, contributor_role = get_contributors(files_to_aggregate)
+    add_attribute = {'contributor_name': "; ".join(contributor_name),
+                     'contributor_email': "; ".join(contributor_email),
+                     'contributor_role': "; ".join(contributor_role),
+                     'rejected_files': "\n".join(list(bad_files)),
                      'included_values_flagged_as':  ", ".join([qcflags_names[flag] for flag in qcflags])}
     nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
     nc_aggregated.attrs['abstract'] = nc_aggregated.attrs['abstract'].format(

@@ -12,6 +12,7 @@ import numpy as np
 import xarray as xr
 import pandas as pd
 
+from aodntools import __version__
 
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
@@ -494,11 +495,15 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     add_attribute = {'rejected_files': "\n".join(rejected_files),
                      'contributor_name': "; ".join(contributor_name),
                      'contributor_email': "; ".join(contributor_email),
-                     'contributor_role': "; ".join(contributor_role)}
+                     'contributor_role': "; ".join(contributor_role),
+                     'generating_code_version': __version__
+                     }
     agg_dataset.attrs = set_globalattr(agg_dataset, TEMPLATE_JSON, var_to_agg, site_code, add_attribute)
 
     ## add version
-    github_comment = ' Product created with https://github.com/aodn/data-services/blob/master/ANMN/LTSP/TSaggregator/aggregated_timeseries.py'
+    github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
+                      '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)
+                      )
 
     agg_dataset.attrs['lineage'] += github_comment
 

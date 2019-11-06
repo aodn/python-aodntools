@@ -4,6 +4,7 @@ import unittest
 from netCDF4 import Dataset, chartostring
 
 from test_aodntools.base_test import BaseTestCase
+from aodntools import __version__
 from aodntools.timeseries_products.aggregated_timeseries import main_aggregator
 
 
@@ -28,6 +29,8 @@ class TestAggregatedTimeseries(BaseTestCase):
             self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH', 'Wrong file version: Level 0 - Raw Data'})
 
         dataset = Dataset(output_file)
+
+        # check dimensions and variables
         self.assertSetEqual(set(dataset.dimensions), {'OBSERVATION', 'INSTRUMENT', 'string256'})
         self.assertSetEqual(set(dataset.variables.keys()),
                             {'TIME', 'LATITUDE', 'LONGITUDE', 'NOMINAL_DEPTH', 'DEPTH', 'DEPTH_quality_control',
@@ -42,6 +45,11 @@ class TestAggregatedTimeseries(BaseTestCase):
 
         for f in chartostring(dataset['source_file'][:]):
             self.assertIn(f, INPUT_FILES)
+
+        # check attributes
+        self.assertEqual(__version__, dataset.generating_code_version)
+        self.assertIn(__version__, dataset.lineage)
+        self.assertIn(BAD_FILE, dataset.rejected_files)
 
     def test_source_file_attributes(self):
         output_file, bad_files = main_aggregator(INPUT_FILES, 'PSAL', 'NRSROT', input_dir=TEST_ROOT,

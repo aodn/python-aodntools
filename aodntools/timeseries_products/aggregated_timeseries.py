@@ -26,12 +26,10 @@ def sort_files_to_aggregate(files_to_agg):
     file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
     for file in files_to_agg:
         with Dataset(file) as nc:
-            try:
-                file_list_dataframe = file_list_dataframe.append({'url': file,
-                                                                'deployment_date': parse(nc.getncattr('time_deployment_start'))},
-                                                                ignore_index=True)
-            except:
-                print(file)
+            file_list_dataframe = file_list_dataframe.append(
+                {'url': file, 'deployment_date': parse(nc.getncattr('time_deployment_start'))},
+                ignore_index=True
+            )
 
     file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
 
@@ -349,81 +347,75 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
         print(fileIndex, end=" ")
         sys.stdout.flush()
 
-        try:
-            ## it will open the netCDF files as a xarray Dataset
-            with xr.open_dataset(file, decode_times=True) as nc:
-                ## do only if the file pass all the sanity tests
-                file_problems = check_file(nc, var_to_agg, site_code, variable_attribute_dictionary)
-                if file_problems == []:
-                    varnames = list(nc.variables.keys())
-                    nobs = len(nc.TIME)
+        ## it will open the netCDF files as a xarray Dataset
+        with xr.open_dataset(file, decode_times=True) as nc:
+            ## do only if the file pass all the sanity tests
+            file_problems = check_file(nc, var_to_agg, site_code, variable_attribute_dictionary)
+            if file_problems == []:
+                varnames = list(nc.variables.keys())
+                nobs = len(nc.TIME)
 
-                    ## get the in-water times
-                    ## important to remove the timezone aware of the converted datetime object from a string
-                    time_deployment_start = pd.to_datetime(parse(nc.attrs['time_deployment_start'])).tz_localize(None)
-                    time_deployment_end = pd.to_datetime(parse(nc.attrs['time_deployment_end'])).tz_localize(None)
+                ## get the in-water times
+                ## important to remove the timezone aware of the converted datetime object from a string
+                time_deployment_start = pd.to_datetime(parse(nc.attrs['time_deployment_start'])).tz_localize(None)
+                time_deployment_end = pd.to_datetime(parse(nc.attrs['time_deployment_end'])).tz_localize(None)
 
-                    DF = pd.DataFrame({ var_to_agg: nc[var_to_agg].squeeze(),
-                                        var_to_agg_qc: nc[var_to_agg + '_quality_control'].squeeze(),
-                                        'TIME': nc.TIME.squeeze(),
-                                        'instrument_index': np.repeat(fileIndex, nobs)})
+                DF = pd.DataFrame({ var_to_agg: nc[var_to_agg].squeeze(),
+                                    var_to_agg_qc: nc[var_to_agg + '_quality_control'].squeeze(),
+                                    'TIME': nc.TIME.squeeze(),
+                                    'instrument_index': np.repeat(fileIndex, nobs)})
 
-                    ## check for DEPTH/PRES variables in the nc and its qc flags
-                    if 'DEPTH' in varnames:
-                        DF['DEPTH'] = nc.DEPTH.squeeze()
-                        if 'DEPTH_quality_control' in varnames:
-                            DF['DEPTH_quality_control'] = nc.DEPTH_quality_control.squeeze()
-                        else:
-                            DF['DEPTH_quality_control'] = np.repeat(0, nobs)
+                ## check for DEPTH/PRES variables in the nc and its qc flags
+                if 'DEPTH' in varnames:
+                    DF['DEPTH'] = nc.DEPTH.squeeze()
+                    if 'DEPTH_quality_control' in varnames:
+                        DF['DEPTH_quality_control'] = nc.DEPTH_quality_control.squeeze()
                     else:
-                        DF['DEPTH'] = np.repeat(FILLVALUE, nobs)
-                        DF['DEPTH_quality_control'] = np.repeat(9, nobs)
-
-                    if 'PRES' in varnames:
-                        DF['PRES'] = nc.PRES.squeeze()
-                        if 'PRES_quality_control' in varnames:
-                            DF['PRES_quality_control'] = nc.PRES_quality_control.squeeze()
-                        else:
-                            DF['PRES_quality_control'] = np.repeat(0, nobs)
-                    else:
-                        DF['PRES'] = np.repeat(FILLVALUE, nobs)
-                        DF['PRES_quality_control'] = np.repeat(9, nobs)
-
-                    if 'PRES_REL' in varnames:
-                        DF['PRES_REL'] = nc.PRES_REL.squeeze()
-                        try:
-                            applied_offset.append(nc.PRES_REL.applied_offset)
-                        except:
-                            applied_offset.append(np.nan)
-                        if 'PRES_REL_quality_control' in varnames:
-                            DF['PRES_REL_quality_control'] = nc.PRES_REL_quality_control.squeeze()
-                        else:
-                            DF['PRES_REL_quality_control'] = np.repeat(0, nobs)
-                    else:
-                        DF['PRES_REL'] = np.repeat(FILLVALUE, nobs)
-                        DF['PRES_REL_quality_control'] = np.repeat(9, nobs)
-                        applied_offset.append(np.nan)
-
-
-                    ## select only in water data
-                    DF = DF[(DF['TIME']>=time_deployment_start) & (DF['TIME']<=time_deployment_end)]
-
-                    ## append data
-                    variableMainDF = pd.concat([variableMainDF, DF], ignore_index=True, sort=False)
-
-
-                    # append auxiliary data
-                    variableAuxDF = variableAuxDF.append({'source_file': file,
-                                                          'instrument_id': nc.attrs['deployment_code'] + '; ' + nc.attrs['instrument'] + '; ' + nc.attrs['instrument_serial_number'],
-                                                          'LONGITUDE': nc.LONGITUDE.squeeze().values,
-                                                          'LATITUDE': nc.LATITUDE.squeeze().values,
-                                                          'NOMINAL_DEPTH': get_nominal_depth(nc)}, ignore_index = True)
-                    fileIndex += 1
+                        DF['DEPTH_quality_control'] = np.repeat(0, nobs)
                 else:
-                    rejected_files.append(file)
-                    bad_files.update({file: file_problems})
-        except:
-            print("FILE NOT FOUND: " + file, file=sys.stderr)
+                    DF['DEPTH'] = np.repeat(FILLVALUE, nobs)
+                    DF['DEPTH_quality_control'] = np.repeat(9, nobs)
+
+                if 'PRES' in varnames:
+                    DF['PRES'] = nc.PRES.squeeze()
+                    if 'PRES_quality_control' in varnames:
+                        DF['PRES_quality_control'] = nc.PRES_quality_control.squeeze()
+                    else:
+                        DF['PRES_quality_control'] = np.repeat(0, nobs)
+                else:
+                    DF['PRES'] = np.repeat(FILLVALUE, nobs)
+                    DF['PRES_quality_control'] = np.repeat(9, nobs)
+
+                if 'PRES_REL' in varnames:
+                    DF['PRES_REL'] = nc.PRES_REL.squeeze()
+                    applied_offset.append(getattr(nc.PRES_REL, 'applied_offset', np.nan))
+                    if 'PRES_REL_quality_control' in varnames:
+                        DF['PRES_REL_quality_control'] = nc.PRES_REL_quality_control.squeeze()
+                    else:
+                        DF['PRES_REL_quality_control'] = np.repeat(0, nobs)
+                else:
+                    DF['PRES_REL'] = np.repeat(FILLVALUE, nobs)
+                    DF['PRES_REL_quality_control'] = np.repeat(9, nobs)
+                    applied_offset.append(np.nan)
+
+
+                ## select only in water data
+                DF = DF[(DF['TIME']>=time_deployment_start) & (DF['TIME']<=time_deployment_end)]
+
+                ## append data
+                variableMainDF = pd.concat([variableMainDF, DF], ignore_index=True, sort=False)
+
+
+                # append auxiliary data
+                variableAuxDF = variableAuxDF.append({'source_file': file,
+                                                      'instrument_id': nc.attrs['deployment_code'] + '; ' + nc.attrs['instrument'] + '; ' + nc.attrs['instrument_serial_number'],
+                                                      'LONGITUDE': nc.LONGITUDE.squeeze().values,
+                                                      'LATITUDE': nc.LATITUDE.squeeze().values,
+                                                      'NOMINAL_DEPTH': get_nominal_depth(nc)}, ignore_index=True)
+                fileIndex += 1
+            else:
+                rejected_files.append(file)
+                bad_files.update({file: file_problems})
 
     print()
 
@@ -434,7 +426,6 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
 
     ## get the list of variables
     varlist = list(variableMainDF.columns) + list(variableAuxDF.columns)
-
 
     ## set variable attributes
     add_variable_attribute = {'PRES_REL': {'applied_offset_by_instrument': applied_offset}}

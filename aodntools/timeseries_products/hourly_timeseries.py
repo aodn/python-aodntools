@@ -11,6 +11,8 @@ import pandas as pd
 import xarray as xr
 from dateutil.parser import parse
 from pkg_resources import resource_filename
+from aggregated_timeseries import get_contributors
+
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
 BINNING_METHOD_JSON = resource_filename(__name__, 'binning_method.json')
@@ -215,35 +217,6 @@ def get_nominal_depth(nc):
         nominal_depth = nc.instrument_nominal_depth
 
     return nominal_depth
-
-
-def get_contributors(files_to_agg):
-    """
-    get the author and principal investigator details for each file
-
-    :param files_to_aggregate: list of files
-    :return: list: contributor_name, email and role
-    """
-
-    contributors = set()
-    contributor_name, contributor_email, contributor_role = [], [], []
-
-    for file in files_to_agg:
-        with xr.open_dataset(file) as nc:
-            attributes = nc.attrs.keys()
-            if all(att in attributes for att in ['author', 'author_email']):
-                contributors.add((nc.author, nc.author_email, 'author'))
-            if all(att in attributes for att in ['principal_investigator', 'principal_investigator_email']):
-                contributors.add((nc.principal_investigator, nc.principal_investigator_email, 'principal_investigator'))
-
-    for item in contributors:
-        contributor_name.append(item[0])
-        contributor_email.append(item[1])
-        contributor_role.append(item[2])
-
-
-    return contributor_name, contributor_email, contributor_role
-
 
 
 def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parameter_names):

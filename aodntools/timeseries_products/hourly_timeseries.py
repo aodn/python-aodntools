@@ -11,7 +11,7 @@ import pandas as pd
 import xarray as xr
 from dateutil.parser import parse
 from pkg_resources import resource_filename
-from aggregated_timeseries import get_contributors
+from aodntools.timeseries_products.aggregated_timeseries import get_contributors
 
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')

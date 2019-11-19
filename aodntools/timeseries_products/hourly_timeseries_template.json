@@ -335,6 +335,20 @@
             "long_name": "quality flag for sea_water_turbidity",
             "standard_name": "sea_water_turbidity status_flag"
             },
+        "TURBF": {
+            "ancillary_variables": "TURBF_quality_control",
+            "_FillValue": 999999.0,
+            "long_name": "sea_water_turbidity_in_FTU",
+            "units": "1",
+            "valid_max": 1000.0,
+            "valid_min": 0.0
+            },
+        "TURBF_quality_control": {
+            "_FillValue": 99,
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for sea_water_turbidity_in_FTU"
+             },
         "PAR": {
             "ancillary_variables": "PAR_quality_control",
             "_FillValue": 999999.0,

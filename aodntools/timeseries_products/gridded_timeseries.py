@@ -98,7 +98,6 @@ def grid_variable(file_name, VoI, site_code, depth_bins=[], max_separation=50, d
 
         for timestamp, (name, group) in enumerate(VoI_grouped):
             time = [name]
-            print(timestamp)
             n_depths = int(len(group.TEMP))
             latitude = float(group.LATITUDE.mean())
             longitude = float(group.LONGITUDE.mean())

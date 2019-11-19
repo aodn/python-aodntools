@@ -1,0 +1,75 @@
+{
+    "_variables": {
+        "TIME": {
+            "axis": "T",
+            "comment": "time stamp corresponds to the hour and represents binned data [30,30) minutes before and after the hour",
+            "long_name": "time",
+            "standard_name": "time",
+            "valid_max": 90000.0,
+            "valid_min": 0.0,
+            "units": "days since 1950-01-01 00:00:00 UTC",
+            "calendar": "gregorian"
+            },
+        "LATITUDE":{
+            "axis": "Y",
+            "long_name": "latitude",
+            "reference_datum": "WGS84 geographic coordinate system",
+            "standard_name": "latitude",
+            "units": "degrees_north",
+            "valid_max": 90.0,
+            "valid_min": -90.0
+            },
+        "LONGITUDE": {
+            "axis": "X",
+            "long_name": "longitude",
+            "reference_datum": "WGS84 geographic coordinate system",
+            "standard_name": "longitude",
+            "units": "degrees_east",
+            "valid_max": 180.0,
+            "valid_min": -180.0
+            },
+        "DEPTH": {
+            "coordinates": "TIME LATITUDE LONGITUDE",
+            "long_name": "depth bin",
+            "positive": "down",
+            "reference_datum": "sea surface",
+            "standard_name": "depth",
+            "units": "m",
+            "valid_max": 12000.0,
+            "valid_min": -5.0,
+            "_FillValue": 999999.0
+            },
+        "TEMP": {
+            "_FillValue": 999999.0,
+            "long_name": "sea_water_temperature",
+            "standard_name": "sea_water_temperature",
+            "units": "degrees_Celsius",
+            "valid_max": 40.0,
+            "valid_min": -2.5
+            },
+        "TEMP_count": {
+            "long_name": "number of observations in the water column",
+            "units": "1",
+            "cell_methods": "DEPTH:count"
+            },
+        "PSAL": {
+            "_FillValue": 999999.0,
+            "long_name": "sea_water_practical_salinity",
+            "standard_name": "sea_water_practical_salinity",
+            "units": "S m-1",
+            "valid_max": 41.0,
+            "valid_min": 2.0
+            },
+        "PSAL_count": {
+            "long_name": "number of observations in the water column",
+            "units": "1",
+            "cell_methods":  "DEPTH:count"
+            }
+    },
+    "_global":{
+        "title": "Gridded Time Series Product: {VoI} interpolated at {site_code} to fixed depth bins at 1-hour time intervals, between {time_min} and {time_max} and {depth_min} and {depth_max} meters.",
+        "abstract": "Gridded Time Series Product: This file contains {VoI} readings from all instruments deployed at the {site_code} mooring site. The source of the values is the Hourly Time Series Product where TIME is fixed to 1-hour interval. The variable values are interpolated to a fixed depth bins using a linear interpolation between consecutive existing depths. Only values flagged as 1 or 2 are used in the interpolation.",
+        "lineage": "The Variable of Interest (VoI) is produced by sequentially interpolating linearly the individual values into pre-defined depth bins using the 1-hour binned data from the Hourly Time Series Product. The number of instruments used for the interpolation at each timestamp is recorded in the VoI_count variable. If less that two instrument readings are present in the timestamp, fill values are stored in all depth bins. The resulting variable has dimensions TIME and DEPTH.  ",
+        "file_version": "Level 2 - Gridded Data"
+        }
+}

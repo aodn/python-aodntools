@@ -12,6 +12,14 @@ import aodntools.timeseries_products.aggregated_timeseries as TStools
 
 TEMPLATE_JSON = resource_filename(__name__, 'gridded_timeseries_template.json')
 
+def get_site_code(file_name):
+    """
+    get site_code from the file name
+    :param file_name: name of the file
+    :return: site_code
+    """
+    return file_name.split("_")[4]
+
 
 def make_depth_bins(nc, increment=10):
     """
@@ -56,19 +64,20 @@ def sort_attributes(attributes):
 
 
 ## MAIN FUNCTION
-def grid_variable(file_name, VoI, site_code, depth_bins=[], max_separation=50, depth_bins_increment=10,
+def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins_increment=10,
                   base_path='./'):
     """
     Grid VoI into depth_bins.
     :param nc: hourly aggregated dataset with VoI, DEPTH and TIME only
     :param VoI: variable of interest (TEMP or PSAL)
-    :param site_code: code of the mooring site
     :param depth_bins: list of depth where to interpolate. if null list is provided it will be calculated from the data
     :param max_separation: max separation allowed for instruments
     :param depth_bins_increment: in case no depth bins provided this is the increment for the calculated bins
     :param base_path: path where the result file will be written
     :return: interpolated dataset
     """
+
+    site_code = get_site_code(file_name)
 
     with xr.open_dataset(file_name) as nc:
         ## get global attributes
@@ -195,7 +204,6 @@ def grid_variable(file_name, VoI, site_code, depth_bins=[], max_separation=50, d
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Gridded time series: interpolate ONE variable from ALL instruments from ALL deployments from ONE site into 1hr timestamps and fixed depth bins")
     parser.add_argument('-var', dest='varname', help='name of the variable to concatenate. Like TEMP, PSAL', required=True)
-    parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI', required=True)
     parser.add_argument('-file', dest='filename', help='name of the Hourly Time Series Product file that contains the data', required=True)
     parser.add_argument('-depth_bins', dest='depth_bins', help='list of depth where the VoI will be interpolated', default=[], required=False)
     parser.add_argument('-max_separation', dest='max_separation', help='maximum difference between instruments to allow interpolation', default=50, required=False)
@@ -203,6 +211,6 @@ if __name__ == "__main__":
     parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default ./', default='./', required=False)
     args = parser.parse_args()
 
-    print(grid_variable(file_name=args.filename, VoI=args.varname, site_code=args.site_code, depth_bins=args.depth_bins,
+    print(grid_variable(file_name=args.filename, VoI=args.varname, depth_bins=args.depth_bins,
                         max_separation=int(args.max_separation), depth_bins_increment=int(args.depth_bins_increment),
                         base_path=args.output_path))

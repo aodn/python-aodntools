@@ -426,7 +426,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     """
 
     parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
-                                'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'PAR']
+                                'DOX2_1', 'DOXS', 'DOXY', 'PRES', 'PRES_REL', 'PSAL', 'TEMP', 'TURB', 'TURBF', 'PAR']
     function_stats = ['min', 'max', 'std', 'count']
     qcflags_names = {0: 'No_QC_performed', 1: 'Good_data', 2: 'Probably_good_data',
                      3: 'Bad_data_that_are_potentially_correctable', 4: 'Bad_data'}

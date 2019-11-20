@@ -3,6 +3,7 @@ import bisect
 import argparse
 import os.path
 import json
+from datetime import datetime
 
 import xarray as xr
 import pandas as pd
@@ -205,7 +206,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Gridded time series: interpolate ONE variable from ALL instruments from ALL deployments from ONE site into 1hr timestamps and fixed depth bins")
     parser.add_argument('-var', dest='varname', help='name of the variable to concatenate. Like TEMP, PSAL', required=True)
     parser.add_argument('-file', dest='filename', help='name of the Hourly Time Series Product file that contains the data', required=True)
-    parser.add_argument('-depth_bins', dest='depth_bins', help='list of depth where the VoI will be interpolated', default=[], required=False)
+    parser.add_argument('-depth_bins', dest='depth_bins', help='list of depth where the VoI will be interpolated', default=None, nargs='+', required=False)
     parser.add_argument('-max_separation', dest='max_separation', help='maximum difference between instruments to allow interpolation', default=50, required=False)
     parser.add_argument('-depth_bins_increment', dest='depth_bins_increment', help='increment in meters for the automatic generated depth bins', default=10, required=False)
     parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default ./', default='./', required=False)

@@ -12,6 +12,12 @@ pipeline {
                 }
             }
             stages {
+                stage('clean') {
+                    steps {
+                        sh 'git reset --hard'
+                        sh 'git clean -xffd'
+                    }
+                }
                 stage('set_version') {
                     when { not { branch "master" } }
                     steps {

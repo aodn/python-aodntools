@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
 INSTALL_REQUIRES = [
-    'jsonschema==2.6.0',
-    'numpy>=1.13.0,<1.17.0',
-    'netCDF4',
-    'pandas<0.25.0',
-    'xarray<0.12.0'
+    'jsonschema>=2.6.0',
+    'numpy>=1.13.0',
+    'netCDF4>=1.5.3',
+    'pandas>=0.24.2',
+    'xarray>=0.11.3'
 ]
 
 PACKAGE_DATA = {

@@ -18,7 +18,7 @@ PACKAGE_NAME = 'aodntools'
 
 setup(
     name=PACKAGE_NAME,
-    version='0.4.6',
+    version='1.0.0',
     packages=find_packages(exclude=PACKAGE_EXCLUDES),
     package_data=PACKAGE_DATA,
     url='https://github.com/aodn',

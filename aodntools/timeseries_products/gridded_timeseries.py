@@ -8,10 +8,12 @@ from datetime import datetime
 import xarray as xr
 import pandas as pd
 
-import aggregated_timeseries as TStools
+from pkg_resources import resource_filename
+
+import aodntools.timeseries_products.aggregated_timeseries as TStools
 
 
-TEMPLATE_JSON = 'gridded_timeseries_template.json'
+TEMPLATE_JSON = resource_filename(__name__, 'gridded_timeseries_template.json')
 
 
 def make_depth_bins(nc, increment=10):

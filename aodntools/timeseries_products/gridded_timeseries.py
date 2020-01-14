@@ -210,10 +210,18 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
 
     encoding = {'TIME': {'_FillValue': None,
                          'units': time_units,
-                         'calendar': time_calendar},
+                         'calendar': time_calendar,
+                         'zlib': True,
+                         'complevel': 5},
+                VoI:    {'zlib': True,
+                         'complevel': 5},
                 VoI+'_count': {'_FillValue': None,
-                               'dtype': np.dtype('int')},
-                'DEPTH': {'dtype': np.dtype('float64')},
+                               'dtype': np.dtype('int'),
+                               'zlib': True,
+                               'complevel': 5},
+                'DEPTH': {'dtype': np.dtype('float64'),
+                          'zlib': True,
+                          'complevel': 5},
                 'LONGITUDE': {'_FillValue': False},
                 'LATITUDE': {'_FillValue': False}}
 

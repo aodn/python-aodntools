@@ -113,8 +113,8 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
         time_0 = pd.to_datetime('1950-01-01T00:00:00')
         time_min = nc.TIME.values.min()
         depth_bin_len = len(depth_bins)
-        VoI_binned = xr.DataArray(np.full((depth_bin_len, 1), np.nan), coords=[[time_0], depth_bins],
-                                  dims=['TIME', 'DEPTH'])
+        VoI_binned = xr.DataArray(np.full((depth_bin_len, 1), np.nan), coords=[depth_bins, [time_0]],
+                                  dims=['DEPTH', 'TIME'])
         VoI_ndepths = xr.DataArray(np.full(1, 0), coords=[[time_0]], dims=['TIME'])
 
         ## group nc by individual timestamps
@@ -142,8 +142,8 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
             else:
                 VoI_gridded = np.full((depth_bin_len, 1), np.nan)
 
-            VoI_temp = xr.DataArray(VoI_gridded.reshape(depth_bin_len, 1), coords=[time, depth_bins],
-                                    dims=['TIME', 'DEPTH'])
+            VoI_temp = xr.DataArray(VoI_gridded.reshape(depth_bin_len, 1), coords=[depth_bins, time],
+                                    dims=['DEPTH', 'TIME'])
             VoI_ndepths_temp = xr.DataArray([n_depths], coords=[time], dims=['TIME'])
 
             VoI_binned = xr.concat([VoI_binned, VoI_temp], dim='TIME')

@@ -62,13 +62,7 @@ def get_depth_mask(depth_bins, depths, max_separation):
             depth_mask[depth_min:depth_max] = [True] * depth_interval_len
     return depth_mask
 
-def sort_attributes(attributes):
-    """
 
-    :param attributes: dictionary of global attributes
-    :return: sorted dictionary
-    """
-    return dict(sorted(attributes.items()))
 
 def sort_depths(depths, values):
     """
@@ -201,7 +195,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
                                                                                                 time_max=pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat),
                                                                                                 depth_min=min(depth_bins),
                                                                                                 depth_max = max(depth_bins))})
-    VoI_interpolated.attrs = sort_attributes(VoI_interpolated.attrs)
+    VoI_interpolated.attrs = sorted(VoI_interpolated.attrs.items())
 
     ## create the output file name and write the aggregated product as netCDF
     facility_code = TStools.get_facility_code(file_name)
@@ -252,10 +246,9 @@ if __name__ == "__main__":
         depth_bins = args.depth_bins
         depth_bins_increment = int(args.depth_bins_increment)
         max_separation = int(args.max_separation)
-        file_name = args.filename
         output_path = args.output_path
 
-    file_name = arguments['filename']
+    file_name = args.filename
 
     print(grid_variable(file_name=file_name, VoI=VoI, depth_bins=depth_bins,
                         max_separation=int(max_separation), depth_bins_increment=int(depth_bins_increment),

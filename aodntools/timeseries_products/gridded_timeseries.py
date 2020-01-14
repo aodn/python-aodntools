@@ -70,10 +70,10 @@ def sort_depths(depths, values):
     """
     index =list(range(len(depths)))
     index.sort(key=depths.__getitem__)
-    depths[:] = [depths[i] for i in index]
-    values[:] = [values[i] for i in index]
+    sorted_depths = [depths[i] for i in index]
+    sorted_values = [values[i] for i in index]
 
-    return depths, values
+    return sorted_depths, sorted_values
 
 
 

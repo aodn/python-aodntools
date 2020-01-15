@@ -237,7 +237,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Gridded time series: interpolate ONE variable from ALL instruments from ALL deployments from ONE site into 1hr timestamps and fixed depth bins")
-    parser.add_argument('-var', dest='varname', help='name of the variable to concatenate. Like TEMP, PSAL', default='TEMP', required=False)
+    parser.add_argument('-var', dest='var', help='name of the variable to concatenate. Like TEMP, PSAL', default='TEMP', required=False)
     parser.add_argument('-file', dest='filename', help='name of the Hourly Time Series Product file that contains the data', default=None, required=False)
     parser.add_argument('-depth_bins', dest='depth_bins', help='list of depth where the VoI will be interpolated', default=None, nargs='+', required=False)
     parser.add_argument('-max_separation', dest='max_separation', help='maximum difference between instruments to allow interpolation', default=50, required=False)
@@ -250,12 +250,12 @@ if __name__ == "__main__":
         with open(config_file) as ff:
             arguments = json.load(ff)
         VoI = arguments['var']
-        depth_bins = arguments['target_depths']
+        depth_bins = arguments['depth_bins']
         depth_bins_increment = int(arguments['depth_bins_increment'])
         max_separation = int(arguments['max_separation'])
-        output_path = arguments['path']
+        output_path = arguments['output_path']
     else:
-        VoI = args.varname
+        VoI = args.var
         depth_bins = args.depth_bins
         depth_bins_increment = int(args.depth_bins_increment)
         max_separation = int(args.max_separation)

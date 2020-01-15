@@ -2,8 +2,8 @@
   "site_code": "GBRPPS",
   "filename": "IMOS_ANMN-QLD_BOSTZ_20090607_GBRPPS_FV02_hourly-timeseries_END-20101101_C-20191106.nc",
   "var": "TEMP",
-  "target_depths": null,
+  "depth_bins": null,
   "depth_bins_increment": 5,
   "max_separation": 50,
-  "path": "./"
+  "output_path": "./"
 }

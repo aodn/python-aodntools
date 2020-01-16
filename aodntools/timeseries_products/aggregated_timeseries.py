@@ -13,7 +13,7 @@ import xarray as xr
 import pandas as pd
 
 
-TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
+TEMPLATE_JSON = resource_filename(__name__, 'gridded_timeseries_template.json')
 
 
 def sort_files_to_aggregate(files_to_agg):

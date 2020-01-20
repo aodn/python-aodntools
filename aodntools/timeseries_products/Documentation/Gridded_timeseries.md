@@ -3,7 +3,6 @@
 - [Scope](#scope)
 - [Input](#input)
 - [Method](#method)
-- [Distribution](#distribution)
 - [Output](#output)
 
 

@@ -1,4 +1,4 @@
-# Hourly Time Series Product (non-velocity)
+# Gridded Time Series Product (Temperature)
 
 - [Scope](#scope)
 - [Input](#input)

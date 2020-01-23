@@ -1,4 +1,5 @@
-from __future__ import print_function
+#!/usr/bin/env python3
+
 import sys
 import os.path
 from dateutil.parser import parse
@@ -12,20 +13,22 @@ import numpy as np
 import xarray as xr
 import pandas as pd
 
+from aodntools import __version__
 
 TEMPLATE_JSON = resource_filename(__name__, 'gridded_timeseries_template.json')
 
 
-def sort_files_to_aggregate(files_to_agg):
+def sort_files_to_aggregate(files_to_agg, input_dir=''):
     """
     sort the list of files to aggregate by time_deployment start attribute
 
     :param files_to_agg: list of file URLs
+    :param input_dir: base path where source files are stored
     :return: list of file URLs
     """
     file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
     for file in files_to_agg:
-        with Dataset(file) as nc:
+        with Dataset(os.path.join(input_dir, file)) as nc:
             try:
                 file_list_dataframe = file_list_dataframe.append({'url': file,
                                                                 'deployment_date': parse(nc.getncattr('time_deployment_start'))},
@@ -121,6 +124,33 @@ def get_nominal_depth(nc):
 
     return nominal_depth
 
+def get_contributors(files_to_agg, input_dir=''):
+    """
+    get the author and principal investigator details for each file
+
+    :param files_to_aggregate: list of files
+    :param input_dir: base path where source files are stored
+    :return: list: contributor_name, email and role
+    """
+
+    contributors = set()
+    contributor_name, contributor_email, contributor_role = [], [], []
+
+    for file in files_to_agg:
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
+            attributes = nc.attrs.keys()
+            if all(att in attributes for att in ['author', 'author_email']):
+                contributors.add((nc.author, nc.author_email, 'author'))
+            if all(att in attributes for att in ['principal_investigator', 'principal_investigator_email']):
+                contributors.add((nc.principal_investigator, nc.principal_investigator_email, 'principal_investigator'))
+
+    for item in contributors:
+        contributor_name.append(item[0])
+        contributor_email.append(item[1])
+        contributor_role.append(item[2])
+
+
+    return contributor_name, contributor_email, contributor_role
 
 def set_globalattr(agg_dataset, templatefile, varname, site, add_attribute):
     """
@@ -267,16 +297,42 @@ def write_netCDF_aggfile(agg_dataset, output_path, encoding):
 
     return output_path
 
+
+def source_file_attributes(download_url_prefix, opendap_url_prefix):
+    """
+    If relevant URL prefixes are specified, return attributes to add to the source_file variable to describe their use.
+
+    :param download_url_prefix: prefix string for download URLs
+    :param opendap_url_prefix: prefix string for OPENDAP URLs
+    :return: dictionary of attributes to add to the source_file variable
+    """
+    attributes = {'comment': "This variable lists the relative path of each input file."}
+    if download_url_prefix:
+        attributes['comment'] += (" To obain a download URL for a file, "
+                                  "append its path to the download_url_prefix attribute.")
+        attributes['download_url_prefix'] = download_url_prefix
+    if opendap_url_prefix:
+        attributes['comment'] += (" To interact with the file remotely via the OPENDAP protocol, "
+                                  "append its path to the opendap_url_prefix attribute.")
+        attributes['opendap_url_prefix'] = opendap_url_prefix
+    return attributes
+
+
 ## MAIN FUNCTION
-def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
+def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_dir='./', download_url_prefix=None,
+                    opendap_url_prefix=None):
     """
     Aggregates the variable of interest, its coordinates, quality control and metadata variables, from each file in
     the list into a netCDF file and returns its file name.
 
-    :param files_to_agg: List of URLs for files to aggregate.
+    :param files_to_agg: List of files to aggregate. Each path is interpreted relative to input_dir (if specified).
+                         These relative paths are listed in the `source_files` variable in the output file.
     :param var_to_agg: Name of variable to aggregate.
     :param site_code: code of the mooring site.
-    :param base_path: path where the result file will be written
+    :param input_dir: base path where source files are stored
+    :param output_dir: path where the result file will be written
+    :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_agg)
+    :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
     :return: File path of the aggregated product
     :rtype: string
     """
@@ -285,7 +341,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
     FILLVALUE = 999999.0
 
     ## sort the file URL in chronological order of deployment
-    files_to_agg = sort_files_to_aggregate(files_to_agg)
+    files_to_agg = sort_files_to_aggregate(files_to_agg, input_dir=input_dir)
 
     var_to_agg_qc = var_to_agg + '_quality_control'
     ## create empty DF for main and auxiliary variables
@@ -325,7 +381,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
 
         try:
             ## it will open the netCDF files as a xarray Dataset
-            with xr.open_dataset(file, decode_times=True) as nc:
+            with xr.open_dataset(os.path.join(input_dir, file), decode_times=True) as nc:
                 ## do only if the file pass all the sanity tests
                 file_problems = check_file(nc, var_to_agg, site_code, variable_attribute_dictionary)
                 if file_problems == []:
@@ -409,9 +465,10 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
     ## get the list of variables
     varlist = list(variableMainDF.columns) + list(variableAuxDF.columns)
 
-
     ## set variable attributes
     add_variable_attribute = {'PRES_REL': {'applied_offset_by_instrument': applied_offset}}
+    if download_url_prefix or opendap_url_prefix:
+        add_variable_attribute['source_file'] = source_file_attributes(download_url_prefix, opendap_url_prefix)
     variable_attributes = set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute)
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')
@@ -435,21 +492,29 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, base_path='./'):
 
 
     ## Set global attrs
-    add_attribute = {'rejected_files': "\n".join(rejected_files)}
+    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg, input_dir=input_dir)
+    add_attribute = {'rejected_files': "\n".join(rejected_files),
+                     'contributor_name': "; ".join(contributor_name),
+                     'contributor_email': "; ".join(contributor_email),
+                     'contributor_role': "; ".join(contributor_role),
+                     'generating_code_version': __version__
+                     }
     agg_dataset.attrs = set_globalattr(agg_dataset, TEMPLATE_JSON, var_to_agg, site_code, add_attribute)
 
     ## add version
-    github_comment = ' Product created with https://github.com/aodn/data-services/blob/master/ANMN/LTSP/TSaggregator/aggregated_timeseries.py'
+    github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
+                      '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)
+                      )
 
     agg_dataset.attrs['lineage'] += github_comment
 
     ## create the output file name and write the aggregated product as netCDF
-    facility_code = get_facility_code(files_to_agg[0])
+    facility_code = get_facility_code(os.path.join(input_dir, files_to_agg[0]))
     data_code = get_data_code(var_to_agg) + 'Z'
     product_type='aggregated-timeseries'
     file_version=1
     ncout_filename = generate_netcdf_output_filename(nc=agg_dataset, facility_code=facility_code, data_code=data_code, VoI=var_to_agg, site_code=site_code, product_type=product_type, file_version=file_version)
-    ncout_path = os.path.join(base_path, ncout_filename)
+    ncout_path = os.path.join(output_dir, ncout_filename)
 
     encoding = {'TIME':                     {'_FillValue': False,
                                              'units': time_units,
@@ -469,10 +534,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Concatenate ONE variable from ALL instruments from ALL deployments from ONE site")
     parser.add_argument('-var', dest='varname', help='name of the variable to concatenate. Like TEMP, PSAL', required=True)
     parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
-    parser.add_argument('-files', dest='filenames', help='name of the file that contains the source URLs', required=True)
-    parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Defaul ./', default='./', required=False)
+    parser.add_argument('-files', dest='filenames',
+                        help='name of the file that contains the source URLs (relative to inpath, if given)',
+                        required=True)
+    parser.add_argument('-indir', dest='input_dir', help='base path of input files', default='', required=False)
+    parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default ./',
+                        default='./', required=False)
     args = parser.parse_args()
 
     files_to_aggregate = pd.read_csv(args.filenames, header=None)[0].tolist()
 
-    print(main_aggregator(files_to_agg=files_to_aggregate, var_to_agg=args.varname, site_code=args.site_code, base_path = args.output_path))
+    print(main_aggregator(files_to_agg=files_to_aggregate, var_to_agg=args.varname, site_code=args.site_code,
+                          input_dir=args.input_dir, output_dir=args.output_dir))

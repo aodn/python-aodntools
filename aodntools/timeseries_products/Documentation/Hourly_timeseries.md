@@ -1,14 +1,13 @@
 # Hourly Time Series Product (non-velocity)
 
-- [Output](#output)
-- [Scope](#scope)
-- [Output](#output)
+- [Objective](#objective)
+- [Input](#input)
 - [Method](#method)
-- [Distribution](#distribution)
+- [Output](#output)
 
 
 
-## Output
+## Objective
 
 The code will provide aggregated files for each IMOS mooring site parameters (excluding current velocity data) binned into one hour intervals, excluding out-of-water data and records not flagged as “good” or “probably good” in the input files. QC flags will not be included. Statistics related to the averaging process will be stored as variables (standard deviation, minimum and maximum values, number of records binned). A version of the product can be generated with the inclusion of the non quality controlled variables (qc flag 0 -- no_QC_performed).
 
@@ -60,8 +59,8 @@ The product will aggregate the following variables (standard/long name in bracke
 `PRES_REL`  (sea_water_pressure_due_to_sea_water);  
 `PSAL`  (sea_water_salinity);  
 `TEMP`  (sea_water_temperature);  
-`TURB`  (sea_water_turbidity).   
-
+`TURB`  (sea_water_turbidity);   
+`TURBF`  (sea_water_turbidity_in_FTU).
 
 Each Variable of Interest (VoI) is produced by selecting only the “good” and “probably good” data (QC flags 1 and 2), binning the values to a one-hour interval, and concatenating the resulting values into a single file. The resulting variables have dimension OBSERVATION. The VoI's ancillary_variables, in particular the corresponding quality-control flags, are not included. 
 

@@ -15,7 +15,7 @@ import pandas as pd
 
 from aodntools import __version__
 
-TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
+TEMPLATE_JSON = resource_filename(__name__, 'gridded_timeseries_template.json')
 
 
 def sort_files_to_aggregate(files_to_agg, input_dir=''):

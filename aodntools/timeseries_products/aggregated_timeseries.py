@@ -18,6 +18,7 @@ from aodntools import __version__
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
 
+
 def sort_files_to_aggregate(files_to_agg, input_dir=''):
     """
     sort the list of files to aggregate by time_deployment start attribute

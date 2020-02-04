@@ -189,6 +189,8 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
         'source_file':           file_name,
         'time_coverage_start':   pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat),
         'time_coverage_end':     pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat),
+        'geospatial_vertical_min': float(VoI_interpolated.DEPTH.min()),
+        'geospatial_vertical_max': float(VoI_interpolated.DEPTH.max()),
         'keywords':              ', '.join([VoI, 'DEPTH'] + ['HOURLY', 'GRIDDED']),
         'abstract':              global_attribute_dictionary['abstract'].format(VoI=VoI, site_code=site_code),
         'history':               VoI_interpolated.attrs['history'] + ' {today}: Gridded file created.'.format(today=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')),

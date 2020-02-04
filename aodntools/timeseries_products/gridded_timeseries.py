@@ -115,8 +115,10 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     ## create empty containers
     time_0 = pd.to_datetime('1950-01-01T00:00:00')
     time_min = nc.TIME.values.min()
-    depth_bin_len = len(depth_bins)
-    VoI_binned = xr.DataArray(np.full((depth_bin_len, 1), np.nan), coords=[depth_bins, [time_0]],
+    depth_bin_len = len(depth_bins)\
+
+    ## create empty containers for the interpolated values
+    VoI_temp = xr.DataArray(np.full((depth_bin_len, 1), np.nan), coords=[depth_bins, [time_0]],
                               dims=['DEPTH', 'TIME'])
     VoI_ndepths = xr.DataArray(np.full(1, 0), coords=[[time_0]], dims=['TIME'])
 
@@ -137,22 +139,23 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
             ## check for max separation
             depth_mask = get_depth_mask(depth_bins=depth_bins, depths=depth, max_separation=max_separation)
             ## do the interpolation
-            VoI_gridded = np.interp(depth_bins, depth, VoI_values, left=np.nan, right=np.nan)
+            interpolated_var = np.interp(depth_bins, depth, VoI_values, left=np.nan, right=np.nan)
             ## set masked depth bins to zero
-            VoI_gridded = VoI_gridded * depth_mask
-            VoI_gridded[VoI_gridded == 0] = np.nan
+            interpolated_var = interpolated_var * depth_mask
+            interpolated_var[interpolated_var == 0] = np.nan
 
         else:
-            VoI_gridded = np.full((depth_bin_len, 1), np.nan)
+            interpolated_var = np.full((depth_bin_len, 1), np.nan)
 
-        VoI_temp = xr.DataArray(VoI_gridded.reshape(depth_bin_len, 1), coords=[depth_bins, time],
+        VoI_temp_tmp = xr.DataArray(interpolated_var.reshape(depth_bin_len, 1), coords=[depth_bins, time],
                                 dims=['DEPTH', 'TIME'])
-        VoI_ndepths_temp = xr.DataArray([n_depths], coords=[time], dims=['TIME'])
+        VoI_ndepths_tmp = xr.DataArray([n_depths], coords=[time], dims=['TIME'])
 
-        VoI_binned = xr.concat([VoI_binned, VoI_temp], dim='TIME')
-        VoI_ndepths = xr.concat([VoI_ndepths, VoI_ndepths_temp], dim='TIME')
+        ## concatenate the interpolated values
+        VoI_temp = xr.concat([VoI_temp, VoI_temp_tmp], dim='TIME')
+        VoI_ndepths = xr.concat([VoI_ndepths, VoI_ndepths_tmp], dim='TIME')
 
-    VoI_interpolated = xr.Dataset({VoI: VoI_binned.astype(float),
+    VoI_interpolated = xr.Dataset({VoI: VoI_temp.astype(float),
                                    VoI + '_count': VoI_ndepths.astype(int)})
 
     ## drop the very first record as it is dummy

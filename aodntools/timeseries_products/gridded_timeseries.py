@@ -190,6 +190,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     VoI_interpolated.attrs.update({
         'file_version':          global_attribute_dictionary['file_version'],
         'source_file':           file_name,
+        'featureType':           global_attribute_dictionary['featureType'],
         'time_coverage_start':   pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat),
         'time_coverage_end':     pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat),
         'geospatial_vertical_min': float(VoI_interpolated.DEPTH.min()),
@@ -209,7 +210,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     ## create the output file name and write the aggregated product as netCDF
     facility_code = TStools.get_facility_code(file_name)
     data_code = TStools.get_data_code(VoI) + 'Z'
-    product_type = 'timeSeriesProfile'
+    product_type = 'gridded-timeseries'
     file_version = 2
     ncout_filename = TStools.generate_netcdf_output_filename(nc=VoI_interpolated, facility_code=facility_code,
                                                              data_code=data_code, VoI=VoI,

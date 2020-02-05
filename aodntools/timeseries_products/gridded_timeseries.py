@@ -116,7 +116,9 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     time_0 = pd.to_datetime('1950-01-01T00:00:00')
     time_min = nc.TIME.values.min()
     depth_bin_len = len(depth_bins)
-    VoI_binned = xr.DataArray(np.full((depth_bin_len, 1), np.nan), coords=[depth_bins, [time_0]],
+
+    ## create empty containers for the interpolated values
+    VoI_temp = xr.DataArray(np.full((depth_bin_len, 1), np.nan), coords=[depth_bins, [time_0]],
                               dims=['DEPTH', 'TIME'])
     VoI_ndepths = xr.DataArray(np.full(1, 0), coords=[[time_0]], dims=['TIME'])
 
@@ -124,8 +126,8 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     VoI_grouped = nc.groupby('TIME')
 
 
-    for timestamp, (name, group) in enumerate(VoI_grouped):
-        time = [name]
+    for timestamp, group in VoI_grouped:
+        time = [timestamp]
         n_depths = int(len(group[VoI]))
 
         if n_depths >= 2:
@@ -137,24 +139,23 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
             ## check for max separation
             depth_mask = get_depth_mask(depth_bins=depth_bins, depths=depth, max_separation=max_separation)
             ## do the interpolation
-            # import pdb
-            # pdb.set_trace()
-            VoI_gridded = np.interp(depth_bins, depth, VoI_values, left=np.nan, right=np.nan)
+            interpolated_var = np.interp(depth_bins, depth, VoI_values, left=np.nan, right=np.nan)
             ## set masked depth bins to zero
-            VoI_gridded = VoI_gridded * depth_mask
-            VoI_gridded[VoI_gridded == 0] = np.nan
+            interpolated_var = interpolated_var * depth_mask
+            interpolated_var[interpolated_var == 0] = np.nan
 
         else:
-            VoI_gridded = np.full((depth_bin_len, 1), np.nan)
+            interpolated_var = np.full((depth_bin_len, 1), np.nan)
 
-        VoI_temp = xr.DataArray(VoI_gridded.reshape(depth_bin_len, 1), coords=[depth_bins, time],
+        VoI_temp_tmp = xr.DataArray(interpolated_var.reshape(depth_bin_len, 1), coords=[depth_bins, time],
                                 dims=['DEPTH', 'TIME'])
-        VoI_ndepths_temp = xr.DataArray([n_depths], coords=[time], dims=['TIME'])
+        VoI_ndepths_tmp = xr.DataArray([n_depths], coords=[time], dims=['TIME'])
 
-        VoI_binned = xr.concat([VoI_binned, VoI_temp], dim='TIME')
-        VoI_ndepths = xr.concat([VoI_ndepths, VoI_ndepths_temp], dim='TIME')
+        ## concatenate the interpolated values
+        VoI_temp = xr.concat([VoI_temp, VoI_temp_tmp], dim='TIME')
+        VoI_ndepths = xr.concat([VoI_ndepths, VoI_ndepths_tmp], dim='TIME')
 
-    VoI_interpolated = xr.Dataset({VoI: VoI_binned.astype(float),
+    VoI_interpolated = xr.Dataset({VoI: VoI_temp.astype(float),
                                    VoI + '_count': VoI_ndepths.astype(int)})
 
     ## drop the very first record as it is dummy
@@ -185,21 +186,27 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
 
     ## set global attributes
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
+    date_start = pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat)
+    date_end = pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat)
     VoI_interpolated.attrs.update(global_attributes)
-    VoI_interpolated.attrs.update({'file_version':          global_attribute_dictionary['file_version'],
-                                   'source_file':           file_name,
-                                   'time_coverage_start':   pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat),
-                                   'time_coverage_end':     pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat),
-                                   'keywords':              ', '.join([VoI, 'DEPTH'] + ['HOURLY', 'GRIDDED']),
-                                   'abstract':              global_attribute_dictionary['abstract'].format(VoI=VoI, site_code=site_code),
-                                   'history':               VoI_interpolated.attrs['history'] + ' {today}: Gridded file created.'.format(today=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')),
-                                   'lineage':               global_attribute_dictionary['lineage'],
-                                   'title':                 global_attribute_dictionary['title'].format(VoI=VoI,
-                                                                                                site_code=site_code,
-                                                                                                time_min=pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat),
-                                                                                                time_max=pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat),
-                                                                                                depth_min=min(depth_bins),
-                                                                                                depth_max = max(depth_bins))})
+    VoI_interpolated.attrs.update({
+        'file_version':          global_attribute_dictionary['file_version'],
+        'source_file':           file_name,
+        'featureType':           global_attribute_dictionary['featureType'],
+        'time_coverage_start':   date_start,
+        'time_coverage_end':     date_end,
+        'geospatial_vertical_min': min(depth_bins),
+        'geospatial_vertical_max': max(depth_bins),
+        'keywords':              ', '.join([VoI, 'DEPTH'] + ['HOURLY', 'GRIDDED']),
+        'abstract':              global_attribute_dictionary['abstract'].format(VoI=VoI, site_code=site_code),
+        'history':               VoI_interpolated.attrs['history'] + ' {today}: Gridded file created.'.format(today=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')),
+        'lineage':               global_attribute_dictionary['lineage'],
+        'title':                 global_attribute_dictionary['title'].format(VoI=VoI,
+                                                                    site_code=site_code,
+                                                                    time_min=date_start,
+                                                                    time_max=date_end,
+                                                                    depth_min=min(depth_bins),
+                                                                    depth_max = max(depth_bins))})
     VoI_interpolated.attrs = sorted(VoI_interpolated.attrs.items())
 
     ## create the output file name and write the aggregated product as netCDF
@@ -247,7 +254,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.config_file:
-        with open(config_file) as ff:
+        with open(args.config_file) as ff:
             arguments = json.load(ff)
         VoI = arguments['var']
         depth_bins = arguments['depth_bins']

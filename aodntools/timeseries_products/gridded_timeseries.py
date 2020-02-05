@@ -115,7 +115,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     ## create empty containers
     time_0 = pd.to_datetime('1950-01-01T00:00:00')
     time_min = nc.TIME.values.min()
-    depth_bin_len = len(depth_bins)\
+    depth_bin_len = len(depth_bins)
 
     ## create empty containers for the interpolated values
     VoI_temp = xr.DataArray(np.full((depth_bin_len, 1), np.nan), coords=[depth_bins, [time_0]],

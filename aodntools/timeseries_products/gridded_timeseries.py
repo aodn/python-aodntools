@@ -186,23 +186,25 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
 
     ## set global attributes
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
+    date_start = pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat)
+    date_end = pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat)
     VoI_interpolated.attrs.update(global_attributes)
     VoI_interpolated.attrs.update({
         'file_version':          global_attribute_dictionary['file_version'],
         'source_file':           file_name,
         'featureType':           global_attribute_dictionary['featureType'],
-        'time_coverage_start':   pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat),
-        'time_coverage_end':     pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat),
-        'geospatial_vertical_min': float(VoI_interpolated.DEPTH.min()),
-        'geospatial_vertical_max': float(VoI_interpolated.DEPTH.max()),
+        'time_coverage_start':   date_start,
+        'time_coverage_end':     date_end,
+        'geospatial_vertical_min': min(depth_bins),
+        'geospatial_vertical_max': max(depth_bins),
         'keywords':              ', '.join([VoI, 'DEPTH'] + ['HOURLY', 'GRIDDED']),
         'abstract':              global_attribute_dictionary['abstract'].format(VoI=VoI, site_code=site_code),
         'history':               VoI_interpolated.attrs['history'] + ' {today}: Gridded file created.'.format(today=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')),
         'lineage':               global_attribute_dictionary['lineage'],
         'title':                 global_attribute_dictionary['title'].format(VoI=VoI,
                                                                     site_code=site_code,
-                                                                    time_min=pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat),
-                                                                    time_max=pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat),
+                                                                    time_min=date_start,
+                                                                    time_max=date_end,
                                                                     depth_min=min(depth_bins),
                                                                     depth_max = max(depth_bins))})
     VoI_interpolated.attrs = sorted(VoI_interpolated.attrs.items())

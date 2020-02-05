@@ -1,5 +1,6 @@
 import os
 import sys
+import uuid
 import netCDF4 as nc4
 import numpy as np
 import json
@@ -13,16 +14,15 @@ import aggregated_timeseries as TStools
 TEMPLATE_JSON = 'velocity_aggregated_timeseries_template.json'
 
 
-def sort_files(files_to_agg):
+def sorted_files(file_list):
     """
     sort list of files according to deployment date
-    requires netcdf4 as nc4, dateutil.parser as parse
-    :param files_to_agg: List of files to sort
+    :param file_list: List of files to sort
     :return: sorted list of files
     """
 
     time_start = []
-    for file in files_to_agg:
+    for file in file_list:
         with nc4.Dataset(file, 'r') as ds:
             time_start.append(np.datetime64(ds.time_deployment_start))
     tuples = sorted(zip(time_start, files_to_agg))
@@ -51,9 +51,8 @@ def check_file(nc, site_code):
     required_variables = ['UCUR', 'VCUR', 'WCUR']
     error_list = []
 
-    nc_site_code = nc.site_code
-    if nc_site_code != site_code:
-        error_list.append('Wrong site_code: ' + nc_site_code)
+    if nc.site_code != site_code:
+        error_list.append('Wrong site_code: ' + nc.site_code)
 
     nc_file_version = nc.file_version
     if 'Level 1' not in nc_file_version:
@@ -80,22 +79,22 @@ def check_file(nc, site_code):
     return error_list
 
 
-def get_nvalues(nc):
+def get_number_flatvalues(nc):
     """
-    Get the number of cells above the sensor
+    Get the number of flatten values and the number of cells above the sensor
     :param nc: xarray dataset
-    :return: number of cells, number of bins
+    :return: number of values, number of cells above the sensor
     """
     if 'HEIGHT_ABOVE_SENSOR' in nc.dims:
-        nbins = nc.dims['HEIGHT_ABOVE_SENSOR']
-        nvalues = nc.dims['TIME'] * nbins
+        n_cells = nc.dims['HEIGHT_ABOVE_SENSOR']
+        n_flatt_values = nc.dims['TIME'] * n_cells
     else:
-        nbins = 1
-        nvalues = nc.dims['TIME']
-    return nvalues, nbins
+        n_cells = 1
+        n_flatt_values = nc.dims['TIME']
+    return n_flatt_values, n_cells
 
 
-def get_varvalues(nc, varname):
+def flat_variable(nc, varname):
     """
     Return a 1D array of 2D values
     :param nc: dataset
@@ -116,7 +115,7 @@ def get_instrumentID(nc):
 
 def in_water(nc):
     """
-    cut data to in-water only timestamps, dropping the out-of-water records.
+    cut data the entire dataset to in-water only timestamps, dropping the out-of-water records.
     :param nc: xarray dataset
     :return: xarray dataset
     """
@@ -152,10 +151,10 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
     rejected_files = []
 
     # default name for temporary file. It will be renamed at the end
-    outfile = 'Velocity_agg_tmp.nc'
+    outfile = str(uuid.uuid4().hex) + '.nc'
 
     ## sort the file list in chronological order
-    files_to_agg = sort_files(files_to_agg)
+    files_to_agg = sorted_files(files_to_agg)
 
     ## check files and get total number of flattened obs
     for file in files_to_agg:
@@ -163,10 +162,10 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
             ## clip to in water data only
             nc = in_water(nc)
 
-            varlen_file.append(get_nvalues(nc))
+            varlen_file.append(get_number_flatvalues(nc))
             error_list = check_file(nc, site_code)
             if not error_list:
-                varlen_list.append(get_nvalues(nc)[0])
+                varlen_list.append(get_number_flatvalues(nc)[0])
             else:
                 bad_files.append([file, error_list])
                 rejected_files.append(file)
@@ -213,14 +212,14 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
 
             start = sum(varlen_list[:index + 1])
             end = sum(varlen_list[:index + 2])
-            n_cells = get_nvalues(nc)[1]
-            UCUR[start:end] = get_varvalues(nc, 'UCUR')
-            UCURqc[start:end] = get_varvalues(nc, 'UCUR_quality_control')
-            VCUR[start:end] = get_varvalues(nc, 'VCUR')
-            VCURqc[start:end] = get_varvalues(nc, 'VCUR_quality_control')
+            n_cells = get_number_flatvalues(nc)[1]
+            UCUR[start:end] = flat_variable(nc, 'UCUR')
+            UCURqc[start:end] = flat_variable(nc, 'UCUR_quality_control')
+            VCUR[start:end] = flat_variable(nc, 'VCUR')
+            VCURqc[start:end] = flat_variable(nc, 'VCUR_quality_control')
             if 'WCUR' in nc.data_vars:
-                WCUR[start:end] = get_varvalues(nc, 'WCUR')
-                WCURqc[start:end] = get_varvalues(nc, 'WCUR_quality_control')
+                WCUR[start:end] = flat_variable(nc, 'WCUR')
+                WCURqc[start:end] = flat_variable(nc, 'WCUR_quality_control')
             else:
                 WCUR[start:end] = np.full(varlen_list[index], np.nan)
                 WCURqc[start:end] = np.full(varlen_list[index], np.nan)
@@ -232,7 +231,7 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
                 DEPTH[start:end] = nc.DEPTH.values
                 DEPTHqc[start:end] = nc.DEPTH_quality_control.values
             ## set TIME and instrument index
-            TIME[start:end] = (np.repeat(get_varvalues(nc, 'TIME'), n_cells) - epoch) / one_day
+            TIME[start:end] = (np.repeat(flat_variable(nc, 'TIME'), n_cells) - epoch) / one_day
             instrument_index[start:end] = np.repeat(index, varlen_list[index + 1])
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values

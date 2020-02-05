@@ -46,6 +46,7 @@
             "_FillValue": 999999.0,
             "long_name": "sea_water_temperature",
             "standard_name": "sea_water_temperature",
+            "cell_methods": "TIME:median DEPTH: point",
             "units": "degrees_Celsius",
             "valid_max": 40.0,
             "valid_min": -2.5

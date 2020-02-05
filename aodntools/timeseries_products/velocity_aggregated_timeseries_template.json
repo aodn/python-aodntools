@@ -153,7 +153,7 @@
         "data_centre": "Australian Ocean Data Network (AODN)",
         "data_centre_email": "info@aodn.org.au",
         "disclaimer": "Data, products and services from IMOS are provided \"as is\" without any warranty as to fitness for a particular purpose.",
-        "feature_type": "timeSeries",
+        "featureType": "timeSeries",
         "file_version": "Level 1 - Quality Controlled Data",
         "file_version_quality_control": "Quality controlled data have been through quality assurance procedures such as automated routines and sensor calibration or visual inspection and flag of obvious errors. The data are in physical units using standard SI metric units with calibration and other pre-processing routines applied, all time and location values are in absolute coordinates to comply with standards and datum. Data includes flags for each measurement to indicate the estimated quality of the measurement. Metadata exists for the data or for the higher level dataset that the data belongs to. This is the standard IMOS data level and is what should be made available to AODN and to the IMOS community.",
         "institution_references": "http://imos.org.au/facilities/aodn/",

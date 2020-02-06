@@ -6,12 +6,14 @@ import numpy as np
 import json
 from datetime import datetime
 import argparse
+from pkg_resources import resource_filename
+from aodntools import __version__
 
 import xarray as xr
 
 import aggregated_timeseries as TStools
 
-TEMPLATE_JSON = 'velocity_aggregated_timeseries_template.json'
+TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
 
 
 def sorted_files(file_list):

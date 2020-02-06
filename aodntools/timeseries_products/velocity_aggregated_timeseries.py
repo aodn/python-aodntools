@@ -225,7 +225,7 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
                 WCURqc[start:end] = np.full(varlen_list[index], np.nan)
             ##calculate depth
             if 'HEIGHT_ABOVE_SENSOR' in nc.dims:
-                DEPTH[start:end] = (nc.DEPTH + nc.HEIGHT_ABOVE_SENSOR.T).values.flatten()
+                DEPTH[start:end] = (nc.DEPTH - nc.HEIGHT_ABOVE_SENSOR.T).values.flatten()
                 DEPTHqc[start:end] = np.array(n_cells * [nc.DEPTH_quality_control.values]).flatten()
             else:
                 DEPTH[start:end] = nc.DEPTH.values

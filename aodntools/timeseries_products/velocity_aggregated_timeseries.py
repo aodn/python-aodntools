@@ -203,6 +203,7 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
     LATITUDE = ds.createVariable(varname='LATITUDE', datatype='float', dimensions=("INSTRUMENT"))
     LONGITUDE = ds.createVariable(varname='LONGITUDE', datatype='float', dimensions=("INSTRUMENT"))
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', datatype='float', dimensions=('INSTRUMENT'))
+    SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', datatype='float', dimensions=('INSTRUMENT'))
 
     ## main loop
     for index, file in enumerate(files_to_agg):
@@ -241,6 +242,11 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
             NOMINAL_DEPTH[index] = TStools.get_nominal_depth(nc)
             source_file[index] = file
             instrument_id[index] = get_instrumentID(nc)
+            ## add time offset to the middle of the measuring window, if it exists
+            if 'seconds_to_middle_of_measurement' in nc.TIME.attrs:
+                SECONDS_TO_MIDDLE[index] = nc.TIME.seconds_to_middle_of_measurement
+            else:
+                SECONDS_TO_MIDDLE[index] = np.nan
 
     ## add atributes
     with open(TEMPLATE_JSON) as json_file:

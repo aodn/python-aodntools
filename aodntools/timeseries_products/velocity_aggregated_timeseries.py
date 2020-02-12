@@ -187,23 +187,31 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
     OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
 
-    UCUR = ds.createVariable(varname='UCUR', datatype='float', zlib=True, dimensions=('OBSERVATION'), fill_value=999999.0)
-    VCUR = ds.createVariable(varname='VCUR', datatype='float', zlib=True, dimensions=('OBSERVATION'), fill_value=999999.0)
-    WCUR = ds.createVariable(varname='WCUR', datatype='float', zlib=True, dimensions=('OBSERVATION'), fill_value=999999.0)
-    DEPTH = ds.createVariable(varname='DEPTH', datatype='float', zlib=True, dimensions=('OBSERVATION'), fill_value=999999.0)
-    UCURqc = ds.createVariable(varname='UCUR_quality_control', datatype='byte', zlib=True, dimensions=('OBSERVATION'), fill_value=99)
-    VCURqc = ds.createVariable(varname='VCUR_quality_control', datatype='byte', zlib=True, dimensions=('OBSERVATION'), fill_value=99)
-    WCURqc = ds.createVariable(varname='WCUR_quality_control', datatype='byte', zlib=True, dimensions=('OBSERVATION'), fill_value=99)
-    DEPTHqc = ds.createVariable(varname='DEPTH_quality_control', datatype='byte', zlib=True, dimensions=('OBSERVATION'), fill_value=99)
-    TIME = ds.createVariable(varname='TIME', datatype='double', zlib=True, dimensions=('OBSERVATION'))
-    instrument_index = ds.createVariable(varname='instrument_index', datatype='int', zlib=True, dimensions=('OBSERVATION'))
+    obs_float_template = {'datatype': 'float', 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
+    obs_byte_template = {'datatype': 'byte', 'zlib': True, 'dimensions': ('OBSERVATION'), 'fill_value': 99}
+    obs_int_template = {'datatype': 'int', 'zlib': True, 'dimensions': ('OBSERVATION')}
+    inst_S256_template = {'datatype': 'S256', 'dimensions': ('INSTRUMENT')}
+    inst_float_template ={'datatype': 'float', 'dimensions': ('INSTRUMENT')}
 
-    source_file = ds.createVariable(varname='source_file', datatype='S256', dimensions=('INSTRUMENT'))
-    instrument_id = ds.createVariable(varname='instrument_id', datatype='S256', dimensions=('INSTRUMENT'))
-    LATITUDE = ds.createVariable(varname='LATITUDE', datatype='float', dimensions=("INSTRUMENT"))
-    LONGITUDE = ds.createVariable(varname='LONGITUDE', datatype='float', dimensions=("INSTRUMENT"))
-    NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', datatype='float', dimensions=('INSTRUMENT'))
-    SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', datatype='float', dimensions=('INSTRUMENT'))
+
+
+    UCUR = ds.createVariable(varname='UCUR', **obs_float_template)
+    VCUR = ds.createVariable(varname='VCUR', **obs_float_template)
+    WCUR = ds.createVariable(varname='WCUR', **obs_float_template)
+    DEPTH = ds.createVariable(varname='DEPTH', **obs_float_template)
+    UCURqc = ds.createVariable(varname='UCUR_quality_control', **obs_byte_template)
+    VCURqc = ds.createVariable(varname='VCUR_quality_control', **obs_byte_template)
+    WCURqc = ds.createVariable(varname='WCUR_quality_control', **obs_byte_template)
+    DEPTHqc = ds.createVariable(varname='DEPTH_quality_control', **obs_byte_template)
+    TIME = ds.createVariable(varname='TIME', **obs_float_template)
+    instrument_index = ds.createVariable(varname='instrument_index', **obs_int_template)
+
+    source_file = ds.createVariable(varname='source_file', **inst_S256_template)
+    instrument_id = ds.createVariable(varname='instrument_id', **inst_S256_template)
+    LATITUDE = ds.createVariable(varname='LATITUDE', **inst_float_template)
+    LONGITUDE = ds.createVariable(varname='LONGITUDE', **inst_float_template)
+    NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
+    SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
 
     ## main loop
     for index, file in enumerate(files_to_agg):

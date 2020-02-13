@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import uuid
@@ -6,12 +8,14 @@ import numpy as np
 import json
 from datetime import datetime
 import argparse
+from pkg_resources import resource_filename
 
 import xarray as xr
 
-import aggregated_timeseries as TStools
+from aodntools import __version__
+import aodntools.timeseries_products.aggregated_timeseries as TStools
 
-TEMPLATE_JSON = 'aggregated_timeseries_template_NC4.json'
+TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
 
 def sort_files(files_to_agg):

@@ -6,6 +6,7 @@ import unittest
 from netCDF4 import Dataset, chartostring
 
 from test_aodntools.base_test import BaseTestCase
+from aodntools import __version__
 from aodntools.timeseries_products.hourly_timeseries import hourly_aggregator
 
 
@@ -59,6 +60,12 @@ class TestHourlyTimeseries(BaseTestCase):
 
         for f in chartostring(dataset['source_file'][:]):
             self.assertIn(f, INPUT_PATHS)
+
+        # check metadata
+        self.assertEqual(__version__, dataset.generating_code_version)
+        self.assertIn(__version__, dataset.lineage)
+        self.assertIn('hourly_timeseries.py', dataset.lineage)
+        self.assertIn(BAD_FILE, dataset.rejected_files)
 
     def test_hourly_aggregator_with_nonqc(self):
         output_file, bad_files = hourly_aggregator(files_to_aggregate=INPUT_FILES,

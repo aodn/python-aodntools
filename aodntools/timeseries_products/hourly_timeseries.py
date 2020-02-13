@@ -11,6 +11,8 @@ import pandas as pd
 import xarray as xr
 from dateutil.parser import parse
 from pkg_resources import resource_filename
+
+from aodntools import __version__
 from aodntools.timeseries_products.aggregated_timeseries import get_contributors, source_file_attributes
 
 
@@ -543,7 +545,9 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
                      'contributor_email': "; ".join(contributor_email),
                      'contributor_role': "; ".join(contributor_role),
                      'rejected_files': "\n".join(list(bad_files)),
-                     'included_values_flagged_as':  ", ".join([qcflags_names[flag] for flag in qcflags])}
+                     'included_values_flagged_as':  ", ".join([qcflags_names[flag] for flag in qcflags]),
+                     'generating_code_version': __version__
+                     }
     nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
     nc_aggregated.attrs['abstract'] = nc_aggregated.attrs['abstract'].format(
         site_code=site_code,
@@ -552,6 +556,10 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
     if 0 in qcflags:
         nc_aggregated.attrs['lineage'] += ('The percentage of quality controlled values used in the aggregation is '
                                            'indicated in the percent_quality_controlled variable attribute.')
+    github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
+                      '{v}/aodntools/timeseries_products/hourly_timeseries.py'.format(v=__version__)
+                      )
+    nc_aggregated.attrs['lineage'] += github_comment
 
     ## add variable attributes
     variablenames_others = ['TIME', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH',

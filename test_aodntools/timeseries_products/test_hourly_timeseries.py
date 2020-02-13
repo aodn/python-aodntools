@@ -39,12 +39,9 @@ class TestHourlyTimeseries(BaseTestCase):
                                                    qcflags=(1, 2),
                                                    file_path='/tmp'
                                                    )
-        print('Output file:', output_file)
-        print('Bad files:', bad_files)
-
-        self.assertRegexpMatches(output_file,
-                                 r'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-\d{8}\.nc'
-                                 )
+        self.assertRegex(output_file,
+                         r'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-\d{8}\.nc'
+                         )
 
         self.assertEqual(1, len(bad_files))
         for path, errors in bad_files.items():
@@ -66,13 +63,10 @@ class TestHourlyTimeseries(BaseTestCase):
                                                    qcflags=(0, 1, 2),
                                                    file_path='/tmp'
                                                    )
-        print('Output file:', output_file)
-        print('Bad files:', bad_files)
-
-        self.assertRegexpMatches(output_file,
-                                 r'IMOS_ANMN-NRS_BOSTUZ_20181213_NRSROT_FV02_hourly-timeseries-including-non-QC'
-                                 r'_END-20190523_C-\d{8}\.nc'
-                                 )
+        self.assertRegex(output_file,
+                         r'IMOS_ANMN-NRS_BOSTUZ_20181213_NRSROT_FV02_hourly-timeseries-including-non-QC'
+                         r'_END-20190523_C-\d{8}\.nc'
+                         )
 
 
 if __name__ == '__main__':

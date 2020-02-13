@@ -11,20 +11,21 @@ import pandas as pd
 import xarray as xr
 from dateutil.parser import parse
 from pkg_resources import resource_filename
-from aodntools.timeseries_products.aggregated_timeseries import get_contributors
+from aodntools.timeseries_products.aggregated_timeseries import get_contributors, source_file_attributes
 
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
 BINNING_METHOD_JSON = resource_filename(__name__, 'binning_method.json')
 
 
-def check_files(file_list, site_code, parameter_names_accepted):
+def check_files(file_list, site_code, parameter_names_accepted, input_dir=''):
     """
     Return a chronologically sorted file_list and a dictionary if the file fails one or more of the tests
 
     :param file_list: list or file URLs
     :param site_code: code of the mooring site
     :param parameter_names_accepted: list of names of accepted parameters
+    :param input_dir: base path where source files are stored
     :return: dictionary with the file name and list of failed tests, list good files chronologically ordered
     """
 
@@ -34,7 +35,7 @@ def check_files(file_list, site_code, parameter_names_accepted):
 
     for file_index, file in enumerate(file_list):
 
-        with xr.open_dataset(file) as nc:
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             attributes = list(nc.attrs)
             variables = list(nc.variables)
             allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE']
@@ -414,15 +415,20 @@ def PDresample_by_hour(df, function_dict, function_stats):
 
 
 ### MAIN FUNCTION
-def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
+def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', output_dir='./',
+                      download_url_prefix=None, opendap_url_prefix=None):
     """
     Aggregate a dataset into 1 hour intervals and calculate related statistics
 
-    :param files_to_aggregate: list of file URLs
+    :param files_to_aggregate: List of files to aggregate. Each path is interpreted relative
+    to input_dir (if specified). These paths are listed in the `source_files` variable in the output file.
     :param site_code: code of the mooring site
     :param qcflags: list of QCflags indicating what values of the variables to keep
-    :param file_path: path to save the output file
-    :return: str path of hte resulting aggregated file
+    :param input_dir: base path where source files are stored
+    :param output_dir: path where the result file will be written
+    :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_aggregate)
+    :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_aggregate)
+    :return: tuple (path of the output file, dict of rejected files and error messages)
     """
 
     parameter_names_accepted = ['DEPTH', 'CPHL', 'CHLF', 'CHLU', 'DOX', 'DOX1', 'DOX1_2', 'DOX1_3', 'DOX2',
@@ -437,7 +443,8 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     qcflags = sorted(qcflags)
 
     # Check files and sort chronologically
-    files_to_aggregate, bad_files = check_files(files_to_aggregate, site_code, parameter_names_accepted)
+    files_to_aggregate, bad_files = check_files(files_to_aggregate, site_code, parameter_names_accepted,
+                                                input_dir=input_dir)
 
     ## get binning function dictionary
     with open(BINNING_METHOD_JSON) as json_file:
@@ -466,7 +473,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
     for file_index, file in enumerate(files_to_aggregate):
         print(file_index)
-        with xr.open_dataset(file, mask_and_scale=True, decode_times=True) as nc:
+        with xr.open_dataset(os.path.join(input_dir, file), mask_and_scale=True, decode_times=True) as nc:
             parameter_names = list(set(list(nc.variables)) & set(parameter_names_accepted))
             parameter_names_all += parameter_names
 
@@ -531,7 +538,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     nc_aggregated = nc_aggregated.drop('OBSERVATION')
 
     ## add global attributes
-    contributor_name, contributor_email, contributor_role = get_contributors(files_to_aggregate)
+    contributor_name, contributor_email, contributor_role = get_contributors(files_to_aggregate, input_dir=input_dir)
     add_attribute = {'contributor_name': "; ".join(contributor_name),
                      'contributor_email': "; ".join(contributor_email),
                      'contributor_role': "; ".join(contributor_role),
@@ -552,6 +559,8 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     parameter_names_all = list(set(parameter_names_all))
     variable_attributes = variable_attribute_dictionary
     variable_attributes['PRES_REL'].update({'applied_offset_by_instrument': applied_offset})
+    if download_url_prefix or opendap_url_prefix:
+        variable_attributes['source_file'].update(source_file_attributes(download_url_prefix, opendap_url_prefix))
 
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')
@@ -605,7 +614,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
 
 
     ## create the output file name and write the aggregated product as netCDF
-    facility_code = get_facility_code(files_to_aggregate[0])
+    facility_code = get_facility_code(os.path.join(input_dir, files_to_aggregate[0]))
     data_code = "".join(sorted(set(get_data_code(p) for p in parameter_names_all)))
     if 0 in qcflags:
         product_type = 'hourly-timeseries-including-non-QC'
@@ -615,7 +624,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, file_path ='./'):
     ncout_filename = generate_netcdf_output_filename(nc=nc_aggregated, facility_code=facility_code, data_code=data_code,
                                                      site_code=site_code,
                                                      product_type=product_type, file_version=file_version)
-    ncout_path = os.path.join(file_path, ncout_filename)
+    ncout_path = os.path.join(output_dir, ncout_filename)
     write_netCDF_aggfile(nc_aggregated, ncout_path, encoding)
 
 
@@ -628,11 +637,14 @@ if __name__ == "__main__":
     parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
     parser.add_argument('-files', dest='filenames', help='name of the file that contains the source URLs', required=True)
     parser.add_argument('-qc', dest='qcflags', help='list of QC flags to select variable values to keep', nargs='+', required=True)
-    parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default ./', default='./', required=False)
+    parser.add_argument('-indir', dest='input_dir', help='base path of input files', default='', required=False)
+    parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default ./',
+                        default='./', required=False)
     args = parser.parse_args()
 
     with open(args.filenames, 'r') as file:
         files_to_aggregate = [i.strip() for i in file.readlines()]
     qcflags = [int(i) for i in args.qcflags]
 
-    hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, qcflags=qcflags, file_path=args.output_path)
+    hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, qcflags=qcflags,
+                      input_dir=args.input_dir, output_dir=args.output_path)

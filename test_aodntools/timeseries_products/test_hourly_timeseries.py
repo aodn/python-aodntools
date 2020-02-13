@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from netCDF4 import Dataset
+from netCDF4 import Dataset, chartostring
 
 from test_aodntools.base_test import BaseTestCase
 from aodntools.timeseries_products.hourly_timeseries import hourly_aggregator
@@ -37,7 +37,7 @@ class TestHourlyTimeseries(BaseTestCase):
         output_file, bad_files = hourly_aggregator(files_to_aggregate=INPUT_PATHS,
                                                    site_code='NRSROT',
                                                    qcflags=(1, 2),
-                                                   file_path='/tmp'
+                                                   output_dir='/tmp'
                                                    )
         self.assertRegex(output_file,
                          r'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-\d{8}\.nc'
@@ -57,16 +57,28 @@ class TestHourlyTimeseries(BaseTestCase):
         obs_variables = {n for n, v in dataset.variables.items() if v.dimensions == ('OBSERVATION',)}
         self.assertTrue(obs_variables.issubset(OBS_VARIABLES))
 
+        for f in chartostring(dataset['source_file'][:]):
+            self.assertIn(f, INPUT_PATHS)
+
     def test_hourly_aggregator_with_nonqc(self):
-        output_file, bad_files = hourly_aggregator(files_to_aggregate=INPUT_PATHS,
+        output_file, bad_files = hourly_aggregator(files_to_aggregate=INPUT_FILES,
                                                    site_code='NRSROT',
                                                    qcflags=(0, 1, 2),
-                                                   file_path='/tmp'
+                                                   input_dir=TEST_ROOT,
+                                                   output_dir='/tmp',
+                                                   download_url_prefix='http://test.download.url',
+                                                   opendap_url_prefix='http://test.opendap.url'
                                                    )
         self.assertRegex(output_file,
                          r'IMOS_ANMN-NRS_BOSTUZ_20181213_NRSROT_FV02_hourly-timeseries-including-non-QC'
                          r'_END-20190523_C-\d{8}\.nc'
                          )
+
+        dataset = Dataset(output_file)
+        self.assertEqual(dataset['source_file'].download_url_prefix, 'http://test.download.url')
+        self.assertEqual(dataset['source_file'].opendap_url_prefix, 'http://test.opendap.url')
+        for f in chartostring(dataset['source_file'][:]):
+            self.assertIn(f, INPUT_FILES)
 
 
 if __name__ == '__main__':

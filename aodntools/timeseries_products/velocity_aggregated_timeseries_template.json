@@ -99,7 +99,7 @@
             },
         "UCUR": {
             "ancillary_variables": "UCUR_quality_control",
-            "coordinates": "TIME DEPTH",
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
             "long_name": "eastward_sea_water_velocity",
             "standard_name": "eastward_sea_water_velocity",
             "units": "m s-1",
@@ -108,7 +108,7 @@
             },
         "VCUR": {
             "ancillary_variables": "VCUR_quality_control",
-            "coordinates": "TIME DEPTH",
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
             "long_name": "northward_sea_water_velocity",
             "standard_name": "northward_sea_water_velocity",
             "units": "m s-1",
@@ -117,7 +117,7 @@
             },
         "WCUR": {
             "ancillary_variables": "WCUR_quality_control",
-            "coordinates": "TIME DEPTH",
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
             "long_name": "upward_sea_water_velocity",
             "standard_name": "upward_sea_water_velocity",
             "units": "m s-1",

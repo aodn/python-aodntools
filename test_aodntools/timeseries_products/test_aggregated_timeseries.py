@@ -33,7 +33,7 @@ class TestAggregatedTimeseries(BaseTestCase):
         dataset = Dataset(output_file)
 
         # check dimensions and variables
-        self.assertSetEqual(set(dataset.dimensions), {'OBSERVATION', 'INSTRUMENT', 'string256'})
+        self.assertSetEqual(set(dataset.dimensions), {'OBSERVATION', 'INSTRUMENT'})
         self.assertSetEqual(set(dataset.variables.keys()),
                             {'TIME', 'LATITUDE', 'LONGITUDE', 'NOMINAL_DEPTH', 'DEPTH', 'DEPTH_quality_control',
                              'PRES', 'PRES_quality_control', 'PRES_REL', 'PRES_REL_quality_control',
@@ -45,7 +45,7 @@ class TestAggregatedTimeseries(BaseTestCase):
         for var in obs_vars:
             self.assertEqual(dataset.variables[var].dimensions, ('OBSERVATION',))
 
-        for f in chartostring(dataset['source_file'][:]):
+        for f in dataset['source_file'][:]:
             self.assertIn(f, INPUT_FILES)
 
         # check attributes

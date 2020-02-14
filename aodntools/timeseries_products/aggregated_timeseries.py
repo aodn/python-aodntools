@@ -295,16 +295,12 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     ds = Dataset(os.path.join(output_dir, outfile), 'w')
     OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
-    #STRING256 = ds.createDimension('string256', size=256)
-
 
     obs_float_template = {'datatype': 'float', 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
     obs_byte_template = {'datatype': 'byte', 'zlib': True, 'dimensions': ('OBSERVATION'), 'fill_value': 99}
     obs_int_template = {'datatype': 'int', 'zlib': True, 'dimensions': ('OBSERVATION')}
     inst_S256_template = {'datatype': 'S256', 'dimensions': ('INSTRUMENT')}
     inst_float_template ={'datatype': 'float', 'dimensions': ('INSTRUMENT'), "fill_value": 99999.0}
-
-
 
     agg_variable = ds.createVariable(varname=var_to_agg, **obs_float_template)
     agg_variable_qc = ds.createVariable(varname=var_to_agg + '_quality_control', **obs_byte_template)
@@ -395,12 +391,10 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
                       '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)
                       )
     global_attribute_dictionary['lineage'] += github_comment
-
     global_attribute_dictionary.update(add_attribute)
     ds.setncatts(dict(sorted(global_attribute_dictionary.items())))
 
     ds.close()
-
 
     ## create the output file name and rename the tmp file
     facility_code = get_facility_code(os.path.join(input_dir, files_to_agg[0]))

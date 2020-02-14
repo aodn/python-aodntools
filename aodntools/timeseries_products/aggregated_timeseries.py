@@ -28,8 +28,6 @@ def sort_files(files_to_agg, input_dir=''):
 
     time_start = []
     for file in files_to_agg:
-        #print(file)
-        print('.', end='', flush=True)
         with Dataset(os.path.join(input_dir, file)) as ds:
             time_start.append(np.datetime64(ds.time_deployment_start))
     tuples = sorted(zip(time_start, files_to_agg))
@@ -268,13 +266,10 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     outfile = str(uuid.uuid4().hex) + '.nc'
 
     ## sort the file list in chronological order
-    print("SORTING FILES")
     files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
     ## check files and get total number of flattened obs
-    print('CHECK FILES')
     for file in files_to_agg:
-        print('.', end="", flush=True)
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             ## clip to in water data only
             nc = in_water(nc)
@@ -330,9 +325,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
 
     ## main loop
-    print('AGGREGATE FILES')
     for index, file in enumerate(files_to_agg):
-        print(index, end=",", flush=True)
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             nc = in_water(nc)
             file_variables = list(nc.variables)

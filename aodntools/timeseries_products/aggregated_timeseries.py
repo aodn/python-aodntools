@@ -3,7 +3,7 @@
 import os
 import sys
 import uuid
-import netCDF4 as nc4
+from  netCDF4 import Dataset, num2date
 import numpy as np
 import json
 from datetime import datetime
@@ -17,11 +17,12 @@ from aodntools import __version__
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
 
-def sort_files(files_to_agg):
+def sort_files(files_to_agg, input_dir=''):
     """
     sort list of files according to deployment date
-    requires netcdf4 as nc4, dateutil.parser as parse
+    requires netcdf4, dateutil.parser as parse
     :param files_to_agg: List of files to sort
+    :param input_dir: base path where source files are stored
     :return: sorted list of files
     """
 
@@ -29,7 +30,7 @@ def sort_files(files_to_agg):
     for file in files_to_agg:
         #print(file)
         print('.', end='', flush=True)
-        with nc4.Dataset(file, 'r') as ds:
+        with Dataset(os.path.join(input_dir, file)) as ds:
             time_start.append(np.datetime64(ds.time_deployment_start))
     tuples = sorted(zip(time_start, files_to_agg))
     return [t[1] for t in tuples]
@@ -217,17 +218,40 @@ def get_facility_code(fileURL):
 
     return os.path.basename(fileURL).split("_")[1]
 
+def source_file_attributes(download_url_prefix, opendap_url_prefix):
+    """
+    If relevant URL prefixes are specified, return attributes to add to the source_file variable to describe their use.
+    :param download_url_prefix: prefix string for download URLs
+    :param opendap_url_prefix: prefix string for OPENDAP URLs
+    :return: dictionary of attributes to add to the source_file variable
+    """
+    attributes = {'comment': "This variable lists the relative path of each input file."}
+    if download_url_prefix:
+        attributes['comment'] += (" To obtain a download URL for a file, "
+                                  "append its path to the download_url_prefix attribute.")
+        attributes['download_url_prefix'] = download_url_prefix
+    if opendap_url_prefix:
+        attributes['comment'] += (" To interact with the file remotely via the OPENDAP protocol, "
+                                  "append its path to the opendap_url_prefix attribute.")
+        attributes['opendap_url_prefix'] = opendap_url_prefix
+    return attributes
+
 
 
 ## MAIN FUNCTION
-def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
+def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_dir='./',
+                    download_url_prefix=None, opendap_url_prefix=None):
     """
     Aggregate the Variable of Interest (VoI) from all deployments at one site.
     additional metadata variables are stored to track the origin of the data
-    :param files_to_agg: list of files to aggregate
+    :param files_to_agg: List of files to aggregate. Each path is interpreted relative to input_dir (if specified).
+                         These relative paths are listed in the `source_files` variable in the output file.
     :param site_code: site code
-    :param VoI: Variable of Interest
-    :param base_path: base path to store the resulting file
+    :param var_to_agg: Variable of Interest
+    :param input_dir: base path where source files are stored
+    :param output_dir: path where the result file will be written
+    :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_agg)
+    :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
     :return: name of the resulting file, list of rejected files
     """
 
@@ -237,7 +261,7 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
     one_day = np.timedelta64(1, 'D')
 
     varlen_list = []
-    bad_files = []
+    bad_files = {}
     rejected_files = []
 
     # default name for temporary file. It will be renamed at the end
@@ -245,28 +269,27 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
 
     ## sort the file list in chronological order
     print("SORTING FILES")
-    files_to_agg = sort_files(files_to_agg)
+    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
     ## check files and get total number of flattened obs
     print('CHECK FILES')
     for file in files_to_agg:
         print('.', end="", flush=True)
-        with xr.open_dataset(file) as nc:
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             ## clip to in water data only
             nc = in_water(nc)
 
-            error_list = check_file(nc, site_code, VoI)
+            error_list = check_file(nc, site_code, var_to_agg)
             if not error_list:
                 varlen_list.append(len(nc.TIME))
             else:
-                bad_files.append([file, error_list])
+                bad_files.update({file: error_list})
                 rejected_files.append(file)
 
-    #print(bad_files)
 
     ## remove bad files form the list
-    for file in bad_files:
-        files_to_agg.remove(file[0])
+    for file in bad_files.keys():
+        files_to_agg.remove(file)
 
 
     varlen_list = [0] + varlen_list
@@ -274,9 +297,11 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
     n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions and variables
-    ds = nc4.Dataset(os.path.join(base_path, outfile), 'w')
+    ds = Dataset(os.path.join(output_dir, outfile), 'w')
     OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
+    #STRING256 = ds.createDimension('string256', size=256)
+
 
     obs_float_template = {'datatype': 'float', 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
     obs_byte_template = {'datatype': 'byte', 'zlib': True, 'dimensions': ('OBSERVATION'), 'fill_value': 99}
@@ -286,8 +311,8 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
 
 
 
-    agg_variable = ds.createVariable(varname=VoI, **obs_float_template)
-    agg_variable_qc = ds.createVariable(varname=VoI+'_quality_control', **obs_byte_template)
+    agg_variable = ds.createVariable(varname=var_to_agg, **obs_float_template)
+    agg_variable_qc = ds.createVariable(varname=var_to_agg + '_quality_control', **obs_byte_template)
     DEPTH = ds.createVariable(varname='DEPTH', **obs_float_template)
     DEPTHqc = ds.createVariable(varname='DEPTH_quality_control', **obs_byte_template)
     PRES = ds.createVariable(varname='PRES', **obs_float_template)
@@ -308,19 +333,18 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
     print('AGGREGATE FILES')
     for index, file in enumerate(files_to_agg):
         print(index, end=",", flush=True)
-        with xr.open_dataset(file) as nc:
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             nc = in_water(nc)
             file_variables = list(nc.variables)
             start = sum(varlen_list[:index + 1])
             end = sum(varlen_list[:index + 2])
-            agg_variable[start:end], agg_variable_qc[start:end] = get_variable_values(nc, VoI)
+            agg_variable[start:end], agg_variable_qc[start:end] = get_variable_values(nc, var_to_agg)
             DEPTH[start:end], DEPTHqc[start:end] = get_variable_values(nc, 'DEPTH')
             PRES[start:end], PRESqc[start:end] = get_variable_values(nc, 'PRESS')
             PRES_REL[start:end], PRES_RELqc[start:end] = get_variable_values(nc, 'PRESS_REL')
 
             ## set TIME and instrument index
             TIME[start:end] = (nc.TIME.values - epoch) / one_day
-            ##TIME[start:end] = nc.TIME
             instrument_index[start:end] = np.repeat(index, varlen_list[index+1])
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values
@@ -340,19 +364,22 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
     for var in list(ds.variables):
         ds[var].setncatts(variable_attribute_dictionary[var])
 
+    if download_url_prefix or opendap_url_prefix:
+        ds['source_file'].setncatts(source_file_attributes(download_url_prefix, opendap_url_prefix))
+
     ## set global attrs
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
     file_timeformat = '%Y%m%d'
 
-    time_start = nc4.num2date(np.min(TIME[:]), time_units, time_calendar).strftime(timeformat)
-    time_end = nc4.num2date(np.max(TIME[:]), time_units, time_calendar).strftime(timeformat)
-    time_start_filename = nc4.num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
-    time_end_filename = nc4.num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
+    time_start = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(timeformat)
+    time_end = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(timeformat)
+    time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
+    time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg)
+    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
-                    'title':                    ("Long Timeseries Velocity Aggregated product: " + VoI + " at " +
-                                                  site_code + " between " + time_start + " and " + time_end),
+                    'title':                    ("Long Timeseries Velocity Aggregated product: " + var_to_agg + " at " +
+                                                 site_code + " between " + time_start + " and " + time_end),
                     'site_code':                site_code,
                     'time_coverage_start':      time_start,
                     'time_coverage_end':        time_end,
@@ -364,11 +391,12 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
                     'geospatial_lon_max':       np.max(ds['LONGITUDE']),
                     'date_created':             datetime.utcnow().strftime(timeformat),
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
-                    'keywords':                 ', '.join([VoI, 'AGGREGATED']),
+                    'keywords':                 ', '.join([var_to_agg, 'AGGREGATED']),
                     'rejected_files':           "\n".join(rejected_files),
                     'contributor_name':         "; ".join(contributor_name),
                     'contributor_email':        "; ".join(contributor_email),
-                    'contributor_role':         "; ".join(contributor_role)}
+                    'contributor_role':         "; ".join(contributor_role),
+                    'generating_code_version':  __version__}
 
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
                       '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)
@@ -382,30 +410,39 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
 
 
     ## create the output file name and rename the tmp file
-    facility_code = get_facility_code(files_to_agg[0])
-    data_code = get_data_code(VoI)
+    facility_code = get_facility_code(os.path.join(input_dir, files_to_agg[0]))
+    data_code = get_data_code(var_to_agg)
     product_type = 'aggregated-timeseries'
     file_version = 1
     output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),
-                            (VoI+"-"+product_type),
+                            (var_to_agg + "-" + product_type),
                             ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
-    ncout_path = os.path.join(base_path, output_name)
-    os.rename(outfile, ncout_path)
+    ncout_path = os.path.join(output_dir, output_name)
+    os.rename(os.path.join(output_dir, outfile), os.path.join(output_dir, ncout_path))
 
     return ncout_path, bad_files
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Concatenate X,Y,Z velocity variables from ALL instruments from ALL deployments from ONE site")
+    parser = argparse.ArgumentParser(description="Aggregate ONE variable from ALL instruments from ALL deployments from ONE site")
     parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
-    parser.add_argument('-var', dest='VoI', help='variable to aggregate, like TEMP', required=True)
-    parser.add_argument('-files', dest='filenames', help='name of the file that contains the source URLs', required=True)
-    parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default: ./', default='./', required=False)
+    parser.add_argument('-var', dest='varname', help='variable to aggregate, like TEMP', required=True)
+    parser.add_argument('-files', dest='filenames',
+                        help='name of the file that contains the source URLs (relative to inpath, if given)',
+                        required=True)
+    parser.add_argument('-indir', dest='input_dir', help='base path of input files', default='', required=False)
+    parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default ./',
+                        default='./', required=False)
+    parser.add_argument('-download_url', dest='download_url', help='path to the download_url_prefix',
+                        default='', required=False)
+    parser.add_argument('-opendap_url', dest='opendap_url', help='path to the opendap_url_prefix',
+                        default='', required=False)
     args = parser.parse_args()
 
-    with open(args.filenames) as ff:
+    with open(os.path.join(args.input_dir,args.filenames)) as ff:
         files_to_agg = [line.rstrip() for line in ff]
 
-
-    print(aggregate_timeseries(files_to_agg=files_to_agg, site_code=args.site_code, VoI=args.VoI, base_path = args.output_path))
+    print(main_aggregator(files_to_agg=files_to_agg, var_to_agg=args.varname, site_code=args.site_code,
+                          input_dir=args.input_dir, output_dir=args.output_dir,
+                          download_url_prefix=args.download_url, opendap_url_prefix=args.opendap_url))

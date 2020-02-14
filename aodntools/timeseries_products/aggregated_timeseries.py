@@ -13,7 +13,6 @@ from pkg_resources import resource_filename
 import xarray as xr
 
 from aodntools import __version__
-import aodntools.timeseries_products.aggregated_timeseries as TStools
 
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
@@ -120,10 +119,9 @@ def get_instrumentID(nc):
     """
     return '; '.join([nc.deployment_code, nc.instrument, nc.instrument_serial_number])
 
-
 def in_water(nc):
     """
-    cut data to in-water only timestamps, dropping the out-of-water records.
+    cut data the entire dataset to in-water only timestamps, dropping the out-of-water records.
     :param nc: xarray dataset
     :return: xarray dataset
     """
@@ -132,6 +130,92 @@ def in_water(nc):
     TIME = nc['TIME'][:]
     return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)
 
+
+def get_nominal_depth(nc):
+    """
+    retunr nominal depth from NOMINAL_DEPTH variable or
+    if it is not present from instrument_nominal_depth global attribute
+
+    :param nc: xarray dataset
+    :return: nominal depth of the instrument
+    """
+
+    if 'NOMINAL_DEPTH' in list(nc.variables):
+        nominal_depth = nc.NOMINAL_DEPTH.squeeze().values
+    else:
+        nominal_depth = nc.instrument_nominal_depth
+
+    return nominal_depth
+
+
+def get_contributors(files_to_agg, input_dir=''):
+    """
+    get the author and principal investigator details for each file
+
+    :param files_to_aggregate: list of files
+    :param input_dir: base path where source files are stored
+    :return: list: contributor_name, email and role
+    """
+
+    contributors = set()
+    contributor_name, contributor_email, contributor_role = [], [], []
+
+    for file in files_to_agg:
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
+            attributes = nc.attrs.keys()
+            if all(att in attributes for att in ['author', 'author_email']):
+                contributors.add((nc.author, nc.author_email, 'author'))
+            if all(att in attributes for att in ['principal_investigator', 'principal_investigator_email']):
+                contributors.add((nc.principal_investigator, nc.principal_investigator_email, 'principal_investigator'))
+    for item in contributors:
+        contributor_name.append(item[0])
+        contributor_email.append(item[1])
+        contributor_role.append(item[2])
+
+    return contributor_name, contributor_email, contributor_role
+
+
+def get_data_code(VoI):
+    """
+    get data code sensu IMOS conventions from variable code
+
+    :param VoI: variable code
+    :return: variable data code
+    """
+
+    #dictionary of data code. could be read from external file
+    dataCodes = {'DEPTH':       'Z',
+                 'PRES':        'Z',
+                 'PRES_REL':    'Z',
+                 'TEMP':        'T',
+                 'PSAL':        'S',
+                 'PAR':         'F',
+                 'TURB':        'U',
+                 'TURBF':       'U',
+                 'DOX1':        'O',
+                 'DOX1_2':      'O',
+                 'DOX1_3':      'O',
+                 'DOX2':        'O',
+                 'DOX2_1':      'O',
+                 'DOXS':        'O',
+                 'CPHL':        'B',
+                 'CHLU':        'B',
+                 'CHLF':        'B',
+                 'UCUR':        'V',
+                 'VCUR':        'V',
+                 'WCUR':        'V'}
+    return dataCodes[VoI]
+
+
+def get_facility_code(fileURL):
+    """
+    get the facility code from the file URL
+
+    :param fileURL: URL of a file
+    :return: facility code
+    """
+
+    return os.path.basename(fileURL).split("_")[1]
 
 
 
@@ -241,7 +325,7 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
-            NOMINAL_DEPTH[index] = TStools.get_nominal_depth(nc)
+            NOMINAL_DEPTH[index] = get_nominal_depth(nc)
             source_file[index] = file
             instrument_id[index] = get_instrumentID(nc)
 
@@ -265,7 +349,7 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
     time_start_filename = nc4.num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
     time_end_filename = nc4.num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    contributor_name, contributor_email, contributor_role = TStools.get_contributors(files_to_agg)
+    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Aggregated product: " + VoI + " at " +
                                                   site_code + " between " + time_start + " and " + time_end),
@@ -280,7 +364,7 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
                     'geospatial_lon_max':       np.max(ds['LONGITUDE']),
                     'date_created':             datetime.utcnow().strftime(timeformat),
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
-                    'keywords':                 [VoI + 'AGGREGATED'],
+                    'keywords':                 ', '.join([VoI, 'AGGREGATED']),
                     'rejected_files':           "\n".join(rejected_files),
                     'contributor_name':         "; ".join(contributor_name),
                     'contributor_email':        "; ".join(contributor_email),
@@ -293,8 +377,8 @@ def aggregate_timeseries(files_to_agg, site_code, VoI, base_path):
 
 
     ## create the output file name and rename the tmp file
-    facility_code = TStools.get_facility_code(files_to_agg[0])
-    data_code = TStools.get_data_code(VoI)
+    facility_code = get_facility_code(files_to_agg[0])
+    data_code = get_data_code(VoI)
     product_type = 'aggregated-timeseries'
     file_version = 1
     output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),

@@ -301,7 +301,15 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                     'rejected_files':           "\n".join(rejected_files),
                     'contributor_name':        "; ".join(contributor_name),
                     'contributor_email':       "; ".join(contributor_email),
-                    'contributor_role':        "; ".join(contributor_role)}
+                    'contributor_role':        "; ".join(contributor_role),
+                    'generating_code_version':  __version__
+    }
+
+    ## add version
+    github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
+                      '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)
+                      )
+    global_attribute_dictionary['lineage'] += github_comment
 
     global_attribute_dictionary.update(add_attribute)
     ds.setncatts(dict(sorted(global_attribute_dictionary.items())))

@@ -16,7 +16,7 @@ import aggregated_timeseries as TStools
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
 
 
-def sorted_files(file_list):
+def sort_files(file_list, input_dir=""):
     """
     sort list of files according to deployment date
     :param file_list: List of files to sort
@@ -25,7 +25,7 @@ def sorted_files(file_list):
 
     time_start = []
     for file in file_list:
-        with nc4.Dataset(file, 'r') as ds:
+        with nc4.Dataset(os.path.join(input_dir, file), 'r') as ds:
             time_start.append(np.datetime64(ds.time_deployment_start))
     tuples = sorted(zip(time_start, files_to_agg))
     return [t[1] for t in tuples]
@@ -130,15 +130,19 @@ def in_water(nc):
 
 
 ## MAIN FUNCTION
-def aggregate_velocity(files_to_agg, site_code, base_path):
+def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
+                        download_url_prefix=None, opendap_url_prefix=None):
     """
     Aggregate U, V and W CUR variables from all deployments at one site.
     the vertical cells are flattened and related to its depth
     additional metadata variables are stored to track the origin of the data
     :param files_to_agg: list of files to aggregate
     :param site_code: site code
-    :param base_path: base path to store the resulting file
-    :return: name of the resulting file, list of rejected files
+    :param input_dir: base path where source files are stored
+    :param output_dir: path where the result file will be written
+    :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_agg)
+    :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
+    :return: file path of the aggregated product, list of rejected files
     """
 
     varlist = ['UCUR', 'VCUR', 'WCUR', 'DEPTH']
@@ -156,11 +160,11 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
     outfile = str(uuid.uuid4().hex) + '.nc'
 
     ## sort the file list in chronological order
-    files_to_agg = sorted_files(files_to_agg)
+    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
     ## check files and get total number of flattened obs
     for file in files_to_agg:
-        with xr.open_dataset(file) as nc:
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             ## clip to in water data only
             nc = in_water(nc)
 
@@ -183,7 +187,7 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
 
 
     ## create ncdf file, dimensions and variables
-    ds = nc4.Dataset(os.path.join(base_path, outfile), 'w')
+    ds = nc4.Dataset(os.path.join(output_dir, outfile), 'w')
     OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
 
@@ -216,7 +220,7 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
     ## main loop
     for index, file in enumerate(files_to_agg):
         print(index)
-        with xr.open_dataset(file) as nc:
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
             ## in water data only
             nc = in_water(nc)
@@ -266,6 +270,9 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
     for var in list(ds.variables):
         ds[var].setncatts(variable_attribute_dictionary[var])
 
+    if download_url_prefix or opendap_url_prefix:
+        ds['source_file'].setncatts(TStools.source_file_attributes(download_url_prefix, opendap_url_prefix))
+
     ## set global attrs
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
     file_timeformat = '%Y%m%d'
@@ -275,7 +282,7 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
     time_start_filename = nc4.num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
     time_end_filename = nc4.num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    contributor_name, contributor_email, contributor_role = TStools.get_contributors(files_to_agg)
+    contributor_name, contributor_email, contributor_role = TStools.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Aggregated product: " + ', '.join(varlist) + " at " +
                                                   site_code + " between " + time_start + " and " + time_end),
@@ -303,14 +310,14 @@ def aggregate_velocity(files_to_agg, site_code, base_path):
 
 
     ## create the output file name and rename the tmp file
-    facility_code = TStools.get_facility_code(files_to_agg[0])
+    facility_code = TStools.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
     data_code = 'VZ'
     product_type = 'aggregated-timeseries'
     file_version = 1
     output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),
                             ("velocity-"+product_type),
                             ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
-    ncout_path = os.path.join(base_path, output_name)
+    ncout_path = os.path.join(output_dir, output_name)
     os.rename(outfile, ncout_path)
 
     return ncout_path, bad_files
@@ -322,10 +329,19 @@ if __name__ == "__main__":
     parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
     parser.add_argument('-files', dest='filenames', help='name of the file that contains the source URLs', required=True)
     parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default: ./', default='./', required=False)
+    parser.add_argument('-indir', dest='input_dir', help='base path of input files', default='', required=False)
+    parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default ./',
+                        default='./', required=False)
+    parser.add_argument('-download_url', dest='download_url', help='path to the download_url_prefix',
+                        default='', required=False)
+    parser.add_argument('-opendap_url', dest='opendap_url', help='path to the opendap_url_prefix',
+                        default='', required=False)
+
     args = parser.parse_args()
 
     with open(args.filenames) as ff:
         files_to_agg = [line.rstrip() for line in ff]
 
-
-    print(aggregate_velocity(files_to_agg=files_to_agg, site_code=args.site_code, base_path = args.output_path))
+    print(velocity_aggregated(files_to_agg=files_to_agg, site_code=args.site_code,
+                              input_dir=args.input_dir, output_dir=args.output_dir,
+                              download_url_prefix=args.download_url, opendap_url_prefix=args.opendap_url))

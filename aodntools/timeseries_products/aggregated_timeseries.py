@@ -115,16 +115,6 @@ def get_variable_values(nc, variable):
     return variable_values, variableQC_values
 
 
-def get_varvalues(nc, varname):
-    """
-    Return a 1D array of 2D values
-    :param nc: dataset
-    :param varname: Variable of interest
-    :return: variable values flattened
-    """
-    return nc[varname].values.flatten()
-
-
 def get_instrumentID(nc):
     """
     Create instrument id based on deployment metadata

@@ -271,8 +271,6 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     # default name for temporary file. It will be renamed at the end
     _, outfile = tempfile.mkstemp(suffix='.nc')
 
-    ## sort the file list in chronological order
-    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
     ## check files and get total number of flattened obs
     for file in files_to_agg:
@@ -292,6 +290,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     for file in bad_files.keys():
         files_to_agg.remove(file)
 
+    ## sort the file list in chronological order
+    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
     varlen_list = [0] + varlen_list
     varlen_total = sum(varlen_list)

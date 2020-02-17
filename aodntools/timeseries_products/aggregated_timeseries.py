@@ -2,8 +2,9 @@
 
 import os
 import sys
-import uuid
-from  netCDF4 import Dataset, num2date
+import tempfile
+import shutil
+from netCDF4 import Dataset, num2date
 import numpy as np
 import json
 from datetime import datetime
@@ -268,7 +269,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     rejected_files = []
 
     # default name for temporary file. It will be renamed at the end
-    outfile = str(uuid.uuid4().hex) + '.nc'
+    _, outfile = tempfile.mkstemp(suffix='.nc')
 
     ## sort the file list in chronological order
     files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
@@ -409,7 +410,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
                             (var_to_agg + "-" + product_type),
                             ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
     ncout_path = os.path.join(output_dir, output_name)
-    os.rename(os.path.join(output_dir, outfile), os.path.join(output_dir, ncout_path))
+    shutil.move(outfile, os.path.join(output_dir, ncout_path))
 
     return ncout_path, bad_files
 

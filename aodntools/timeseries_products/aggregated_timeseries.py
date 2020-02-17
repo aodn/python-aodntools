@@ -275,11 +275,10 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     ## check files and get total number of flattened obs
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
-            ## clip to in water data only
-            nc = in_water(nc)
 
             error_list = check_file(nc, site_code, var_to_agg)
             if not error_list:
+                nc = in_water(nc)
                 varlen_list.append(len(nc.TIME))
             else:
                 bad_files.update({file: error_list})

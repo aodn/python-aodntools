@@ -50,26 +50,42 @@ def check_file(nc, site_code, VoI):
     """
 
     attributes = list(nc.attrs)
-    file_variables = list(nc.variables)
+    variables = list(nc.variables)
     allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE']
     error_list = []
 
-    nc_site_code = nc.site_code
-    if nc_site_code != site_code:
-        error_list.append('Wrong site_code: ' + nc_site_code)
+    if site_code != nc.site_code:
+        error_list.append('Wrong site_code: ' + site_code)
 
     nc_file_version = nc.file_version
     if 'Level 1' not in nc_file_version:
         error_list.append('Wrong file version: ' + nc_file_version)
 
-    if VoI not in file_variables:
+    if 'TIME' not in variables:
+        error_list.append('TIME variable missing')
+
+    if 'LATITUDE' not in variables:
+        error_list.append('LATITUDE variable missing')
+
+    if 'LONGITUDE' not in variables:
+        error_list.append('LONGITUDE variable missing')
+
+    if VoI not in variables:
         error_list.append(VoI + ' not in file')
     else:
-        for dimension in list(nc[VoI].dims):
-            if dimension not in allowed_dimensions:
-                error_list.append(dimension+' is not an allowed dimension for ' + VoI)
+        VoIdimensions = list(nc[VoI].dims)
+        if 'TIME' not in VoIdimensions:
+            error_list.append('TIME is not a dimension')
+        if 'LATITUDE' in VoIdimensions and len(nc.LATITUDE) > 1:
+            error_list.append('more than one LATITUDE')
+        if 'LONGITUDE' in VoIdimensions and len(nc.LONGITUDE) > 1:
+            error_list.append('more than one LONGITUDE')
+        for d in range(len(VoIdimensions)):
+            if VoIdimensions[d] not in allowed_dimensions:
+                error_list.append('not allowed dimensions: ' + VoIdimensions[d])
+                break
 
-    if 'NOMINAL_DEPTH' not in file_variables and 'instrument_nominal_depth' not in attributes:
+    if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
         error_list.append('no NOMINAL_DEPTH')
 
     return error_list

@@ -20,7 +20,6 @@ TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json
 def sort_files(files_to_agg, input_dir=''):
     """
     sort list of files according to deployment date
-    requires netcdf4, dateutil.parser as parse
     :param files_to_agg: List of files to sort
     :param input_dir: base path where source files are stored
     :return: sorted list of files
@@ -94,8 +93,8 @@ def check_file(nc, site_code, VoI):
 def get_variable_values(nc, variable):
     """
     Get value sof the variable and its QC flags.
-    If variable is not present, nan returned
-    If variable present but not its QC flags, QC set to 9
+    If variable is not present, nan returned, its QC flags set to 9
+    If variable present but not its QC flags, QC set to 0
     :param nc: dataset
     :param variable: name of the variable to get
     :return: variable values and variable qc flags
@@ -108,10 +107,10 @@ def get_variable_values(nc, variable):
         if variable+'_quality_control' in file_variables:
             variableQC_values = nc[variable+'_quality_control']
         else:
-            variableQC_values = np.repeat(9, n_records)
+            variableQC_values = np.repeat(0, n_records)
     else:
         variable_values = np.repeat(np.nan, n_records)
-        variableQC_values = np.repeat(np.nan, n_records)
+        variableQC_values = np.repeat(9, n_records)
 
     return variable_values, variableQC_values
 

@@ -103,9 +103,9 @@ def get_variable_values(nc, variable):
     file_variables = list(nc.variables)
 
     if variable in file_variables:
-        variable_values = nc[variable]
+        variable_values = nc[variable].values
         if variable+'_quality_control' in file_variables:
-            variableQC_values = nc[variable+'_quality_control']
+            variableQC_values = nc[variable+'_quality_control'].values
         else:
             variableQC_values = np.repeat(0, n_records)
     else:
@@ -339,7 +339,6 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     for index, file in enumerate(files_to_agg):
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             nc = in_water(nc)
-            file_variables = list(nc.variables)
             start = sum(varlen_list[:index + 1])
             end = sum(varlen_list[:index + 2])
             agg_variable[start:end], agg_variable_qc[start:end] = get_variable_values(nc, var_to_agg)

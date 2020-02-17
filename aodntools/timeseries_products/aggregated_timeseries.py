@@ -403,7 +403,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
 
     ## create the output file name and rename the tmp file
     facility_code = get_facility_code(os.path.join(input_dir, files_to_agg[0]))
-    data_code = get_data_code(var_to_agg)
+    data_code = get_data_code(var_to_agg) + 'Z'
     product_type = 'aggregated-timeseries'
     file_version = 1
     output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),

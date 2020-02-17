@@ -116,7 +116,7 @@ def get_variable_values(nc, variable):
     return variable_values, variableQC_values
 
 
-def get_instrumentID(nc):
+def get_instrument_id(nc):
     """
     Create instrument id based on deployment metadata
     :param nc: xarray dataset
@@ -345,7 +345,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = get_nominal_depth(nc)
             source_file[index] = file
-            instrument_id[index] = get_instrumentID(nc)
+            instrument_id[index] = get_instrument_id(nc)
 
 
     ## add atributes

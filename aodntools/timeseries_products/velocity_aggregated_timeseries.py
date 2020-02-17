@@ -1,6 +1,7 @@
 import os
 import sys
-import uuid
+import tempfile
+import shutil
 import netCDF4 as nc4
 import numpy as np
 import json
@@ -157,7 +158,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     rejected_files = []
 
     # default name for temporary file. It will be renamed at the end
-    outfile = str(uuid.uuid4().hex) + '.nc'
+    _, outfile = tempfile.mkstemp(suffix='.nc')
 
     ## sort the file list in chronological order
     files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
@@ -326,7 +327,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                             ("velocity-"+product_type),
                             ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
     ncout_path = os.path.join(output_dir, output_name)
-    os.rename(outfile, ncout_path)
+    shutil.move(outfile, ncout_path)
+
 
     return ncout_path, bad_files
 

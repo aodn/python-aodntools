@@ -3,12 +3,11 @@
 import os
 import unittest
 
-from netCDF4 import Dataset, chartostring
+from netCDF4 import Dataset
 
-from test_aodntools.base_test import BaseTestCase
 from aodntools import __version__
 from aodntools.timeseries_products.aggregated_timeseries import main_aggregator
-
+from test_aodntools.base_test import BaseTestCase
 
 TEST_ROOT = os.path.dirname(__file__)
 BAD_FILE = 'IMOS_ANMN-NRS_TZ_20181213T080000Z_NRSROT_FV00_NRSROT-1812-SBE39-43_END-20181214T004000Z_C-20190827T000000Z.nc'
@@ -33,7 +32,7 @@ class TestAggregatedTimeseries(BaseTestCase):
         dataset = Dataset(output_file)
 
         # check dimensions and variables
-        self.assertSetEqual(set(dataset.dimensions), {'OBSERVATION', 'INSTRUMENT', 'string256'})
+        self.assertSetEqual(set(dataset.dimensions), {'OBSERVATION', 'INSTRUMENT'})
         self.assertSetEqual(set(dataset.variables.keys()),
                             {'TIME', 'LATITUDE', 'LONGITUDE', 'NOMINAL_DEPTH', 'DEPTH', 'DEPTH_quality_control',
                              'PRES', 'PRES_quality_control', 'PRES_REL', 'PRES_REL_quality_control',
@@ -45,7 +44,7 @@ class TestAggregatedTimeseries(BaseTestCase):
         for var in obs_vars:
             self.assertEqual(dataset.variables[var].dimensions, ('OBSERVATION',))
 
-        for f in chartostring(dataset['source_file'][:]):
+        for f in dataset['source_file'][:]:
             self.assertIn(f, INPUT_FILES)
 
         # check attributes

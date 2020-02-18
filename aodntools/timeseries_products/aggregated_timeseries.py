@@ -36,12 +36,14 @@ def sort_files(files_to_agg, input_dir=''):
 
 def check_file(nc, site_code, VoI):
     """
-    Return list of errors found in the file:
-    Variables of interest are present
-    TIME. LATITUDE, LONGITUDE,  is present
-    NOMINAL_DEPTH is not present as variable or attribute
-    file_version is not FV01
-    if LATITUDE or LONIGUTDE dimension has length >1
+    Return list of errors found in the file.
+    Checks applied:
+    * Correct site_code
+    * Variables of interest is present
+    * Variables TIME, LATITUDE and LONGITUDE are present
+    * NOMINAL_DEPTH is present as variable or attribute
+    * file_version is FV01
+    * if LATITUDE or LONIGUTDE are dimension, they have length 1
 
     :param nc: xarray dataset
     :param site_code: code of the mooring site
@@ -93,7 +95,7 @@ def check_file(nc, site_code, VoI):
 
 def get_variable_values(nc, variable):
     """
-    Get value sof the variable and its QC flags.
+    Get values of the variable and its QC flags.
     If variable is not present, nan returned, its QC flags set to 9
     If variable present but not its QC flags, QC set to 0
     :param nc: dataset
@@ -123,6 +125,7 @@ def get_instrument_id(nc):
     :return: instrumentID as string
     """
     return '; '.join([nc.deployment_code, nc.instrument, nc.instrument_serial_number])
+
 
 def in_water(nc):
     """
@@ -157,7 +160,7 @@ def get_contributors(files_to_agg, input_dir=''):
     """
     get the author and principal investigator details for each file
 
-    :param files_to_aggregate: list of files
+    :param files_to_agg: list of files
     :param input_dir: base path where source files are stored
     :return: list: contributor_name, email and role
     """
@@ -221,6 +224,7 @@ def get_facility_code(fileURL):
     """
 
     return os.path.basename(fileURL).split("_")[1]
+
 
 def source_file_attributes(download_url_prefix, opendap_url_prefix):
     """

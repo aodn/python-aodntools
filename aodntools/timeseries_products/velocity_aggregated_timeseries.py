@@ -121,7 +121,7 @@ def flat_variable(nc, varname):
     return nc[varname].values.flatten()
 
 
-def get_instrumentID(nc):
+def get_instrument_id(nc):
     """
     Create instrument id based on deployment metadata
     :param nc: xarray dataset
@@ -270,7 +270,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = TStools.get_nominal_depth(nc)
             source_file[index] = file
-            instrument_id[index] = get_instrumentID(nc)
+            instrument_id[index] = get_instrument_id(nc)
             ## add time offset to the middle of the measuring window, if it exists
             if 'seconds_to_middle_of_measurement' in nc.TIME.attrs:
                 SECONDS_TO_MIDDLE[index] = nc.TIME.seconds_to_middle_of_measurement

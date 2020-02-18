@@ -28,7 +28,7 @@ def sort_files(files_to_agg, input_dir=''):
     time_start = []
     for file in files_to_agg:
         with Dataset(os.path.join(input_dir, file)) as ds:
-            time_start.append(np.datetime64(ds.time_deployment_start))
+            time_start.append(np.datetime64(ds.time_deployment_start.rstrip('Z')))
     tuples = sorted(zip(time_start, files_to_agg))
     return [t[1] for t in tuples]
 

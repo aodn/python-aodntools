@@ -269,7 +269,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     rejected_files = []
 
     # default name for temporary file. It will be renamed at the end
-    _, outfile = tempfile.mkstemp(suffix='.nc')
+    _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
 
     ## check files and get total number of flattened obs
@@ -297,7 +297,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions and variables
-    ds = Dataset(os.path.join(output_dir, outfile), 'w')
+    ds = Dataset(os.path.join(output_dir, temp_outfile), 'w')
     OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
 
@@ -410,7 +410,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
                             (var_to_agg + "-" + product_type),
                             ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
     ncout_path = os.path.join(output_dir, output_name)
-    shutil.move(outfile, os.path.join(output_dir, ncout_path))
+    shutil.move(temp_outfile, os.path.join(output_dir, ncout_path))
 
     return ncout_path, bad_files
 

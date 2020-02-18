@@ -304,12 +304,12 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
 
-    obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
-    obs_double_template = {'datatype': 'double', 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
-    obs_byte_template = {'datatype': 'byte', 'zlib': True, 'dimensions': ('OBSERVATION'), 'fill_value': 99}
-    obs_int_template = {'datatype': 'int', 'zlib': True, 'dimensions': ('OBSERVATION')}
-    inst_S256_template = {'datatype': 'str', 'dimensions': ('INSTRUMENT')}
-    inst_float_template ={'datatype': np.float32, 'dimensions': ('INSTRUMENT'), "fill_value": 99999.0}
+    obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION',), "fill_value": 99999.0}
+    obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION',), "fill_value": 99999.0}
+    obs_byte_template = {'datatype': np.byte, 'zlib': True, 'dimensions': ('OBSERVATION',), 'fill_value': 99}
+    obs_int_template = {'datatype': np.uint32, 'zlib': True, 'dimensions': ('OBSERVATION',)}
+    inst_str_template = {'datatype': 'str', 'dimensions': ('INSTRUMENT',)}
+    inst_float_template = {'datatype': np.float32, 'dimensions': ('INSTRUMENT',), "fill_value": 99999.0}
 
     agg_variable = ds.createVariable(varname=var_to_agg, **obs_float_template)
     agg_variable_qc = ds.createVariable(varname=var_to_agg + '_quality_control', **obs_byte_template)
@@ -323,8 +323,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     TIME = ds.createVariable(varname='TIME', **obs_double_template)
     instrument_index = ds.createVariable(varname='instrument_index', **obs_int_template)
 
-    source_file = ds.createVariable(varname='source_file', **inst_S256_template)
-    instrument_id = ds.createVariable(varname='instrument_id', **inst_S256_template)
+    source_file = ds.createVariable(varname='source_file', **inst_str_template)
+    instrument_id = ds.createVariable(varname='instrument_id', **inst_str_template)
     LATITUDE = ds.createVariable(varname='LATITUDE', **obs_double_template)
     LONGITUDE = ds.createVariable(varname='LONGITUDE', **obs_double_template)
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)

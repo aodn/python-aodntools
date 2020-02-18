@@ -192,11 +192,13 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
 
-    obs_float_template = {'datatype': 'float', 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
+    obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
+    obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
     obs_byte_template = {'datatype': 'byte', 'zlib': True, 'dimensions': ('OBSERVATION'), 'fill_value': 99}
     obs_int_template = {'datatype': 'int', 'zlib': True, 'dimensions': ('OBSERVATION')}
-    inst_S256_template = {'datatype': 'S256', 'dimensions': ('INSTRUMENT')}
-    inst_float_template ={'datatype': 'float', 'dimensions': ('INSTRUMENT')}
+    inst_S256_template = {'datatype': 'str', 'dimensions': ('INSTRUMENT')}
+    inst_float_template ={'datatype': np.float32, 'dimensions': ('INSTRUMENT')}
+    inst_double_template ={'datatype': np.float64, 'dimensions': ('INSTRUMENT')}
 
 
 
@@ -208,13 +210,13 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     VCURqc = ds.createVariable(varname='VCUR_quality_control', **obs_byte_template)
     WCURqc = ds.createVariable(varname='WCUR_quality_control', **obs_byte_template)
     DEPTHqc = ds.createVariable(varname='DEPTH_quality_control', **obs_byte_template)
-    TIME = ds.createVariable(varname='TIME', **obs_float_template)
+    TIME = ds.createVariable(varname='TIME', **obs_double_template)
     instrument_index = ds.createVariable(varname='instrument_index', **obs_int_template)
 
     source_file = ds.createVariable(varname='source_file', **inst_S256_template)
     instrument_id = ds.createVariable(varname='instrument_id', **inst_S256_template)
-    LATITUDE = ds.createVariable(varname='LATITUDE', **inst_float_template)
-    LONGITUDE = ds.createVariable(varname='LONGITUDE', **inst_float_template)
+    LATITUDE = ds.createVariable(varname='LATITUDE', **inst_double_template)
+    LONGITUDE = ds.createVariable(varname='LONGITUDE', **inst_double_template)
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
     SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
 

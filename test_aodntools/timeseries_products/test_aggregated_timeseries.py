@@ -3,12 +3,11 @@
 import os
 import unittest
 
-from netCDF4 import Dataset, chartostring
+from netCDF4 import Dataset
 
-from test_aodntools.base_test import BaseTestCase
 from aodntools import __version__
 from aodntools.timeseries_products.aggregated_timeseries import main_aggregator
-
+from test_aodntools.base_test import BaseTestCase
 
 TEST_ROOT = os.path.dirname(__file__)
 BAD_FILE = 'IMOS_ANMN-NRS_TZ_20181213T080000Z_NRSROT_FV00_NRSROT-1812-SBE39-43_END-20181214T004000Z_C-20190827T000000Z.nc'

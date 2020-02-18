@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import tempfile
-import shutil
-from netCDF4 import Dataset, num2date
-import numpy as np
-import json
-from datetime import datetime
 import argparse
-from pkg_resources import resource_filename
+import json
+import os
+import shutil
+import tempfile
+from datetime import datetime
 
+import numpy as np
 import xarray as xr
+from netCDF4 import Dataset, num2date
+from pkg_resources import resource_filename
 
 from aodntools import __version__
 

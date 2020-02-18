@@ -36,20 +36,18 @@ def check_file(nc, site_code):
     """
     Return list of errors found in the file:
     Variables of interest are present
-    TIME. LATITUDE, LONGITUDE,  is present
+    TIME, DEPTH, LATITUDE, LONGITUDE,  is present
     NOMINAL_DEPTH is not present as variable or attribute
     file_version is not FV01
-    if LATITUDE or LONIGUTDE dimension has length >1
+    if LATITUDE or LONIGITUDE dimension has length >1
 
-    :param file: name of the netcdf file
     :param nc: xarray dataset
-    :param VoI: string. Variable of Interest
     :param site_code: code of the mooring site
     :return: dictionary with the file name and list of failed tests
     """
 
     attributes = list(nc.attrs)
-    file_variables = list(nc.variables)
+    variables = list(nc.variables)
     allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE', 'HEIGHT_ABOVE_SENSOR']
     required_variables = ['UCUR', 'VCUR', 'WCUR']
     error_list = []
@@ -61,8 +59,24 @@ def check_file(nc, site_code):
     if 'Level 1' not in nc_file_version:
         error_list.append('Wrong file version: ' + nc_file_version)
 
+    if 'DEPTH' not in variables:
+        error_list.append('DEPTH variable missing')
+
+    if 'DEPTH' not in variables and 'HEIGHT_ABOVE_SENSOR' not in variables:
+        error_list.append('DEPTH and HEIGHT_ABOVE_SENSOR missing')
+
+    if 'TIME' not in variables:
+        error_list.append('TIME variable missing')
+
+    if 'LATITUDE' not in variables:
+        error_list.append('LATITUDE variable missing')
+
+    if 'LONGITUDE' not in variables:
+        error_list.append('LONGITUDE variable missing')
+
+
     for variable in required_variables:
-        if variable not in file_variables:
+        if variable not in variables:
             error_list.append(variable + ' variable missing')
         else:
             VoIdimensions = list(nc[variable].dims)
@@ -76,7 +90,7 @@ def check_file(nc, site_code):
                 if dim not in allowed_dimensions:
                     error_list.append('not allowed dimension: ' + dim)
 
-    if 'NOMINAL_DEPTH' not in file_variables and 'instrument_nominal_depth' not in attributes:
+    if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
         error_list.append('no NOMINAL_DEPTH')
 
     return error_list

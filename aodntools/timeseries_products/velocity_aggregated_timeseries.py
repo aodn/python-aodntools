@@ -34,7 +34,7 @@ def check_file(nc, site_code):
     attributes = list(nc.attrs)
     variables = list(nc.variables)
     allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE', 'HEIGHT_ABOVE_SENSOR']
-    required_variables = ['UCUR', 'VCUR', 'WCUR']
+    required_variables = ['UCUR', 'VCUR']
     error_list = []
 
     if nc.site_code != site_code:
@@ -44,21 +44,10 @@ def check_file(nc, site_code):
     if 'Level 1' not in nc_file_version:
         error_list.append('Wrong file version: ' + nc_file_version)
 
-    if 'DEPTH' not in variables:
-        error_list.append('DEPTH variable missing')
-
-    if 'DEPTH' not in variables and 'HEIGHT_ABOVE_SENSOR' not in variables:
-        error_list.append('DEPTH and HEIGHT_ABOVE_SENSOR missing')
-
-    if 'TIME' not in variables:
-        error_list.append('TIME variable missing')
-
-    if 'LATITUDE' not in variables:
-        error_list.append('LATITUDE variable missing')
-
-    if 'LONGITUDE' not in variables:
-        error_list.append('LONGITUDE variable missing')
-
+    required_coordinates = ['TIME', 'DEPTH', 'LATITUDE', 'LONGITUDE']
+    for coord in required_coordinates:
+        if coord not in variables:
+            error_list.append('{coord} variable missing'.format(coord=coord))
 
     for variable in required_variables:
         if variable not in variables:

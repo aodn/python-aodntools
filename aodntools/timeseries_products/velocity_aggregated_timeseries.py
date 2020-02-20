@@ -157,7 +157,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     :param output_dir: path where the result file will be written
     :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_agg)
     :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
-    :return: file path of the aggregated product, list of rejected files
+    :return: file path of the aggregated product, dict of rejected files: errors
     """
 
     varlist = ['UCUR', 'VCUR', 'WCUR', 'DEPTH']

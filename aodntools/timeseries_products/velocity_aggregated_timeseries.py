@@ -12,24 +12,9 @@ from aodntools import __version__
 
 import xarray as xr
 
-import aggregated_timeseries as TStools
+import aggregated_timeseries as ts_tools
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
-
-
-def sort_files(file_list, input_dir=""):
-    """
-    sort list of files according to deployment date
-    :param file_list: List of files to sort
-    :return: sorted list of files
-    """
-
-    time_start = []
-    for file in file_list:
-        with nc4.Dataset(os.path.join(input_dir, file), 'r') as ds:
-            time_start.append(np.datetime64(ds.time_deployment_start))
-    tuples = sorted(zip(time_start, files_to_agg))
-    return [t[1] for t in tuples]
 
 
 def check_file(nc, site_code):
@@ -175,7 +160,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
     ## sort the file list in chronological order
-    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
+    files_to_agg = ts_tools.sort_files(files_to_agg, input_dir=input_dir)
 
     ## check files and get total number of flattened obs
     for file in files_to_agg:
@@ -268,7 +253,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
-            NOMINAL_DEPTH[index] = TStools.get_nominal_depth(nc)
+            NOMINAL_DEPTH[index] = ts_tools.get_nominal_depth(nc)
             source_file[index] = file
             instrument_id[index] = get_instrument_id(nc)
             ## add time offset to the middle of the measuring window, if it exists
@@ -288,7 +273,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
         ds[var].setncatts(variable_attribute_dictionary[var])
 
     if download_url_prefix or opendap_url_prefix:
-        ds['source_file'].setncatts(TStools.source_file_attributes(download_url_prefix, opendap_url_prefix))
+        ds['source_file'].setncatts(ts_tools.source_file_attributes(download_url_prefix, opendap_url_prefix))
 
     ## set global attrs
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
@@ -299,7 +284,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     time_start_filename = nc4.num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
     time_end_filename = nc4.num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    contributor_name, contributor_email, contributor_role = TStools.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
+    contributor_name, contributor_email, contributor_role = ts_tools.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Aggregated product: " + ', '.join(varlist) + " at " +
                                                   site_code + " between " + time_start + " and " + time_end),
@@ -335,7 +320,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
 
     ## create the output file name and rename the tmp file
-    facility_code = TStools.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
+    facility_code = ts_tools.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
     data_code = 'VZ'
     product_type = 'aggregated-timeseries'
     file_version = 1

@@ -12,7 +12,7 @@ from aodntools import __version__
 
 import xarray as xr
 
-import aggregated_timeseries as ts_tools
+import aggregated_timeseries as utils
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
 
@@ -95,27 +95,6 @@ def flat_variable(nc, varname):
     return nc[varname].values.flatten()
 
 
-def get_instrument_id(nc):
-    """
-    Create instrument id based on deployment metadata
-    :param nc: xarray dataset
-    :return: instrumentID as string
-    """
-    return '; '.join([nc.deployment_code, nc.instrument, nc.instrument_serial_number])
-
-
-def in_water(nc):
-    """
-    cut data the entire dataset to in-water only timestamps, dropping the out-of-water records.
-    :param nc: xarray dataset
-    :return: xarray dataset
-    """
-    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
-    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
-    TIME = nc['TIME'][:]
-    return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)
-
-
 
 
 ## MAIN FUNCTION
@@ -149,13 +128,13 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
     ## sort the file list in chronological order
-    files_to_agg = ts_tools.sort_files(files_to_agg, input_dir=input_dir)
+    files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
 
     ## check files and get total number of flattened obs
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             ## clip to in water data only
-            nc = in_water(nc)
+            nc = utils.in_water(nc)
 
             varlen_file.append(get_number_flatvalues(nc))
             error_list = check_file(nc, site_code)
@@ -214,7 +193,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
             ## in water data only
-            nc = in_water(nc)
+            nc = utils.in_water(nc)
 
             start = sum(varlen_list[:index + 1])
             end = sum(varlen_list[:index + 2])
@@ -242,9 +221,9 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
-            NOMINAL_DEPTH[index] = ts_tools.get_nominal_depth(nc)
+            NOMINAL_DEPTH[index] = utils.get_nominal_depth(nc)
             source_file[index] = file
-            instrument_id[index] = get_instrument_id(nc)
+            instrument_id[index] = utils.get_instrument_id(nc)
             ## add time offset to the middle of the measuring window, if it exists
             if 'seconds_to_middle_of_measurement' in nc.TIME.attrs:
                 SECONDS_TO_MIDDLE[index] = nc.TIME.seconds_to_middle_of_measurement
@@ -262,7 +241,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
         ds[var].setncatts(variable_attribute_dictionary[var])
 
     if download_url_prefix or opendap_url_prefix:
-        ds['source_file'].setncatts(ts_tools.source_file_attributes(download_url_prefix, opendap_url_prefix))
+        ds['source_file'].setncatts(utils.source_file_attributes(download_url_prefix, opendap_url_prefix))
 
     ## set global attrs
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
@@ -273,7 +252,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     time_start_filename = nc4.num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
     time_end_filename = nc4.num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    contributor_name, contributor_email, contributor_role = ts_tools.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
+    contributor_name, contributor_email, contributor_role = utils.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Aggregated product: " + ', '.join(varlist) + " at " +
                                                   site_code + " between " + time_start + " and " + time_end),
@@ -309,7 +288,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
 
     ## create the output file name and rename the tmp file
-    facility_code = ts_tools.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
+    facility_code = utils.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
     data_code = 'VZ'
     product_type = 'aggregated-timeseries'
     file_version = 1

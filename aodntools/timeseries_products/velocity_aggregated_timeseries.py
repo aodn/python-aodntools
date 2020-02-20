@@ -324,7 +324,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
     ## add version
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
-                      '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)
+                      '{v}/aodntools/timeseries_products/{f}'.format(v=__version__, f=os.path.basename(__file__))
                       )
     global_attribute_dictionary['lineage'] += github_comment
 

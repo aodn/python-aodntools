@@ -198,8 +198,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 WCUR[start:end] = flat_variable(nc, 'WCUR')
                 WCURqc[start:end] = flat_variable(nc, 'WCUR_quality_control')
             else:
-                WCUR[start:end] = np.full(varlen_list[index], np.nan)
-                WCURqc[start:end] = np.full(varlen_list[index], 9)
+                WCUR[start:end] = np.full(varlen_list[index + 1], np.nan)
+                WCURqc[start:end] = np.full(varlen_list[index + 1], 9)
             ##calculate depth
             if 'HEIGHT_ABOVE_SENSOR' in nc.dims:
                 DEPTH[start:end] = (nc.DEPTH - nc.HEIGHT_ABOVE_SENSOR).values.flatten()

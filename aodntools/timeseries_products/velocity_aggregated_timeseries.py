@@ -299,7 +299,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Concatenate X,Y,Z velocity variables from ALL instruments from ALL deployments from ONE site")
     parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
     parser.add_argument('-files', dest='filenames', help='name of the file that contains the source URLs', required=True)
-    parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default: ./', default='./', required=False)
     parser.add_argument('-indir', dest='input_dir', help='base path of input files', default='', required=False)
     parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default ./',
                         default='./', required=False)

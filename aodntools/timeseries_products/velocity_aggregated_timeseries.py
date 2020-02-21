@@ -127,6 +127,9 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     # default name for temporary file. It will be renamed at the end
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
+    ## sort the file list in chronological order
+    files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
+
     ## check files and get total number of flattened obs
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
@@ -140,9 +143,6 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     ## remove bad files form the list
     for file in bad_files.keys():
         files_to_agg.remove(file)
-
-    ## sort the file list in chronological order
-    files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
 
     varlen_list = [0] + varlen_list
     varlen_total = sum(varlen_list)

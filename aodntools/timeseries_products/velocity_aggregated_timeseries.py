@@ -19,12 +19,14 @@ TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_temp
 
 def check_file(nc, site_code):
     """
-    Return list of errors found in the file:
-    Variables of interest are present
-    TIME, DEPTH, LATITUDE, LONGITUDE,  is present
+    Return list of errors found in the file if:
+    site_code does not correspond to provided site code
+    Variables of interest are not  present
+    TIME, DEPTH, LATITUDE, LONGITUDE, are not present
     NOMINAL_DEPTH is not present as variable or attribute
     file_version is not FV01
-    if LATITUDE or LONIGITUDE dimension has length >1
+    the variable has one or more dimension not in allowed dimensions
+    if LATITUDE or LONGITUDE dimension has length >1
 
     :param nc: xarray dataset
     :param site_code: code of the mooring site
@@ -120,9 +122,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     one_day = np.timedelta64(1, 'D')
 
     varlen_list = []
-    bad_files = []
+    bad_files = {}
     varlen_file = []
-    rejected_files = []
 
     # default name for temporary file. It will be renamed at the end
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
@@ -141,18 +142,15 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             if not error_list:
                 varlen_list.append(get_number_flatvalues(nc)[0])
             else:
-                bad_files.append([file, error_list])
-                rejected_files.append(file)
+                bad_files.update({file: error_list})
 
     ## remove bad files form the list
-    for file in bad_files:
-        files_to_agg.remove(file[0])
-
+    for file in bad_files.keys():
+        files_to_agg.remove(file)
 
     varlen_list = [0] + varlen_list
     varlen_total = sum(varlen_list)
     n_files = len(files_to_agg)
-
 
     ## create ncdf file, dimensions and variables
     ds = nc4.Dataset(os.path.join(output_dir, temp_outfile), 'w')
@@ -166,8 +164,6 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     inst_S256_template = {'datatype': 'str', 'dimensions': ('INSTRUMENT')}
     inst_float_template ={'datatype': np.float32, 'dimensions': ('INSTRUMENT')}
     inst_double_template ={'datatype': np.float64, 'dimensions': ('INSTRUMENT')}
-
-
 
     UCUR = ds.createVariable(varname='UCUR', **obs_float_template)
     VCUR = ds.createVariable(varname='VCUR', **obs_float_template)
@@ -268,7 +264,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                     'date_created':             datetime.utcnow().strftime(timeformat),
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
                     'keywords':                 ', '.join(varlist + ['AGGREGATED']),
-                    'rejected_files':           "\n".join(rejected_files),
+                    'rejected_files':           "\n".join(bad_files.keys()),
                     'contributor_name':        "; ".join(contributor_name),
                     'contributor_email':       "; ".join(contributor_email),
                     'contributor_role':        "; ".join(contributor_role),

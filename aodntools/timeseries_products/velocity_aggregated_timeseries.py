@@ -112,7 +112,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     :param output_dir: path where the result file will be written
     :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_agg)
     :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
-    :return: file path of the aggregated product, list of rejected files
+    :return: file path of the aggregated product, dict of rejected files: errors
     """
 
     varlist = ['UCUR', 'VCUR', 'WCUR', 'DEPTH']
@@ -203,7 +203,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             ##calculate depth
             if 'HEIGHT_ABOVE_SENSOR' in nc.dims:
                 DEPTH[start:end] = (nc.DEPTH - nc.HEIGHT_ABOVE_SENSOR).values.flatten()
-                DEPTHqc[start:end] = np.array(n_cells * [nc.DEPTH_quality_control.values]).flatten()
+                DEPTHqc[start:end] = np.repeat(nc.DEPTH_quality_control, n_cells).values
             else:
                 DEPTH[start:end] = nc.DEPTH.values
                 DEPTHqc[start:end] = nc.DEPTH_quality_control.values
@@ -269,7 +269,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
     ## add version
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
-                      '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)
+                      '{v}/aodntools/timeseries_products/{f}'.format(v=__version__, f=os.path.basename(__file__))
                       )
     global_attribute_dictionary['lineage'] += github_comment
 

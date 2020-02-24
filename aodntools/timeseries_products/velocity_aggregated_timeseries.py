@@ -12,7 +12,7 @@ from aodntools import __version__
 
 import xarray as xr
 
-import aggregated_timeseries as utils
+from aodntools.timeseries_products import aggregated_timeseries as utils
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
 
@@ -30,7 +30,7 @@ def check_file(nc, site_code):
 
     :param nc: xarray dataset
     :param site_code: code of the mooring site
-    :return: dictionary with the file name and list of failed tests
+    :return: list of failed tests
     """
 
     attributes = list(nc.attrs)

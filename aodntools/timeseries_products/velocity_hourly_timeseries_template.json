@@ -184,6 +184,10 @@
             "long_name": "count data value in the bin, after rejection of flagged data",
             "cell_methods": "TIME:count"
             },
+        "cell_index": {
+            "long_name": "index of the corresponding measuring cell",
+            "comment": "the closest cell to the sensor is cell 0"
+        },
         "SECONDS_TO_MIDDLE": {
             "long_name": "number of seconds from timestamp to middle of the measurement window"
         }

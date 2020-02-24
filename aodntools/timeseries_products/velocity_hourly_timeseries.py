@@ -269,6 +269,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     LATITUDE = ds.createVariable(varname='LATITUDE', **inst_double_template)
     LONGITUDE = ds.createVariable(varname='LONGITUDE', **inst_double_template)
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
+    cell_index = ds.createVariable(varname='cell_index', **obs_int_template)
+
     #SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
 
 
@@ -295,6 +297,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
             ## in-water data only
             nc = in_water(nc)
+            n_measurements = len(nc.TIME)
 
             ## move timestamp to the middle of the measurement window
             time_delta_ns = int(nc['TIME'].seconds_to_middle_of_measurement * 10**9)
@@ -303,19 +306,21 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             if is_2D:
                 ## process all cells, one by one
                 cells = nc.HEIGHT_ABOVE_SENSOR.values
-                for cell in cells:
+                for cell_idx, cell in enumerate(cells):
                     ## get cell data, drop HEIGHT_ABOVE_SENSOR dim
                     nc_cell = nc.where(nc.HEIGHT_ABOVE_SENSOR == cell, drop=True).squeeze('HEIGHT_ABOVE_SENSOR')
                     ## convert to absolute DEPTH
                     nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell
-
                     slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
                                                      epoch, one_day, is_WCUR)
+                    cell_index[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)
 
                     slice_start = slice_end
             else:
                 slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
                                                  epoch, one_day, is_WCUR)
+                cell_index[slice_start:slice_end] = np.full(slice_end - slice_start, 0, dtype=np.uint32)
+
                 slice_start = slice_end
 
             ## metadata variables

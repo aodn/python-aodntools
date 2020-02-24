@@ -178,6 +178,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     LONGITUDE = ds.createVariable(varname='LONGITUDE', **inst_double_template)
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
     SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
+    CELL_INDEX = ds.createVariable(varname='CELL_INDEX', **obs_int_template)
 
     ## main loop
     for index, file in enumerate(files_to_agg):
@@ -186,6 +187,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
             ## in water data only
             nc = utils.in_water(nc)
+            n_measurements = len(nc.TIME)
+
 
             start = sum(varlen_list[:index + 1])
             end = sum(varlen_list[:index + 2])
@@ -200,13 +203,18 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             else:
                 WCUR[start:end] = np.full(varlen_list[index + 1], np.nan)
                 WCURqc[start:end] = np.full(varlen_list[index + 1], 9)
-            ##calculate depth
+
+            ##calculate depth and add CELL_INDEX
             if 'HEIGHT_ABOVE_SENSOR' in nc.dims:
                 DEPTH[start:end] = (nc.DEPTH - nc.HEIGHT_ABOVE_SENSOR).values.flatten()
                 DEPTHqc[start:end] = np.repeat(nc.DEPTH_quality_control, n_cells).values
+                CELL_INDEX[start:end] = np.array([np.full(n_measurements, cell) for cell in range(n_cells)],
+                                                 dtype=np.uint32)
             else:
                 DEPTH[start:end] = nc.DEPTH.values
                 DEPTHqc[start:end] = nc.DEPTH_quality_control.values
+                CELL_INDEX[start:end] = np.full(varlen_list[index + 1], 0, dtype=np.uint32)
+
             ## set TIME and instrument index
             TIME[start:end] = (np.repeat(flat_variable(nc, 'TIME'), n_cells) - epoch) / one_day
             instrument_index[start:end] = np.repeat(index, varlen_list[index + 1])

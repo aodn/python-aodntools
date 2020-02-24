@@ -144,6 +144,10 @@
         },
         "SECONDS_TO_MIDDLE": {
             "long_name": "number of seconds to middle of the measurement window"
+        },
+        "CELL_INDEX": {
+            "long_name": "index of the corresponding measuring cell",
+            "comment": "the closest cell to the sensor is cell 0"
         }
     },
     "_global":{

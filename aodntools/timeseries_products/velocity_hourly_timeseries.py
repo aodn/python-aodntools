@@ -233,7 +233,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     LATITUDE = ds.createVariable(varname='LATITUDE', **inst_double_template)
     LONGITUDE = ds.createVariable(varname='LONGITUDE', **inst_double_template)
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
-    cell_index = ds.createVariable(varname='cell_index', **obs_int_template)
+    CELL_INDEX = ds.createVariable(varname='CELL_INDEX', **obs_int_template)
 
     #SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
 
@@ -277,13 +277,13 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                     nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell
                     slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
                                                      epoch, one_day, is_WCUR)
-                    cell_index[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)
+                    CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)
 
                     slice_start = slice_end
             else:
                 slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
                                                  epoch, one_day, is_WCUR)
-                cell_index[slice_start:slice_end] = np.full(slice_end - slice_start, 0, dtype=np.uint32)
+                CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, 0, dtype=np.uint32)
 
                 slice_start = slice_end
 

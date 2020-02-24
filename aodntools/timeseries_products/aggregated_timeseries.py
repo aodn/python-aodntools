@@ -1,79 +1,64 @@
 #!/usr/bin/env python3
 
-import sys
-import os.path
-from dateutil.parser import parse
-from datetime import datetime
-import json
-from netCDF4 import Dataset
 import argparse
-from pkg_resources import resource_filename
+import json
+import os
+import shutil
+import tempfile
+from datetime import datetime
 
 import numpy as np
 import xarray as xr
-import pandas as pd
+from netCDF4 import Dataset, num2date
+from pkg_resources import resource_filename
 
 from aodntools import __version__
 
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
 
-
-def sort_files_to_aggregate(files_to_agg, input_dir=''):
+def sort_files(files_to_agg, input_dir=''):
     """
-    sort the list of files to aggregate by time_deployment start attribute
-
-    :param files_to_agg: list of file URLs
+    sort list of files according to deployment date
+    :param files_to_agg: List of files to sort
     :param input_dir: base path where source files are stored
-    :return: list of file URLs
+    :return: sorted list of files
     """
-    file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
+
+    time_start = []
     for file in files_to_agg:
-        with Dataset(os.path.join(input_dir, file)) as nc:
-            try:
-                file_list_dataframe = file_list_dataframe.append({'url': file,
-                                                                'deployment_date': parse(nc.getncattr('time_deployment_start'))},
-                                                                ignore_index=True)
-            except:
-                print(file)
-
-    file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
-
-    return list(file_list_dataframe['url'])
+        with Dataset(os.path.join(input_dir, file)) as ds:
+            time_start.append(np.datetime64(ds.time_deployment_start.rstrip('Z')))
+    tuples = sorted(zip(time_start, files_to_agg))
+    return [t[1] for t in tuples]
 
 
-def check_file(nc, VoI, site_code, variable_attribute_dictionary):
+def check_file(nc, site_code, VoI):
     """
-    Return True the file pass all the following tests:
-    VoI is present
-    TIME is present
-    LATITUDE is present
-    LONGITUDE is present
-    NOMINAL_DEPTH is present as variable or attribute
-    file_version is FV01
-    Return False if at least one of the tests fail
-    if LATITUDE is a dimension has length 1
-    if LONGITUDE is a dimension has length 1
+    Return list of errors found in the file.
+    Checks applied:
+    * Correct site_code
+    * Variables of interest is present
+    * Variables TIME, LATITUDE and LONGITUDE are present
+    * NOMINAL_DEPTH is present as variable or attribute
+    * file_version is FV01
+    * if LATITUDE or LONIGUTDE are dimension, they have length 1
 
-    :param file: name of the netcdf file
     :param nc: xarray dataset
-    :param VoI: string. Variable of Interest
     :param site_code: code of the mooring site
-    :param variable_attribute_dictionary: dictionary of variable attributes
+    :param VoI: string. Variable of Interest
     :return: dictionary with the file name and list of failed tests
     """
 
     attributes = list(nc.attrs)
     variables = list(nc.variables)
-    dimensions = list(nc.dims)
     allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE']
     error_list = []
 
-    nc_site_code = getattr(nc, 'site_code', '')
-    if nc_site_code != site_code:
-        error_list.append('Wrong site_code: ' + nc_site_code)
+    if site_code != nc.site_code:
+        error_list.append('Wrong site_code: ' + site_code)
 
-    nc_file_version = getattr(nc, 'file_version', '')
+    nc_file_version = nc.file_version
     if 'Level 1' not in nc_file_version:
         error_list.append('Wrong file version: ' + nc_file_version)
 
@@ -85,9 +70,6 @@ def check_file(nc, VoI, site_code, variable_attribute_dictionary):
 
     if 'LONGITUDE' not in variables:
         error_list.append('LONGITUDE variable missing')
-
-    if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
-        error_list.append('no NOMINAL_DEPTH')
 
     if VoI not in variables:
         error_list.append(VoI + ' not in file')
@@ -103,11 +85,58 @@ def check_file(nc, VoI, site_code, variable_attribute_dictionary):
             if VoIdimensions[d] not in allowed_dimensions:
                 error_list.append('not allowed dimensions: ' + VoIdimensions[d])
                 break
-        # test the units. not used. To be implemented in the future
-        # if nc[VoI].attrs['units'] != variable_attribute_dictionary[VoI]['units']:
-        #     error_list.append('Wrong units: ' + nc[VoI].attrs['units'])
+
+    if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
+        error_list.append('no NOMINAL_DEPTH')
 
     return error_list
+
+
+def get_variable_values(nc, variable):
+    """
+    Get values of the variable and its QC flags.
+    If variable is not present, nan returned, its QC flags set to 9
+    If variable present but not its QC flags, QC set to 0
+    :param nc: dataset
+    :param variable: name of the variable to get
+    :return: variable values and variable qc flags
+    """
+    n_records = len(nc.TIME)
+    file_variables = list(nc.variables)
+
+    if variable in file_variables:
+        variable_values = nc[variable].values
+        if variable+'_quality_control' in file_variables:
+            variableQC_values = nc[variable+'_quality_control'].values
+        else:
+            variableQC_values = np.repeat(0, n_records)
+    else:
+        variable_values = np.repeat(np.nan, n_records)
+        variableQC_values = np.repeat(9, n_records)
+
+    return variable_values, variableQC_values
+
+
+def get_instrument_id(nc):
+    """
+    Create instrument id based on deployment metadata
+    :param nc: xarray dataset
+    :return: instrumentID as string
+    """
+    return '; '.join([nc.deployment_code, nc.instrument, nc.instrument_serial_number])
+
+
+def in_water(nc):
+    """
+    cut data the entire dataset to in-water only timestamps, dropping the out-of-water records.
+    :param nc: xarray dataset
+    :return: xarray dataset
+    """
+    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
+    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
+    TIME = nc['TIME'][:]
+    return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)
+
 
 def get_nominal_depth(nc):
     """
@@ -125,11 +154,12 @@ def get_nominal_depth(nc):
 
     return nominal_depth
 
+
 def get_contributors(files_to_agg, input_dir=''):
     """
     get the author and principal investigator details for each file
 
-    :param files_to_aggregate: list of files
+    :param files_to_agg: list of files
     :param input_dir: base path where source files are stored
     :return: list: contributor_name, email and role
     """
@@ -144,71 +174,12 @@ def get_contributors(files_to_agg, input_dir=''):
                 contributors.add((nc.author, nc.author_email, 'author'))
             if all(att in attributes for att in ['principal_investigator', 'principal_investigator_email']):
                 contributors.add((nc.principal_investigator, nc.principal_investigator_email, 'principal_investigator'))
-
     for item in contributors:
         contributor_name.append(item[0])
         contributor_email.append(item[1])
         contributor_role.append(item[2])
 
-
     return contributor_name, contributor_email, contributor_role
-
-def set_globalattr(agg_dataset, templatefile, varname, site, add_attribute):
-    """
-    global attributes from a reference nc file and nc file
-
-    :param agg_dataset: aggregated xarray dataset
-    :param templatefile: name of the attributes JSON file
-    :param varname: name of the variable of interest to aggregate
-    :param site: site code
-    :param add_attribute: dictionary of additional attributes to add name:value
-    :return: dictionary of global attributes
-    """
-
-    timeformat = '%Y-%m-%dT%H:%M:%SZ'
-    with open(templatefile) as json_file:
-        global_metadata = json.load(json_file)["_global"]
-
-    agg_attr = {'title':                    ("Long Timeseries Aggregated product: " + varname + " at " + site + " between " + \
-                                             pd.to_datetime(agg_dataset.TIME.values.min()).strftime(timeformat) + " and " + \
-                                             pd.to_datetime(agg_dataset.TIME.values.max()).strftime(timeformat)),
-                'site_code':                site,
-                'local_time_zone':          '',
-                'time_coverage_start':      pd.to_datetime(agg_dataset.TIME.values.min()).strftime(timeformat),
-                'time_coverage_end':        pd.to_datetime(agg_dataset.TIME.values.max()).strftime(timeformat),
-                'geospatial_vertical_min':  float(agg_dataset.DEPTH.min()),
-                'geospatial_vertical_max':  float(agg_dataset.DEPTH.max()),
-                'geospatial_lat_min':       agg_dataset.LATITUDE.values.min(),
-                'geospatial_lat_max':       agg_dataset.LATITUDE.values.max(),
-                'geospatial_lon_min':       agg_dataset.LONGITUDE.values.min(),
-                'geospatial_lon_max':       agg_dataset.LONGITUDE.values.max(),
-                'date_created':             datetime.utcnow().strftime(timeformat),
-                'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
-                'keywords':                 ', '.join(list(agg_dataset.variables) + ['AGGREGATED'])}
-    global_metadata.update(agg_attr)
-    global_metadata.update(add_attribute)
-
-    return dict(sorted(global_metadata.items()))
-
-
-def set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute):
-    """
-    set variables variables atributes
-
-    :param varlist: list of variable names
-    :param variable_attribute_dictionary: dictionary of the variable attributes
-    :param add_variable_attribute: additional attributes to add
-    :return: dictionary of attributes
-    """
-
-    # with open(templatefile) as json_file:
-    #     variable_metadata = json.load(json_file)['_variables']
-    variable_attributes = {key: variable_attribute_dictionary[key] for key in varlist}
-    if len(add_variable_attribute)>0:
-        for key in add_variable_attribute.keys():
-            variable_attributes[key].update(add_variable_attribute[key])
-
-    return variable_attributes
 
 
 def get_data_code(VoI):
@@ -236,8 +207,12 @@ def get_data_code(VoI):
                  'DOXS':        'O',
                  'CPHL':        'B',
                  'CHLU':        'B',
-                 'CHLF':        'B'}
+                 'CHLF':        'B',
+                 'UCUR':        'V',
+                 'VCUR':        'V',
+                 'WCUR':        'V'}
     return dataCodes[VoI]
+
 
 def get_facility_code(fileURL):
     """
@@ -250,66 +225,16 @@ def get_facility_code(fileURL):
     return os.path.basename(fileURL).split("_")[1]
 
 
-def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code, product_type, file_version):
-    """
-    generate the output filename for the VoI netCDF file
-
-    :param nc: aggregated dataset
-    :param facility_code: facility code from file name
-    :param data_code: data code sensu IMOS convention
-    :param VoI: name of the variable to aggregate
-    :param product_type: name of the product
-    :param file_version: version of the output file
-    :return: name of the output file
-    """
-
-    file_timeformat = '%Y%m%d'
-
-    if '_' in VoI:
-        VoI = VoI.replace('_', '-')
-    t_start = pd.to_datetime(nc.TIME.min().values).strftime(file_timeformat)
-    t_end = pd.to_datetime(nc.TIME.max().values).strftime(file_timeformat)
-
-    output_name = '_'.join(['IMOS', facility_code, data_code, t_start, site_code, ('FV0'+str(file_version)), (VoI+"-"+product_type), ('END-'+ t_end), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
-
-    return output_name
-
-def create_empty_dataframe(columns):
-    """
-    create empty dataframe from a dict with data types
-
-    :param: variable name and variable file. List of tuples
-    :return: empty dataframe
-    """
-
-    return pd.DataFrame({k: pd.Series(dtype=t) for k, t in columns})
-
-
-def write_netCDF_aggfile(agg_dataset, output_path, encoding):
-    """
-    write netcdf file
-
-    :param agg_dataset: aggregated xarray dataset
-    :param output_path: full path of the netCDF file to be written
-    :return: name of the netCDf file written
-    """
-
-    agg_dataset.to_netcdf(output_path, encoding=encoding, format='NETCDF4_CLASSIC')
-
-    return output_path
-
-
 def source_file_attributes(download_url_prefix, opendap_url_prefix):
     """
     If relevant URL prefixes are specified, return attributes to add to the source_file variable to describe their use.
-
     :param download_url_prefix: prefix string for download URLs
     :param opendap_url_prefix: prefix string for OPENDAP URLs
     :return: dictionary of attributes to add to the source_file variable
     """
     attributes = {'comment': "This variable lists the relative path of each input file."}
     if download_url_prefix:
-        attributes['comment'] += (" To obain a download URL for a file, "
+        attributes['comment'] += (" To obtain a download URL for a file, "
                                   "append its path to the download_url_prefix attribute.")
         attributes['download_url_prefix'] = download_url_prefix
     if opendap_url_prefix:
@@ -319,231 +244,198 @@ def source_file_attributes(download_url_prefix, opendap_url_prefix):
     return attributes
 
 
-## MAIN FUNCTION
-def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_dir='./', download_url_prefix=None,
-                    opendap_url_prefix=None):
-    """
-    Aggregates the variable of interest, its coordinates, quality control and metadata variables, from each file in
-    the list into a netCDF file and returns its file name.
 
+## MAIN FUNCTION
+def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_dir='./',
+                    download_url_prefix=None, opendap_url_prefix=None):
+    """
+    Aggregate the Variable of Interest (VoI) from all deployments at one site.
+    additional metadata variables are stored to track the origin of the data
     :param files_to_agg: List of files to aggregate. Each path is interpreted relative to input_dir (if specified).
                          These relative paths are listed in the `source_files` variable in the output file.
-    :param var_to_agg: Name of variable to aggregate.
-    :param site_code: code of the mooring site.
+    :param site_code: site code
+    :param var_to_agg: Variable of Interest
     :param input_dir: base path where source files are stored
     :param output_dir: path where the result file will be written
     :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_agg)
     :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
-    :return: File path of the aggregated product
-    :rtype: string
+    :return: name of the resulting file, list of rejected files
     """
 
-    ## constants
-    FILLVALUE = 999999.0
+    time_units="days since 1950-01-01 00:00:00 UTC"
+    time_calendar="gregorian"
+    epoch = np.datetime64("1950-01-01T00:00:00")
+    one_day = np.timedelta64(1, 'D')
 
-    ## sort the file URL in chronological order of deployment
-    files_to_agg = sort_files_to_aggregate(files_to_agg, input_dir=input_dir)
+    varlen_list = []
+    bad_files = {}
+    rejected_files = []
 
-    var_to_agg_qc = var_to_agg + '_quality_control'
-    ## create empty DF for main and auxiliary variables
-    MainDF_types = [(var_to_agg, float),
-                    (var_to_agg_qc, np.byte),
-                    ('TIME', np.float64),
-                    ('DEPTH', float),
-                    ('DEPTH_quality_control', np.byte),
-                    ('PRES', np.float64),
-                    ('PRES_quality_control', np.byte),
-                    ('PRES_REL', np.float64),
-                    ('PRES_REL_quality_control', np.byte),
-                    ('instrument_index', int)]
+    # default name for temporary file. It will be renamed at the end
+    _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
-    AuxDF_types = [('source_file', str),
-                   ('instrument_id', str),
-                   ('LONGITUDE', float),
-                   ('LATITUDE', float),
-                   ('NOMINAL_DEPTH', float)]
+    ## sort the file list in chronological order
+    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
-    variableMainDF = create_empty_dataframe(MainDF_types)
-    variableAuxDF = create_empty_dataframe(AuxDF_types)
+    ## check files and get total number of flattened obs
+    for file in files_to_agg:
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
+
+            error_list = check_file(nc, site_code, var_to_agg)
+            if not error_list:
+                nc = in_water(nc)
+                varlen_list.append(len(nc.TIME))
+            else:
+                bad_files.update({file: error_list})
+                rejected_files.append(file)
+
+    ## remove bad files form the list
+    for file in bad_files.keys():
+        files_to_agg.remove(file)
+
+    varlen_list = [0] + varlen_list
+    varlen_total = sum(varlen_list)
+    n_files = len(files_to_agg)
+
+    ## create ncdf file, dimensions and variables
+    ds = Dataset(os.path.join(output_dir, temp_outfile), 'w')
+    OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
+    INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
+
+    obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION',), "fill_value": 99999.0}
+    obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION',), "fill_value": 99999.0}
+    obs_byte_template = {'datatype': np.byte, 'zlib': True, 'dimensions': ('OBSERVATION',), 'fill_value': 99}
+    obs_int_template = {'datatype': np.uint32, 'zlib': True, 'dimensions': ('OBSERVATION',)}
+    inst_str_template = {'datatype': 'str', 'dimensions': ('INSTRUMENT',)}
+    inst_float_template = {'datatype': np.float32, 'dimensions': ('INSTRUMENT',), "fill_value": 99999.0}
+
+    agg_variable = ds.createVariable(varname=var_to_agg, **obs_float_template)
+    agg_variable_qc = ds.createVariable(varname=var_to_agg + '_quality_control', **obs_byte_template)
+    DEPTH = ds.createVariable(varname='DEPTH', **obs_float_template)
+    DEPTHqc = ds.createVariable(varname='DEPTH_quality_control', **obs_byte_template)
+    PRES = ds.createVariable(varname='PRES', **obs_float_template)
+    PRESqc = ds.createVariable(varname='PRES_quality_control', **obs_byte_template)
+    PRES_REL = ds.createVariable(varname='PRES_REL', **obs_float_template)
+    PRES_RELqc = ds.createVariable(varname='PRES_REL_quality_control', **obs_byte_template)
+
+    TIME = ds.createVariable(varname='TIME', **obs_double_template)
+    instrument_index = ds.createVariable(varname='instrument_index', **obs_int_template)
+
+    source_file = ds.createVariable(varname='source_file', **inst_str_template)
+    instrument_id = ds.createVariable(varname='instrument_id', **inst_str_template)
+    LATITUDE = ds.createVariable(varname='LATITUDE', **obs_double_template)
+    LONGITUDE = ds.createVariable(varname='LONGITUDE', **obs_double_template)
+    NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
 
     ## main loop
+    for index, file in enumerate(files_to_agg):
+        with xr.open_dataset(os.path.join(input_dir, file)) as nc:
+            nc = in_water(nc)
+            start = sum(varlen_list[:index + 1])
+            end = sum(varlen_list[:index + 2])
+            agg_variable[start:end], agg_variable_qc[start:end] = get_variable_values(nc, var_to_agg)
+            DEPTH[start:end], DEPTHqc[start:end] = get_variable_values(nc, 'DEPTH')
+            PRES[start:end], PRESqc[start:end] = get_variable_values(nc, 'PRESS')
+            PRES_REL[start:end], PRES_RELqc[start:end] = get_variable_values(nc, 'PRESS_REL')
 
-    ## get the variables attribute dictionary
+            ## set TIME and instrument index
+            TIME[start:end] = (nc.TIME.values - epoch) / one_day
+            instrument_index[start:end] = np.repeat(index, varlen_list[index+1])
+            ## get and store deployment metadata
+            LATITUDE[index] = nc.LATITUDE.values
+            LONGITUDE[index] = nc.LONGITUDE.values
+            NOMINAL_DEPTH[index] = get_nominal_depth(nc)
+            source_file[index] = file
+            instrument_id[index] = get_instrument_id(nc)
+
+
+    ## add atributes
     with open(TEMPLATE_JSON) as json_file:
-        variable_attribute_dictionary = json.load(json_file)['_variables']
+        attribute_dictionary = json.load(json_file)
+    variable_attribute_dictionary = attribute_dictionary['_variables']
+    global_attribute_dictionary = attribute_dictionary['_global']
 
-    fileIndex = 0
-    rejected_files = []
-    bad_files = {}
-    applied_offset =[]      ## to store the PRES_REL attribute which could vary by deployment
-    for file in files_to_agg:
-        print(fileIndex, end=" ")
-        sys.stdout.flush()
+    ## set variable attrs
+    for var in list(ds.variables):
+        ds[var].setncatts(variable_attribute_dictionary[var])
 
-        try:
-            ## it will open the netCDF files as a xarray Dataset
-            with xr.open_dataset(os.path.join(input_dir, file), decode_times=True) as nc:
-                ## do only if the file pass all the sanity tests
-                file_problems = check_file(nc, var_to_agg, site_code, variable_attribute_dictionary)
-                if file_problems == []:
-                    varnames = list(nc.variables.keys())
-                    nobs = len(nc.TIME)
-
-                    ## get the in-water times
-                    ## important to remove the timezone aware of the converted datetime object from a string
-                    time_deployment_start = pd.to_datetime(parse(nc.attrs['time_deployment_start'])).tz_localize(None)
-                    time_deployment_end = pd.to_datetime(parse(nc.attrs['time_deployment_end'])).tz_localize(None)
-
-                    DF = pd.DataFrame({ var_to_agg: nc[var_to_agg].squeeze(),
-                                        var_to_agg_qc: nc[var_to_agg + '_quality_control'].squeeze(),
-                                        'TIME': nc.TIME.squeeze(),
-                                        'instrument_index': np.repeat(fileIndex, nobs)})
-
-                    ## check for DEPTH/PRES variables in the nc and its qc flags
-                    if 'DEPTH' in varnames:
-                        DF['DEPTH'] = nc.DEPTH.squeeze()
-                        if 'DEPTH_quality_control' in varnames:
-                            DF['DEPTH_quality_control'] = nc.DEPTH_quality_control.squeeze()
-                        else:
-                            DF['DEPTH_quality_control'] = np.repeat(0, nobs)
-                    else:
-                        DF['DEPTH'] = np.repeat(FILLVALUE, nobs)
-                        DF['DEPTH_quality_control'] = np.repeat(9, nobs)
-
-                    if 'PRES' in varnames:
-                        DF['PRES'] = nc.PRES.squeeze()
-                        if 'PRES_quality_control' in varnames:
-                            DF['PRES_quality_control'] = nc.PRES_quality_control.squeeze()
-                        else:
-                            DF['PRES_quality_control'] = np.repeat(0, nobs)
-                    else:
-                        DF['PRES'] = np.repeat(FILLVALUE, nobs)
-                        DF['PRES_quality_control'] = np.repeat(9, nobs)
-
-                    if 'PRES_REL' in varnames:
-                        DF['PRES_REL'] = nc.PRES_REL.squeeze()
-                        try:
-                            applied_offset.append(nc.PRES_REL.applied_offset)
-                        except:
-                            applied_offset.append(np.nan)
-                        if 'PRES_REL_quality_control' in varnames:
-                            DF['PRES_REL_quality_control'] = nc.PRES_REL_quality_control.squeeze()
-                        else:
-                            DF['PRES_REL_quality_control'] = np.repeat(0, nobs)
-                    else:
-                        DF['PRES_REL'] = np.repeat(FILLVALUE, nobs)
-                        DF['PRES_REL_quality_control'] = np.repeat(9, nobs)
-                        applied_offset.append(np.nan)
-
-
-                    ## select only in water data
-                    DF = DF[(DF['TIME']>=time_deployment_start) & (DF['TIME']<=time_deployment_end)]
-
-                    ## append data
-                    variableMainDF = pd.concat([variableMainDF, DF], ignore_index=True, sort=False)
-
-
-                    # append auxiliary data
-                    variableAuxDF = variableAuxDF.append({'source_file': file,
-                                                          'instrument_id': nc.attrs['deployment_code'] + '; ' + nc.attrs['instrument'] + '; ' + nc.attrs['instrument_serial_number'],
-                                                          'LONGITUDE': nc.LONGITUDE.squeeze().values,
-                                                          'LATITUDE': nc.LATITUDE.squeeze().values,
-                                                          'NOMINAL_DEPTH': get_nominal_depth(nc)}, ignore_index = True)
-                    fileIndex += 1
-                else:
-                    rejected_files.append(file)
-                    bad_files.update({file: file_problems})
-        except:
-            print("FILE NOT FOUND: " + file, file=sys.stderr)
-
-    print()
-
-
-    ## rename indices
-    variableAuxDF.index.rename('INSTRUMENT', inplace=True)
-    variableMainDF.index.rename('OBSERVATION', inplace=True)
-
-    ## get the list of variables
-    varlist = list(variableMainDF.columns) + list(variableAuxDF.columns)
-
-    ## set variable attributes
-    add_variable_attribute = {'PRES_REL': {'applied_offset_by_instrument': applied_offset}}
     if download_url_prefix or opendap_url_prefix:
-        add_variable_attribute['source_file'] = source_file_attributes(download_url_prefix, opendap_url_prefix)
-    variable_attributes = set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute)
-    time_units = variable_attributes['TIME'].pop('units')
-    time_calendar = variable_attributes['TIME'].pop('calendar')
+        ds['source_file'].setncatts(source_file_attributes(download_url_prefix, opendap_url_prefix))
 
-    ## build the output file
-    agg_dataset = xr.Dataset({var_to_agg:                   (['OBSERVATION'],variableMainDF[var_to_agg].astype('float32'), variable_attributes[var_to_agg]),
-                          var_to_agg + '_quality_control':  (['OBSERVATION'],variableMainDF[var_to_agg_qc].astype(np.byte), variable_attributes[var_to_agg+'_quality_control']),
-                          'TIME':                           (['OBSERVATION'],variableMainDF['TIME'], variable_attributes['TIME']),
-                          'DEPTH':                          (['OBSERVATION'],variableMainDF['DEPTH'].astype('float32'), variable_attributes['DEPTH']),
-                          'DEPTH_quality_control':          (['OBSERVATION'],variableMainDF['DEPTH_quality_control'].astype(np.byte), variable_attributes['DEPTH_quality_control']),
-                          'PRES':                           (['OBSERVATION'],variableMainDF['PRES'].astype('float32'), variable_attributes['PRES']),
-                          'PRES_quality_control':           (['OBSERVATION'],variableMainDF['PRES_quality_control'].astype(np.byte), variable_attributes['PRES_quality_control']),
-                          'PRES_REL':                       (['OBSERVATION'],variableMainDF['PRES_REL'].astype('float32'), variable_attributes['PRES_REL']),
-                          'PRES_REL_quality_control':       (['OBSERVATION'],variableMainDF['PRES_REL_quality_control'].astype(np.byte), variable_attributes['PRES_REL_quality_control']),
-                          'instrument_index':               (['OBSERVATION'],variableMainDF['instrument_index'].astype('int64'), variable_attributes['instrument_index']),
-                          'LONGITUDE':                      (['INSTRUMENT'], variableAuxDF['LONGITUDE'].astype('float32'), variable_attributes['LONGITUDE']),
-                          'LATITUDE':                       (['INSTRUMENT'], variableAuxDF['LATITUDE'].astype('float32'), variable_attributes['LATITUDE']),
-                          'NOMINAL_DEPTH':                  (['INSTRUMENT'], variableAuxDF['NOMINAL_DEPTH']. astype('float32'), variable_attributes['NOMINAL_DEPTH']),
-                          'instrument_id':                  (['INSTRUMENT'], variableAuxDF['instrument_id'].astype('|S256'), variable_attributes['instrument_id'] ),
-                          'source_file':                    (['INSTRUMENT'], variableAuxDF['source_file'].astype('|S256'), variable_attributes['source_file'])})
+    ## set global attrs
+    timeformat = '%Y-%m-%dT%H:%M:%SZ'
+    file_timeformat = '%Y%m%d'
 
+    time_start = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(timeformat)
+    time_end = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(timeformat)
+    time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
+    time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    ## Set global attrs
-    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg, input_dir=input_dir)
-    add_attribute = {'rejected_files': "\n".join(rejected_files),
-                     'contributor_name': "; ".join(contributor_name),
-                     'contributor_email': "; ".join(contributor_email),
-                     'contributor_role': "; ".join(contributor_role),
-                     'generating_code_version': __version__
-                     }
-    agg_dataset.attrs = set_globalattr(agg_dataset, TEMPLATE_JSON, var_to_agg, site_code, add_attribute)
+    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
+    add_attribute = {
+                    'title':                    ("Long Timeseries Velocity Aggregated product: " + var_to_agg + " at " +
+                                                 site_code + " between " + time_start + " and " + time_end),
+                    'site_code':                site_code,
+                    'time_coverage_start':      time_start,
+                    'time_coverage_end':        time_end,
+                    'geospatial_vertical_min':  np.min(ds['DEPTH']),
+                    'geospatial_vertical_max':  np.max(ds['DEPTH']),
+                    'geospatial_lat_min':       np.min(ds['LATITUDE']),
+                    'geospatial_lat_max':       np.max(ds['LATITUDE']),
+                    'geospatial_lon_min':       np.min(ds['LONGITUDE']),
+                    'geospatial_lon_max':       np.max(ds['LONGITUDE']),
+                    'date_created':             datetime.utcnow().strftime(timeformat),
+                    'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
+                    'keywords':                 ', '.join([var_to_agg, 'AGGREGATED']),
+                    'rejected_files':           "\n".join(rejected_files),
+                    'contributor_name':         "; ".join(contributor_name),
+                    'contributor_email':        "; ".join(contributor_email),
+                    'contributor_role':         "; ".join(contributor_role),
+                    'generating_code_version':  __version__}
 
-    ## add version
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
                       '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)
                       )
+    global_attribute_dictionary['lineage'] += github_comment
+    global_attribute_dictionary.update(add_attribute)
+    ds.setncatts(dict(sorted(global_attribute_dictionary.items())))
 
-    agg_dataset.attrs['lineage'] += github_comment
+    ds.close()
 
-    ## create the output file name and write the aggregated product as netCDF
+    ## create the output file name and rename the tmp file
     facility_code = get_facility_code(os.path.join(input_dir, files_to_agg[0]))
     data_code = get_data_code(var_to_agg) + 'Z'
-    product_type='aggregated-timeseries'
-    file_version=1
-    ncout_filename = generate_netcdf_output_filename(nc=agg_dataset, facility_code=facility_code, data_code=data_code, VoI=var_to_agg, site_code=site_code, product_type=product_type, file_version=file_version)
-    ncout_path = os.path.join(output_dir, ncout_filename)
-
-    encoding = {'TIME':                     {'_FillValue': False,
-                                             'units': time_units,
-                                             'calendar': time_calendar},
-                'LONGITUDE':                {'_FillValue': False},
-                'LATITUDE':                 {'_FillValue': False},
-                'instrument_id':            {'dtype': '|S256'},
-                'source_file':              {'dtype': '|S256'}}
-
-    write_netCDF_aggfile(agg_dataset, ncout_path, encoding)
+    product_type = 'aggregated-timeseries'
+    file_version = 1
+    output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),
+                            (var_to_agg + "-" + product_type),
+                            ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
+    ncout_path = os.path.join(output_dir, output_name)
+    shutil.move(temp_outfile, os.path.join(output_dir, ncout_path))
 
     return ncout_path, bad_files
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Concatenate ONE variable from ALL instruments from ALL deployments from ONE site")
-    parser.add_argument('-var', dest='varname', help='name of the variable to concatenate. Like TEMP, PSAL', required=True)
+    parser = argparse.ArgumentParser(description="Aggregate ONE variable from ALL instruments from ALL deployments from ONE site")
     parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
+    parser.add_argument('-var', dest='varname', help='variable to aggregate, like TEMP', required=True)
     parser.add_argument('-files', dest='filenames',
                         help='name of the file that contains the source URLs (relative to inpath, if given)',
                         required=True)
     parser.add_argument('-indir', dest='input_dir', help='base path of input files', default='', required=False)
     parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default ./',
                         default='./', required=False)
+    parser.add_argument('-download_url', dest='download_url', help='path to the download_url_prefix',
+                        default='', required=False)
+    parser.add_argument('-opendap_url', dest='opendap_url', help='path to the opendap_url_prefix',
+                        default='', required=False)
     args = parser.parse_args()
 
-    files_to_aggregate = pd.read_csv(args.filenames, header=None)[0].tolist()
+    with open(os.path.join(args.input_dir,args.filenames)) as ff:
+        files_to_agg = [line.rstrip() for line in ff]
 
-    print(main_aggregator(files_to_agg=files_to_aggregate, var_to_agg=args.varname, site_code=args.site_code,
-                          input_dir=args.input_dir, output_dir=args.output_dir))
+    print(main_aggregator(files_to_agg=files_to_agg, var_to_agg=args.varname, site_code=args.site_code,
+                          input_dir=args.input_dir, output_dir=args.output_dir,
+                          download_url_prefix=args.download_url, opendap_url_prefix=args.opendap_url))

@@ -10,7 +10,7 @@ import argparse
 
 from pkg_resources import resource_filename
 from aodntools import __version__
-import aodntools.timeseries_products.aggregated_timeseries as TStools
+import aodntools.timeseries_products.aggregated_timeseries as utils
 
 import xarray as xr
 import pandas as pd
@@ -224,7 +224,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
         files_to_agg.remove(file[0])
 
     ## sort the files in chronological order
-    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
+    files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
 
 
     ## create ncdf file, dimensions (unlimited) and variables
@@ -327,7 +327,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             instrument_index[slice_instrument_start:slice_end] = np.repeat(index, slice_end - slice_instrument_start)
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
-            NOMINAL_DEPTH[index] = np.array(TStools.get_nominal_depth(nc))
+            NOMINAL_DEPTH[index] = np.array(utils.get_nominal_depth(nc))
             instrument_id[index] = get_instrument_id(nc)
             source_file[index] = file
 
@@ -343,7 +343,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
         ds[var].setncatts(variable_attribute_dictionary[var])
 
     if download_url_prefix or opendap_url_prefix:
-        ds['source_file'].setncatts(TStools.source_file_attributes(download_url_prefix, opendap_url_prefix))
+        ds['source_file'].setncatts(utils.source_file_attributes(download_url_prefix, opendap_url_prefix))
 
     ## set global attrs
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
@@ -355,7 +355,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
 
-    contributor_name, contributor_email, contributor_role = TStools.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
+    contributor_name, contributor_email, contributor_role = utils.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Hourly Aggregated product: " + ', '.join(varlist) + " at " +
                                                   site_code + " between " + time_start + " and " + time_end),
@@ -396,7 +396,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
 
     ## create the output file name and rename the tmp file
-    facility_code = TStools.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
+    facility_code = utils.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
     data_code = 'VZ'
     product_type = 'hourly-timeseries'
     file_version = 1

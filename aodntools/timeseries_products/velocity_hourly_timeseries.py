@@ -19,21 +19,6 @@ import pandas as pd
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
 
 
-def sort_files(file_list, input_dir=""):
-    """
-    sort list of files according to deployment date
-    :param file_list: List of files to sort
-    :return: sorted list of files
-    """
-
-    time_start = []
-    for file in file_list:
-        with Dataset(os.path.join(input_dir, file), 'r') as ds:
-            time_start.append(np.datetime64(ds.time_deployment_start))
-    tuples = sorted(zip(time_start, files_to_agg))
-    return [t[1] for t in tuples]
-
-
 def check_file(nc, site_code):
     """
     Return list of errors found in the file:
@@ -92,27 +77,6 @@ def check_file(nc, site_code):
         error_list.append('no NOMINAL_DEPTH')
 
     return error_list
-
-def get_instrument_id(nc):
-    """
-    Create instrument id based on deployment metadata
-    :param nc: xarray dataset
-    :return: instrumentID as string
-    """
-    return '; '.join([nc.deployment_code, nc.instrument, nc.instrument_serial_number])
-
-
-def in_water(nc):
-    """
-    cut data the entire dataset to in-water only timestamps, dropping the out-of-water records.
-    :param nc: xarray dataset
-    :return: xarray dataset
-    """
-    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
-    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
-    TIME = nc['TIME'][:]
-    return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)
-
 
 def cell_velocity_resample(df, binning_function, is_WCUR):
     """
@@ -212,7 +176,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     for index, file in enumerate(files_to_agg):
         print(index, end=',', flush=True)
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
-            nc = in_water(nc)
+            nc = utils.in_water(nc)
             error_list = check_file(nc, site_code)
             if error_list:
                 bad_files.append([file, error_list])
@@ -296,7 +260,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 is_WCUR = False
 
             ## in-water data only
-            nc = in_water(nc)
+            nc = utils.in_water(nc)
             n_measurements = len(nc.TIME)
 
             ## move timestamp to the middle of the measurement window
@@ -328,7 +292,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = np.array(utils.get_nominal_depth(nc))
-            instrument_id[index] = get_instrument_id(nc)
+            instrument_id[index] = utils.get_instrument_id(nc)
             source_file[index] = file
 
     print(" ")

@@ -37,7 +37,6 @@ Generating function:
 
 ```
 usage: velocity_aggregated_timeseries.py [-h] -site SITE_CODE -files FILENAMES
-                                         [-path OUTPUT_PATH]
                                          [-indir INPUT_DIR]
                                          [-outdir OUTPUT_DIR]
                                          [-download_url DOWNLOAD_URL]
@@ -50,7 +49,6 @@ optional arguments:
   -h, --help                    show this help message and exit
   -site SITE_CODE               site code, like NRMMAI
   -files FILENAMES              name of the file that contains the source URLs
-  -path OUTPUT_PATH             path where the result file will be written. Default: ./
   -indir INPUT_DIR              base path of input files
   -outdir OUTPUT_DIR            path where the result file will be written. Default ./
   -download_url DOWNLOAD_URL    path to the download_url_prefix
@@ -71,7 +69,6 @@ The dimensions of the resulting file  are determined as follows:
 
 - `OBSERVATION`:    the total number of observation records, excluding out-of-the-water data, in all input files;
 - `INSTRUMENT`:     the number of instruments (i.e. number of files);
-- `string`:         a string dimension for character array variables.
 
 ### Variables
 
@@ -86,8 +83,8 @@ All output variables with the `INSTRUMENT` dimension are sorted in chronological
 In order to keep track of the provenance of the aggregated file, accessory variables are created:
 
 - `instrument_index(OBSERVATION)`: index [0:number of files] of the instrument used, referencing the `INSTRUMENT` dimension.
-- `source_file(INSTRUMENT, string)`: URLs of the files used
-- `instrument_id(INSTRUMENT, string)`: concatenated deployment_code, instrument and instrument_serial_number from the global attributes of each file
+- `source_file(INSTRUMENT)`: URLs of the files used
+- `instrument_id(INSTRUMENT)`: concatenated deployment_code, instrument and instrument_serial_number from the global attributes of each file
 - `LATITUDE(INSTRUMENT)`: LATITUDE per instrument.
 - `LONGITUDE(INSTRUMENT)`: LONGITUDE per instrument.
 - `NOMINAL_DEPTH(INSTRUMENT)`: nominal depth per instrument, from the input file’s variable `NOMINAL_DEPTH` or global attribute instrument_nominal_depth.
@@ -98,7 +95,7 @@ In order to keep track of the provenance of the aggregated file, accessory varia
 
 The variable attributes will comply with the IMOS metadata standards.
 
-The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a JSON file that contains the {key:value} pairs for each of them. See the contents of this file at the end of this document. 
+The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](aodntools/timeseries_products/velocity_aggregated_timeseries_template.json) that contains the {key:value} pairs for each of them.
 
 Attributes specific to each aggregated product, are added as follows:
 
@@ -110,14 +107,14 @@ Attributes specific to each aggregated product, are added as follows:
 - `date_created`: set to the date/time the product file is created;
 - `history`: set to “<date_created>: Aggregated file created.”;
 - `keywords`: set to a comma-separated list of the main variable names (“UCUR, VCUR, WCUR, DEPTH, AGGREGATED”);
-- `lineage`: a statement about how the file was created, including a link to the code used, and any input parameters (except the input files, which are listed in the source_file variable)
-- `title`: "Long Timeseries Velocity Aggregated product: UCUR, VCUR, WCUR, DEPTH at <site_code>  between <time_coverage_start> and <time_coverage_end>"
+- `lineage`: a statement about how the file was created, including a link to the code used; 
+- `title`: "Long Timeseries Velocity Aggregated product: UCUR, VCUR, WCUR, DEPTH at <site_code>  between <time_coverage_start> and <time_coverage_end>"; 
 - `rejected_files`: a list of URLs for files that were in the input files list, but did not meet the input requirements. 
 
 
 ## Output
 
-The output from a single run of the code will be an aggregated file of all available measurements of a single non-velocity variable at one mooring site.
+The output from a single run of the code will be an aggregated file of all available current velocity measurements at one mooring site.
 
 The product will be delivered, in netCDF4 format, compliant with the CF-1.6 and IMOS-1.4 conventions, and structured according to the [indexed ragged array representation](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_indexed_ragged_array_representation).
 

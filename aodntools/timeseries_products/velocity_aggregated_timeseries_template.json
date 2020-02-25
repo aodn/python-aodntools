@@ -1,0 +1,176 @@
+{
+    "_variables": {
+        "TIME": {
+            "axis": "T",
+            "comment": "time aggregated from all files excluding out-of-water records",
+            "long_name": "time",
+            "standard_name": "time",
+            "valid_max": 90000.0,
+            "valid_min": 0.0,
+            "units": "days since 1950-01-01 00:00:00 UTC",
+            "calendar": "gregorian"
+            },
+        "LATITUDE":{
+            "axis": "Y",
+            "long_name": "latitude",
+            "reference_datum": "WGS84 geographic coordinate system",
+            "standard_name": "latitude",
+            "units": "degrees_north",
+            "valid_max": 90.0,
+            "valid_min": -90.0
+            },
+        "LONGITUDE": {
+            "axis": "X",
+            "long_name": "longitude",
+            "reference_datum": "WGS84 geographic coordinate system",
+            "standard_name": "longitude",
+            "units": "degrees_east",
+            "valid_max": 180.0,
+            "valid_min": -180.0
+            },
+        "DEPTH": {
+            "ancillary_variables": "DEPTH_quality_control",
+            "coordinates": "TIME LATITUDE LONGITUDE NOMINAL_DEPTH",
+            "long_name": "actual depth",
+            "positive": "down",
+            "reference_datum": "sea surface",
+            "standard_name": "depth",
+            "units": "m",
+            "valid_max": 12000.0,
+            "valid_min": -5.0
+            },
+        "DEPTH_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for depth",
+            "standard_name": "depth status_flag"
+            },
+        "NOMINAL_DEPTH": {
+            "axis": "Z",
+            "long_name": "nominal depth",
+            "positive": "down",
+            "reference_datum": "sea surface",
+            "standard_name": "depth",
+            "units": "m",
+            "valid_max": 12000.0,
+            "valid_min": -5.0
+            },
+        "PRES": {
+            "ancillary_variables": "PRES_quality_control",
+            "long_name": "sea_water_pressure_due_to_sea_water",
+            "standard_name": "sea_water_pressure_due_to_sea_water",
+            "units": "dbar",
+            "valid_max": 12000.0,
+            "valid_min": -15.0,
+            "_FillValue": 999999.0
+            },
+        "PRES_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "sea_water_pressure status_flag",
+            "standard_name": "depth status_flag",
+            "_FillValue": 99
+            },
+        "PRES_REL": {
+            "ancillary_variables": "PRES_REL_quality_control",
+            "long_name": "sea_water_pressure_due_to_sea_water",
+            "standard_name": "sea_water_pressure_due_to_sea_water",
+            "units": "dbar",
+            "valid_max": 12000.0,
+            "valid_min": -15.0,
+            "_FillValue": 999999.0
+            },
+        "PRES_REL_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "sea_water_pressure_due_to_sea_water status_flag",
+            "standard_name": "depth status_flag",
+            "_FillValue": 99
+            },
+        "instrument_index": {
+            "long_name": "which instrument this obs is for",
+            "instance_dimension": "INSTRUMENT"
+            },
+        "instrument_id": {
+            "long_name": "source deployment code, instrument make, model, serial_number"
+            },
+        "source_file": {
+            "long_name": "source file for this instrument"
+            },
+        "UCUR": {
+            "ancillary_variables": "UCUR_quality_control",
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
+            "long_name": "eastward_sea_water_velocity",
+            "standard_name": "eastward_sea_water_velocity",
+            "units": "m s-1",
+            "valid_max": 10.0,
+            "valid_min": -10.0
+            },
+        "VCUR": {
+            "ancillary_variables": "VCUR_quality_control",
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
+            "long_name": "northward_sea_water_velocity",
+            "standard_name": "northward_sea_water_velocity",
+            "units": "m s-1",
+            "valid_max": 10.0,
+            "valid_min": -10.0
+            },
+        "WCUR": {
+            "ancillary_variables": "WCUR_quality_control",
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
+            "long_name": "upward_sea_water_velocity",
+            "standard_name": "upward_sea_water_velocity",
+            "units": "m s-1",
+            "valid_max": 5.0,
+            "valid_min": -5.0
+            },
+        "UCUR_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for eastward_sea_water_velocity",
+            "standard_name": "eastward_sea_water_velocity status_flag"
+        },
+        "VCUR_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for northward_sea_water_velocity",
+            "standard_name": "northward_sea_water_velocity status_flag"
+        },
+        "WCUR_quality_control": {
+            "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+            "flag_values": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+            "long_name": "quality flag for upward_sea_water_velocity",
+            "standard_name": "upward_sea_water_velocity status_flag"
+        },
+        "SECONDS_TO_MIDDLE": {
+            "long_name": "number of seconds to middle of the measurement window"
+        },
+        "CELL_INDEX": {
+            "long_name": "index of the corresponding measuring cell",
+            "comment": "Cell index is included for reference only and cannot be used to extract values at constant depth. The number and vertical spacing of cells can vary by instrument and deployment. The vertical spacing also varies with time during a deployment. The closest cell to the sensor has index 0."
+        }
+    },
+    "_global":{
+        "abstract": "Velocity Aggregated Time-series Product: This file contains all measurements of UCUR, VCUR and WCUR from all instruments deployed at the selected site. Timestamps are chronologically ordered, but may not be at uniform intervals. Measurements are referenced to its absolute DEPTH. Instrument details are stored as a variable in order to keep a record of the origin of each measurement. The quality control flags of the variable of interest and DEPTH are preserved. Out-of-water measurements have been excluded, but no other filtering has been applied to the input data.",
+        "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
+        "author": "Klein, Eduardo",
+        "author_email": "eduardo.kleinsalas@utas.edu.au",
+        "citation": "The citation in a list of references is: \"IMOS [year-of-data-download], [Title], [data-access-URL], accessed [date-of-access].\".",
+        "Conventions": "CF-1.6,IMOS-1.4",
+        "data_centre": "Australian Ocean Data Network (AODN)",
+        "data_centre_email": "info@aodn.org.au",
+        "disclaimer": "Data, products and services from IMOS are provided \"as is\" without any warranty as to fitness for a particular purpose.",
+        "featureType": "timeSeries",
+        "file_version": "Level 1 - Quality Controlled Data",
+        "file_version_quality_control": "Quality controlled data have been through quality assurance procedures such as automated routines and sensor calibration or visual inspection and flag of obvious errors. The data are in physical units using standard SI metric units with calibration and other pre-processing routines applied, all time and location values are in absolute coordinates to comply with standards and datum. Data includes flags for each measurement to indicate the estimated quality of the measurement. Metadata exists for the data or for the higher level dataset that the data belongs to. This is the standard IMOS data level and is what should be made available to AODN and to the IMOS community.",
+        "institution_references": "http://imos.org.au/facilities/aodn/",
+        "keywords_vocabulary": "IMOS parameter names. See https://github.com/aodn/imos-toolbox/blob/master/IMOS/imosParameters.txt",
+        "license": "http://creativecommons.org/licenses/by/4.0/",
+        "naming_authority": "IMOS",
+        "project": "Integrated Marine Observing System (IMOS)",
+        "references": "http://www.imos.org.au",
+        "source": "Mooring",
+        "standard_name_vocabulary": "NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table 45",
+        "lineage": "The aggregated UCUR, VCUR and WCUR are produced by sequentially concatenating the individual values in each of the input files. In the case of ADCPs, the current values at each measuring cell are referenced to its absolute DEPTH. The resulting variable has dimension OBSERVATION. The VoI's ancillary_variables, in particular the corresponding quality-control flags, are also included, with dimension OBSERVATION. If the quality control variable is absent in any input file, the corresponding flags in the output file will be set to 0 ('no QC performed'). The DEPTH variable is calculated from the DEPTH measurements at the instrument and the HEIGHT_ABOVE_SENSOR distance corresponding to each measurement cell. The DEPTH values are then concatenated into a variable DEPTH(OBSERVATION). If not present, fill values are stored. DEPTH_quality_control, if present, is also included. Where  the DEPTH variable is absent, the corresponding DEPTH_quality_control values are set to 9 ('missing value'). The variable TIME from input files is concatenated into a variable TIME(OBSERVATION). This could result in a non-uniform time interval. All output variables with the INSTRUMENT dimension are sorted in chronological order. In order to keep track of the provenance of VoI in the aggregated file, accessory variables are created. "
+        }
+}

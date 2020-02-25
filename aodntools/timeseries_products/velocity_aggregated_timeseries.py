@@ -208,8 +208,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             if 'HEIGHT_ABOVE_SENSOR' in nc.dims:
                 DEPTH[start:end] = (nc.DEPTH - nc.HEIGHT_ABOVE_SENSOR).values.flatten()
                 DEPTHqc[start:end] = np.repeat(nc.DEPTH_quality_control, n_cells).values
-                CELL_INDEX[start:end] = np.array([np.full(n_measurements, cell) for cell in range(n_cells)],
-                                                 dtype=np.uint32)
+                CELL_INDEX[start:end] = np.tile(np.arange(n_cells, dtype=np.uint32), n_measurements)
+
             else:
                 DEPTH[start:end] = nc.DEPTH.values
                 DEPTHqc[start:end] = nc.DEPTH_quality_control.values

@@ -147,7 +147,7 @@
         },
         "CELL_INDEX": {
             "long_name": "index of the corresponding measuring cell",
-            "comment": "the closest cell to the sensor is cell 0"
+            "comment": "Cell index is included for reference only and cannot be used to extract values at constant depth. The number and vertical spacing of cells can vary by instrument and deployment. The vertical spacing also varies with time during a deployment. The closest cell to the sensor has index 0."
         }
     },
     "_global":{

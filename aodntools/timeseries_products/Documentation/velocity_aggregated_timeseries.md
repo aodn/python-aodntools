@@ -10,7 +10,7 @@
 
 ## Objective
 
-This product provides aggregated U, V, and W velocity time-series files for each mooring site, without any interpolation or filtering, except for the exclusion of the out-of-water data. For the ADCP instruments, the absulte depth of the measuring cell is calculated using the `DEPTH` measured at the instrument and the `HEIGHT_ABOVE_SENSOR`, The Quality Control (QC) flags are preserved. All the (python) code used for the generation of the products is openly available on GitHub.
+This product provides aggregated U, V, and W velocity time-series files for each mooring site, without any interpolation or filtering, except for the exclusion of the out-of-water data. For the profiling (ADCP) instruments, the absolute depth of the measuring cell is calculated using the `DEPTH` measured at the instrument and the `HEIGHT_ABOVE_SENSOR`, The Quality Control (QC) flags are preserved.
 
 
 ## Input
@@ -95,7 +95,7 @@ In order to keep track of the provenance of the aggregated file, accessory varia
 
 The variable attributes will comply with the IMOS metadata standards.
 
-The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](aodntools/timeseries_products/velocity_aggregated_timeseries_template.json) that contains the {key:value} pairs for each of them.
+The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](../velocity_aggregated_timeseries_template.json) that contains the {key:value} pairs for each of them.
 
 Attributes specific to each aggregated product, are added as follows:
 

@@ -10,8 +10,7 @@
 
 ## Objective
 
-
-This product provides aggregated U, V, and W velocity time-series files for each mooring site, without any interpolation or filtering, except for the exclusion of the out-of-water data. For the profiling (ADCP) instruments, the absolute depth of the measuring cell is calculated using the `DEPTH` measured at the instrument and the `HEIGHT_ABOVE_SENSOR`, The Quality Control (QC) flags are preserved.
+This product provides aggregated time-series files for each mooring site and parameter (excluding current velocity), without any interpolation or filtering, except for the exclusion of the out-of-water data. The Quality Control (QC) flags are preserved. All the (python) code used for the generation of the products is openly available on GitHub.
 
 
 ## Input
@@ -36,23 +35,18 @@ The code is able to access the input files either locally, or remotely via the O
 Generating function: 
 
 ```
-usage: velocity_aggregated_timeseries.py [-h] -site SITE_CODE -files FILENAMES
-                                         [-indir INPUT_DIR]
-                                         [-outdir OUTPUT_DIR]
-                                         [-download_url DOWNLOAD_URL]
-                                         [-opendap_url OPENDAP_URL]
+usage: aggregated_timeseries.py [-h] -var VARNAME -site SITE_CODE -files
+                                FILENAMES [-path OUTPUT_PATH]
 
-Concatenate X,Y,Z velocity variables from ALL instruments from ALL deployments
-from ONE site
+Concatenate ONE variable from ALL instruments from ALL deployments from ONE
+site
 
 optional arguments:
-  -h, --help                    show this help message and exit
-  -site SITE_CODE               site code, like NRMMAI
-  -files FILENAMES              name of the file that contains the source URLs
-  -indir INPUT_DIR              base path of input files
-  -outdir OUTPUT_DIR            path where the result file will be written. Default ./
-  -download_url DOWNLOAD_URL    path to the download_url_prefix
-  -opendap_url OPENDAP_URL      path to the opendap_url_prefix
+  -h, --help         show this help message and exit
+  -var VARNAME       name of the variable to concatenate. Like TEMP, PSAL
+  -site SITE_CODE    site code, like NRMMAI
+  -files FILENAMES   name of the file that contains the source URLs
+  -path OUTPUT_PATH  path where the result file will be written. Default ./
 
 ```
 
@@ -68,6 +62,7 @@ The dimensions of the resulting file  are determined as follows:
 
 - `OBSERVATION`:  the total number of observation records, excluding out-of-the-water data, in all input files;
 - `INSTRUMENT`: the number of instruments (i.e. number of files);
+- `string256`: a fixed dimension of length 256 for character array variables.
 
 ### Variables
 
@@ -85,9 +80,9 @@ In order to keep track of the provenance of VoI in the aggregated file, accessor
 
 - `instrument_index(OBSERVATION)`: index [0:number of files] of the instrument used, referencing the `INSTRUMENT` dimension.
 
-- `source_file(INSTRUMENT)`: URLs of the files used.
+- `source_file(INSTRUMENT, string256)`: URLs of the files used.
 
-- `instrument_id(INSTRUMENT)`: concatenated deployment_code, instrument and instrument_serial_number from the global attributes of each file.
+- `instrument_id(INSTRUMENT, string256)`: concatenated deployment_code, instrument and instrument_serial_number from the global attributes of each file.
 
 - `LATITUDE(INSTRUMENT)`: LATITUDE per instrument.
 
@@ -100,7 +95,7 @@ In order to keep track of the provenance of VoI in the aggregated file, accessor
 
 The variable attributes comply with the IMOS metadata standards.
 
-The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](aodntools/timeseries_products/velocity_aggregated_timeseries_template.json) that contains the {key:value} pairs for each of them.
+The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a JSON file that contains the {key:value} pairs for each of them.
 
 Attributes specific to each aggregated product, are added as follows:
 
@@ -120,15 +115,14 @@ Attributes specific to each aggregated product, are added as follows:
 
 - `keywords`: set to a comma-separated list of the main variable names ("\<VoI\>, TIME, DEPTH, LATITUDE, LONGITUDE");
 
-- `lineage`: a statement about how the file was created, including a link to the code used;
+- `lineage`: a statement about how the file was created, including a link to the code used, and any input parameters (except the input files, which are listed in the source_file variable);
 
 - `title`: "Aggregated time-series product: \<VoI\> at \<site_code\> between \<time_coverage_start\> and \<time_coverage_end\>"
 
 ## Output
 
 
-The output from a single run of the code will be an aggregated file of all available current velocity measurements at one mooring site.
-
+The output from a single run of the code will be an aggregated file of all available measurements of a single non-velocity variable at one mooring site.
 
 The product will be delivered, in netCDF4 format, compliant with the CF-1.6 and IMOS-1.4 conventions, and
 structured according to the [indexed ragged array representation](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_indexed_ragged_array_representation).

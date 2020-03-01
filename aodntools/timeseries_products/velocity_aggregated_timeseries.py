@@ -2,7 +2,7 @@ import os
 import sys
 import tempfile
 import shutil
-import netCDF4 as nc4
+from  netCDF4 import Dataset, num2date, stringtochar
 import numpy as np
 import json
 from datetime import datetime
@@ -149,15 +149,16 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions and variables
-    ds = nc4.Dataset(os.path.join(output_dir, temp_outfile), 'w')
-    OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
+    ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format="NETCDF4_CLASSIC")
+    OBSERVATION = ds.createDimension('OBSERVATION', size=None)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
+    STRING256 = ds.createDimension("strlen", 256)
 
     obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
     obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
     obs_byte_template = {'datatype': np.byte, 'zlib': True, 'dimensions': ('OBSERVATION'), 'fill_value': 99}
-    obs_int_template = {'datatype': np.uint32, 'zlib': True, 'dimensions': ('OBSERVATION')}
-    inst_S256_template = {'datatype': 'str', 'dimensions': ('INSTRUMENT')}
+    obs_int_template = {'datatype': 'i2', 'zlib': True, 'dimensions': ('OBSERVATION')}
+    inst_S256_template = {'datatype': 'S1', 'dimensions': ('INSTRUMENT', "strlen")}
     inst_float_template ={'datatype': np.float32, 'dimensions': ('INSTRUMENT')}
     inst_double_template ={'datatype': np.float64, 'dimensions': ('INSTRUMENT')}
 
@@ -222,8 +223,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = utils.get_nominal_depth(nc)
-            source_file[index] = file
-            instrument_id[index] = utils.get_instrument_id(nc)
+            source_file[index] = stringtochar(np.array(file, dtype='S256'))
+            instrument_id[index] = stringtochar(np.array(utils.get_instrument_id(nc), dtype='S256'))
             ## add time offset to the middle of the measuring window, if it exists
             if 'seconds_to_middle_of_measurement' in nc.TIME.attrs:
                 SECONDS_TO_MIDDLE[index] = nc.TIME.seconds_to_middle_of_measurement
@@ -247,10 +248,10 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
     file_timeformat = '%Y%m%d'
 
-    time_start = nc4.num2date(np.min(TIME[:]), time_units, time_calendar).strftime(timeformat)
-    time_end = nc4.num2date(np.max(TIME[:]), time_units, time_calendar).strftime(timeformat)
-    time_start_filename = nc4.num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
-    time_end_filename = nc4.num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
+    time_start = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(timeformat)
+    time_end = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(timeformat)
+    time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
+    time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
     contributor_name, contributor_email, contributor_role = utils.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {

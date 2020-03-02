@@ -212,7 +212,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
         VoI_ndepths = xr.concat([VoI_ndepths, VoI_ndepths_tmp], dim='TIME')
 
     VoI_interpolated = xr.Dataset({VoI: VoI_temp.astype(np.float32),
-                                   VoI + '_count': VoI_ndepths.astype('int')})
+                                   VoI + '_count': VoI_ndepths.astype('int16')})
 
     ## drop the very first record as it is dummy
     VoI_interpolated = VoI_interpolated.where(VoI_interpolated.TIME >= time_min, drop=True)
@@ -284,7 +284,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
                 VoI:    {'zlib': True,
                          'complevel': 5,
                          'dtype': np.dtype('float32')},
-                VoI+'_count': {'dtype': np.dtype('int'),
+                VoI+'_count': {'dtype': np.dtype('int16'),
                                'zlib': True,
                                'complevel': 5},
                 'DEPTH': {'dtype': np.dtype('float32'),

@@ -184,7 +184,7 @@
             "long_name": "count data value in the bin, after rejection of flagged data",
             "cell_methods": "TIME:count"
             },
-        "cell_index": {
+        "CELL_INDEX": {
             "long_name": "index of the corresponding measuring cell",
             "comment": "the closest cell to the sensor is cell 0"
         },

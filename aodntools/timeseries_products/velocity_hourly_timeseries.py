@@ -2,8 +2,8 @@ import os
 import sys
 import tempfile
 import shutil
-from netCDF4 import Dataset, num2date
 import numpy as np
+from netCDF4 import Dataset, num2date, stringtochar
 import json
 from datetime import datetime
 import argparse
@@ -189,17 +189,18 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
     ## sort the files in chronological order
     files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
-
+    n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions (unlimited) and variables
-    ds = Dataset(os.path.join(output_dir, temp_outfile), 'w')
+    ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
     OBSERVATION = ds.createDimension('OBSERVATION', size=None)
-    INSTRUMENT = ds.createDimension('INSTRUMENT', size=None)
+    INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
+    STRING256 = ds.createDimension("strlen", 256)
 
     obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
     obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
-    obs_int_template = {'datatype': np.uint32, 'zlib': True, 'dimensions': ('OBSERVATION')}
-    inst_S256_template = {'datatype': 'str', 'dimensions': ('INSTRUMENT')}
+    obs_int_template = {'datatype': 'i1', 'zlib': True, 'dimensions': ('OBSERVATION')}
+    inst_S256_template = {'datatype': 'S1', 'dimensions': ('INSTRUMENT', "strlen")}
     inst_float_template ={'datatype': np.float32, 'dimensions': ('INSTRUMENT')}
     inst_double_template ={'datatype': np.float64, 'dimensions': ('INSTRUMENT')}
 
@@ -292,8 +293,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = np.array(utils.get_nominal_depth(nc))
-            instrument_id[index] = utils.get_instrument_id(nc)
-            source_file[index] = file
+            source_file[index] = stringtochar(np.array(file, dtype='S256'))
+            instrument_id[index] = stringtochar(np.array(utils.get_instrument_id(nc), dtype='S256'))
 
     print(" ")
     ## add atributes

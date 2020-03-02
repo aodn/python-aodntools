@@ -69,6 +69,7 @@ The dimensions of the resulting file  are determined as follows:
 
 - `OBSERVATION`:    the total number of observation records, excluding out-of-the-water data, in all input files;
 - `INSTRUMENT`:     the number of instruments (i.e. number of files);
+- `strlen`:         a fixed dimension of length 256 for character array variables.
 
 ### Variables
 
@@ -83,8 +84,8 @@ All output variables with the `INSTRUMENT` dimension are sorted in chronological
 In order to keep track of the provenance of the aggregated file, accessory variables are created:
 
 - `instrument_index(OBSERVATION)`: index [0:number of files] of the instrument used, referencing the `INSTRUMENT` dimension.
-- `source_file(INSTRUMENT)`: URLs of the files used
-- `instrument_id(INSTRUMENT)`: concatenated deployment_code, instrument and instrument_serial_number from the global attributes of each file
+- `source_file(INSTRUMENT, strlen)`: URLs of the files used
+- `instrument_id(INSTRUMENT, strlen)`: concatenated deployment_code, instrument and instrument_serial_number from the global attributes of each file
 - `LATITUDE(INSTRUMENT)`: LATITUDE per instrument.
 - `LONGITUDE(INSTRUMENT)`: LONGITUDE per instrument.
 - `NOMINAL_DEPTH(INSTRUMENT)`: nominal depth per instrument, from the input file’s variable `NOMINAL_DEPTH` or global attribute instrument_nominal_depth.

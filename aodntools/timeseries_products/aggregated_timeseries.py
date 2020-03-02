@@ -9,7 +9,7 @@ from datetime import datetime
 
 import numpy as np
 import xarray as xr
-from netCDF4 import Dataset, num2date
+from netCDF4 import Dataset, num2date, stringtochar
 from pkg_resources import resource_filename
 
 from aodntools import __version__
@@ -298,15 +298,17 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions and variables
-    ds = Dataset(os.path.join(output_dir, temp_outfile), 'w')
+    ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
     OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
+    STRING256 = ds.createDimension("strlen", 256)
+
 
     obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION',), "fill_value": 99999.0}
     obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION',), "fill_value": 99999.0}
     obs_byte_template = {'datatype': np.byte, 'zlib': True, 'dimensions': ('OBSERVATION',), 'fill_value': 99}
-    obs_int_template = {'datatype': np.uint32, 'zlib': True, 'dimensions': ('OBSERVATION',)}
-    inst_str_template = {'datatype': 'str', 'dimensions': ('INSTRUMENT',)}
+    obs_int_template = {'datatype': np.int16, 'zlib': True, 'dimensions': ('OBSERVATION',)}
+    inst_S256_template = {'datatype': 'S1', 'dimensions': ('INSTRUMENT', "strlen")}
     inst_float_template = {'datatype': np.float32, 'dimensions': ('INSTRUMENT',), "fill_value": 99999.0}
 
     agg_variable = ds.createVariable(varname=var_to_agg, **obs_float_template)
@@ -321,8 +323,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     TIME = ds.createVariable(varname='TIME', **obs_double_template)
     instrument_index = ds.createVariable(varname='instrument_index', **obs_int_template)
 
-    source_file = ds.createVariable(varname='source_file', **inst_str_template)
-    instrument_id = ds.createVariable(varname='instrument_id', **inst_str_template)
+    source_file = ds.createVariable(varname='source_file', **inst_S256_template)
+    instrument_id = ds.createVariable(varname='instrument_id', **inst_S256_template)
     LATITUDE = ds.createVariable(varname='LATITUDE', **obs_double_template)
     LONGITUDE = ds.createVariable(varname='LONGITUDE', **obs_double_template)
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
@@ -345,8 +347,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = get_nominal_depth(nc)
-            source_file[index] = file
-            instrument_id[index] = get_instrument_id(nc)
+            source_file[index] = stringtochar(np.array(file, dtype='S256'))
+            instrument_id[index] = stringtochar(np.array(get_instrument_id(nc), dtype='S256'))
 
 
     ## add atributes

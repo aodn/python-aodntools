@@ -75,6 +75,62 @@ def sort_depths(depths, values):
 
     return sorted_depths, sorted_values
 
+def write_netCDF_aggfile(agg_dataset, output_path, encoding):
+    """
+    write netcdf file
+
+    :param agg_dataset: aggregated xarray dataset
+    :param output_path: full path of the netCDF file to be written
+    :return: name of the netCDf file written
+    """
+
+    agg_dataset.to_netcdf(output_path, encoding=encoding, format='NETCDF4_CLASSIC')
+
+    return output_path
+
+
+def set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute):
+    """
+    set variables variables atributes
+
+    :param varlist: list of variable names
+    :param variable_attribute_dictionary: dictionary of the variable attributes
+    :param add_variable_attribute: additional attributes to add
+    :return: dictionary of attributes
+    """
+
+    # with open(templatefile) as json_file:
+    #     variable_metadata = json.load(json_file)['_variables']
+    variable_attributes = {key: variable_attribute_dictionary[key] for key in varlist}
+    if len(add_variable_attribute)>0:
+        for key in add_variable_attribute.keys():
+            variable_attributes[key].update(add_variable_attribute[key])
+
+    return variable_attributes
+
+def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code, product_type, file_version):
+    """
+    generate the output filename for the VoI netCDF file
+
+    :param nc: aggregated dataset
+    :param facility_code: facility code from file name
+    :param data_code: data code sensu IMOS convention
+    :param VoI: name of the variable to aggregate
+    :param product_type: name of the product
+    :param file_version: version of the output file
+    :return: name of the output file
+    """
+
+    file_timeformat = '%Y%m%d'
+
+    if '_' in VoI:
+        VoI = VoI.replace('_', '-')
+    t_start = pd.to_datetime(nc.TIME.min().values).strftime(file_timeformat)
+    t_end = pd.to_datetime(nc.TIME.max().values).strftime(file_timeformat)
+
+    output_name = '_'.join(['IMOS', facility_code, data_code, t_start, site_code, ('FV0'+str(file_version)), (VoI+"-"+product_type), ('END-'+ t_end), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
+
+    return output_name
 
 
 
@@ -118,9 +174,9 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     depth_bin_len = len(depth_bins)
 
     ## create empty containers for the interpolated values
-    VoI_temp = xr.DataArray(np.full((depth_bin_len, 1), np.nan), coords=[depth_bins, [time_0]],
+    VoI_temp = xr.DataArray(np.full((depth_bin_len, 1), np.nan, dtype=np.float32), coords=[depth_bins, [time_0]],
                               dims=['DEPTH', 'TIME'])
-    VoI_ndepths = xr.DataArray(np.full(1, 0), coords=[[time_0]], dims=['TIME'])
+    VoI_ndepths = xr.DataArray(np.full(1, 0, dtype='int'), coords=[[time_0]], dims=['TIME'])
 
     ## group nc by individual timestamps
     VoI_grouped = nc.groupby('TIME')
@@ -128,7 +184,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
 
     for timestamp, group in VoI_grouped:
         time = [timestamp]
-        n_depths = int(len(group[VoI]))
+        n_depths = np.array(len(group[VoI]), dtype='int')
 
         if n_depths >= 2:
             VoI_values = list(group[VoI].values)
@@ -155,8 +211,8 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
         VoI_temp = xr.concat([VoI_temp, VoI_temp_tmp], dim='TIME')
         VoI_ndepths = xr.concat([VoI_ndepths, VoI_ndepths_tmp], dim='TIME')
 
-    VoI_interpolated = xr.Dataset({VoI: VoI_temp.astype(float),
-                                   VoI + '_count': VoI_ndepths.astype(int)})
+    VoI_interpolated = xr.Dataset({VoI: VoI_temp.astype(np.float32),
+                                   VoI + '_count': VoI_ndepths.astype('int16')})
 
     ## drop the very first record as it is dummy
     VoI_interpolated = VoI_interpolated.where(VoI_interpolated.TIME >= time_min, drop=True)
@@ -178,7 +234,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     ## set variable attributes
     varlist = list(VoI_interpolated.variables)
     add_variable_attribute = {}
-    variable_attributes = TStools.set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute)
+    variable_attributes = set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute)
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')
     for variable in varlist:
@@ -214,7 +270,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     data_code = TStools.get_data_code(VoI) + 'Z'
     product_type = 'gridded-timeseries'
     file_version = 2
-    ncout_filename = TStools.generate_netcdf_output_filename(nc=VoI_interpolated, facility_code=facility_code,
+    ncout_filename = generate_netcdf_output_filename(nc=VoI_interpolated, facility_code=facility_code,
                                                              data_code=data_code, VoI=VoI,
                                                              site_code=site_code, product_type=product_type,
                                                              file_version=file_version)
@@ -226,18 +282,18 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
                          'zlib': True,
                          'complevel': 5},
                 VoI:    {'zlib': True,
-                         'complevel': 5},
-                VoI+'_count': {'_FillValue': None,
-                               'dtype': np.dtype('int'),
+                         'complevel': 5,
+                         'dtype': np.dtype('float32')},
+                VoI+'_count': {'dtype': np.dtype('int16'),
                                'zlib': True,
                                'complevel': 5},
-                'DEPTH': {'dtype': np.dtype('float64'),
+                'DEPTH': {'dtype': np.dtype('float32'),
                           'zlib': True,
                           'complevel': 5},
                 'LONGITUDE': {'_FillValue': False},
                 'LATITUDE': {'_FillValue': False}}
 
-    TStools.write_netCDF_aggfile(VoI_interpolated, ncout_path, encoding)
+    write_netCDF_aggfile(VoI_interpolated, ncout_path, encoding)
 
     return ncout_path
 

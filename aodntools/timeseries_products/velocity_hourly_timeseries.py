@@ -199,7 +199,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
     obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
     obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
-    obs_int_template = {'datatype': 'i1', 'zlib': True, 'dimensions': ('OBSERVATION')}
+    obs_int_template = {'datatype': np.int16, 'zlib': True, 'dimensions': ('OBSERVATION')}
     inst_S256_template = {'datatype': 'S1', 'dimensions': ('INSTRUMENT', "strlen")}
     inst_float_template ={'datatype': np.float32, 'dimensions': ('INSTRUMENT')}
     inst_double_template ={'datatype': np.float64, 'dimensions': ('INSTRUMENT')}

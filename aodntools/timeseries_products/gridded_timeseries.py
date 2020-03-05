@@ -161,7 +161,7 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
 
     site_code = nc.site_code
     ## get global attributes
-    global_attributes = nc.attrs
+    input_global_attributes = nc.attrs
 
 
 
@@ -246,32 +246,38 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
         VoI_interpolated[variable].attrs = variable_attributes[variable]
 
     ## set global attributes
+    # copy selected attributes from input file
+    for attr in ('geospatial_lat_min', 'geospatial_lat_max', 'geospatial_lon_min', 'geospatial_lon_max', 'site_code',
+                 'included_values_flagged_as', 'contributor_name', 'contributor_role', 'contributor_email'):
+        VoI_interpolated.attrs[attr] = input_global_attributes[attr]
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
     date_start = pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat)
     date_end = pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat)
-    VoI_interpolated.attrs.update(global_attributes)
-    github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
-                      '{v}/aodntools/timeseries_products/{f}'.format(v=__version__, f=os.path.basename(__file__))
-                      )
+    date_created = datetime.utcnow().strftime(timeformat)
+    VoI_interpolated.attrs.update(global_attribute_dictionary)
     VoI_interpolated.attrs.update({
-        'file_version':          global_attribute_dictionary['file_version'],
         'source_file':           input_file,
-        'featureType':           global_attribute_dictionary['featureType'],
         'time_coverage_start':   date_start,
         'time_coverage_end':     date_end,
         'geospatial_vertical_min': min(depth_bins),
         'geospatial_vertical_max': max(depth_bins),
         'keywords':              ', '.join([VoI, 'DEPTH'] + ['HOURLY', 'GRIDDED']),
         'abstract':              global_attribute_dictionary['abstract'].format(VoI=VoI, site_code=site_code),
-        'history':               VoI_interpolated.attrs['history'] + ' {today}: Gridded file created.'.format(today=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')),
-        'lineage':               global_attribute_dictionary['lineage'] + github_comment,
+        'date_created': date_created,
+        'history': input_global_attributes['history'] +' {date_created}: Gridded file created.'.format(
+            date_created=date_created),
         'generating_code_version': __version__,
         'title':                 global_attribute_dictionary['title'].format(VoI=VoI,
                                                                     site_code=site_code,
                                                                     time_min=date_start,
                                                                     time_max=date_end,
                                                                     depth_min=min(depth_bins),
-                                                                    depth_max = max(depth_bins))})
+                                                                    depth_max = max(depth_bins))
+    })
+    github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
+                      '{v}/aodntools/timeseries_products/{f}'.format(v=__version__, f=os.path.basename(__file__))
+                      )
+    VoI_interpolated.attrs['lineage'] += github_comment
     if download_url_prefix:
         VoI_interpolated.attrs['source_file_download'] = os.path.join(download_url_prefix, input_file)
     if opendap_url_prefix:

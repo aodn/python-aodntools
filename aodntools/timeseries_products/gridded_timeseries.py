@@ -10,6 +10,7 @@ import pandas as pd
 
 from pkg_resources import resource_filename
 
+from aodntools import __version__
 import aodntools.timeseries_products.aggregated_timeseries as TStools
 
 
@@ -245,6 +246,9 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
     date_start = pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat)
     date_end = pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat)
     VoI_interpolated.attrs.update(global_attributes)
+    github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
+                      '{v}/aodntools/timeseries_products/{f}'.format(v=__version__, f=os.path.basename(__file__))
+                      )
     VoI_interpolated.attrs.update({
         'file_version':          global_attribute_dictionary['file_version'],
         'source_file':           file_name,
@@ -256,7 +260,8 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
         'keywords':              ', '.join([VoI, 'DEPTH'] + ['HOURLY', 'GRIDDED']),
         'abstract':              global_attribute_dictionary['abstract'].format(VoI=VoI, site_code=site_code),
         'history':               VoI_interpolated.attrs['history'] + ' {today}: Gridded file created.'.format(today=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')),
-        'lineage':               global_attribute_dictionary['lineage'],
+        'lineage':               global_attribute_dictionary['lineage'] + github_comment,
+        'generating_code_version': __version__,
         'title':                 global_attribute_dictionary['title'].format(VoI=VoI,
                                                                     site_code=site_code,
                                                                     time_min=date_start,

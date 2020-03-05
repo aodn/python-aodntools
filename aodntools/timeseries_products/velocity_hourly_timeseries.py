@@ -55,8 +55,8 @@ def check_file(nc, site_code):
         error_list.append('LATITUDE variable missing')
     if 'LONGITUDE' not in variables:
         error_list.append('LONGITUDE variable missing')
-    if 'seconds_to_middle_of_measurement' not in nc['TIME'].attrs:
-        error_list.append('seconds_to_middle_of_measurement not present in TIME')
+    # if 'seconds_to_middle_of_measurement' not in nc['TIME'].attrs:
+    #     error_list.append('seconds_to_middle_of_measurement not present in TIME')
 
     for variable in required_variables:
         if variable not in variables:
@@ -195,7 +195,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
     OBSERVATION = ds.createDimension('OBSERVATION', size=None)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
-    STRING256 = ds.createDimension("strlen", 256)
+    STRING256 = ds.createDimension("strlen", size=256)
 
     obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
     obs_float_template = {'datatype': np.float32, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}
@@ -234,6 +234,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     LATITUDE = ds.createVariable(varname='LATITUDE', **inst_double_template)
     LONGITUDE = ds.createVariable(varname='LONGITUDE', **inst_double_template)
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
+    SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
     CELL_INDEX = ds.createVariable(varname='CELL_INDEX', **obs_int_template)
 
     #SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
@@ -265,8 +266,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             n_measurements = len(nc.TIME)
 
             ## move timestamp to the middle of the measurement window
-            time_delta_ns = int(nc['TIME'].seconds_to_middle_of_measurement * 10**9)
-            nc['TIME'] = nc['TIME'] + np.timedelta64(time_delta_ns, 'ns')
+            # time_delta_ns = int(nc['TIME'].seconds_to_middle_of_measurement * 10**9)
+            # nc['TIME'] = nc['TIME'] + np.timedelta64(time_delta_ns, 'ns')
 
             if is_2D:
                 ## process all cells, one by one
@@ -295,6 +296,11 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             NOMINAL_DEPTH[index] = np.array(utils.get_nominal_depth(nc))
             source_file[index] = stringtochar(np.array(file, dtype='S256'))
             instrument_id[index] = stringtochar(np.array(utils.get_instrument_id(nc), dtype='S256'))
+            ## add time offset to the middle of the measuring window, if it exists
+            if 'seconds_to_middle_of_measurement' in nc.TIME.attrs:
+                SECONDS_TO_MIDDLE[index] = nc.TIME.seconds_to_middle_of_measurement
+            else:
+                SECONDS_TO_MIDDLE[index] = np.nan
 
     print(" ")
     ## add atributes

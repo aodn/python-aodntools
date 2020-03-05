@@ -136,20 +136,24 @@ def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code
 
 
 ## MAIN FUNCTION
-def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins_increment=10,
-                  base_path='./'):
+def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bins_increment=10,
+                  input_dir='', output_dir='.', download_url_prefix=None, opendap_url_prefix=None):
     """
     Grid VoI into depth_bins.
-    :param nc: hourly aggregated dataset with VoI, DEPTH and TIME only
+    :param input_file: Input hourly aggregated file with VoI, DEPTH and TIME only (path interpreted relative
+    to input_dir, if specified)
     :param VoI: variable of interest (TEMP or PSAL)
     :param depth_bins: list of depth where to interpolate. if null list is provided it will be calculated from the data
     :param max_separation: max separation allowed for instruments
     :param depth_bins_increment: in case no depth bins provided this is the increment for the calculated bins
-    :param base_path: path where the result file will be written
-    :return: interpolated dataset
+    :param input_dir: base path where source files are stored
+    :param output_dir: path where the result file will be written
+    :param download_url_prefix: URL prefix for file download (to be prepended to input_file path)
+    :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to input_file path)
+    :return: path of interpolated output file
     """
 
-    with xr.open_dataset(file_name) as nc_full:
+    with xr.open_dataset(os.path.join(input_dir, input_file)) as nc_full:
         nc = nc_full[[VoI, 'TIME', 'DEPTH']]
         ## get lat/lon
         longitude_mean = nc_full.LONGITUDE.mean()
@@ -251,7 +255,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
                       )
     VoI_interpolated.attrs.update({
         'file_version':          global_attribute_dictionary['file_version'],
-        'source_file':           file_name,
+        'source_file':           input_file,
         'featureType':           global_attribute_dictionary['featureType'],
         'time_coverage_start':   date_start,
         'time_coverage_end':     date_end,
@@ -268,10 +272,14 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
                                                                     time_max=date_end,
                                                                     depth_min=min(depth_bins),
                                                                     depth_max = max(depth_bins))})
+    if download_url_prefix:
+        VoI_interpolated.attrs['source_file_download'] = os.path.join(download_url_prefix, input_file)
+    if opendap_url_prefix:
+        VoI_interpolated.attrs['source_file_opendap'] = os.path.join(opendap_url_prefix, input_file)
     VoI_interpolated.attrs = sorted(VoI_interpolated.attrs.items())
 
     ## create the output file name and write the aggregated product as netCDF
-    facility_code = TStools.get_facility_code(file_name)
+    facility_code = TStools.get_facility_code(input_file)
     data_code = TStools.get_data_code(VoI) + 'Z'
     product_type = 'gridded-timeseries'
     file_version = 2
@@ -279,7 +287,7 @@ def grid_variable(file_name, VoI, depth_bins=None, max_separation=50, depth_bins
                                                              data_code=data_code, VoI=VoI,
                                                              site_code=site_code, product_type=product_type,
                                                              file_version=file_version)
-    ncout_path = os.path.join(base_path, ncout_filename)
+    ncout_path = os.path.join(output_dir, ncout_filename)
 
     encoding = {'TIME': {'_FillValue': None,
                          'units': time_units,
@@ -310,7 +318,10 @@ if __name__ == "__main__":
     parser.add_argument('-depth_bins', dest='depth_bins', help='list of depth where the VoI will be interpolated', default=None, nargs='+', required=False)
     parser.add_argument('-max_separation', dest='max_separation', help='maximum difference between instruments to allow interpolation', default=50, required=False)
     parser.add_argument('-depth_bins_increment', dest='depth_bins_increment', help='increment in meters for the automatic generated depth bins', default=10, required=False)
-    parser.add_argument('-path', dest='output_path', help='path where the result file will be written. Default ./', default='./', required=False)
+    parser.add_argument('-indir', dest='input_dir', help='base path of input file. Default .', default='.',
+                        required=False)
+    parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default .',
+                        default='.', required=False)
     parser.add_argument('-config', dest='config_file', help='JSON configuration file', default=None, required=False)
     args = parser.parse_args()
 
@@ -321,16 +332,18 @@ if __name__ == "__main__":
         depth_bins = arguments['depth_bins']
         depth_bins_increment = int(arguments['depth_bins_increment'])
         max_separation = int(arguments['max_separation'])
-        output_path = arguments['output_path']
+        input_dir = arguments.get('input_dir', '.')
+        output_dir = arguments.get('output_dir', '.')
     else:
         VoI = args.var
         depth_bins = args.depth_bins
         depth_bins_increment = int(args.depth_bins_increment)
         max_separation = int(args.max_separation)
-        output_path = args.output_path
+        input_dir = args.input_dir
+        output_dir = args.output_dir
 
     file_name = args.filename
 
-    print(grid_variable(file_name=file_name, VoI=VoI, depth_bins=depth_bins,
+    print(grid_variable(input_file=file_name, VoI=VoI, depth_bins=depth_bins,
                         max_separation=int(max_separation), depth_bins_increment=int(depth_bins_increment),
-                        base_path=output_path))
+                        input_dir=input_dir, output_dir=output_dir))

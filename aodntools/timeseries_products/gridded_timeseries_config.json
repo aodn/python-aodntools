@@ -3,5 +3,6 @@
   "depth_bins": null,
   "depth_bins_increment": 5,
   "max_separation": 50,
-  "output_path": "./"
+  "intput_dir": ".",
+  "output_dir": "."
 }

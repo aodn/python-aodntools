@@ -76,8 +76,24 @@
     "_global":{
         "title": "Gridded Time Series Product: {VoI} interpolated at {site_code} to fixed target depths at 1-hour time intervals, between {time_min} and {time_max} and {depth_min} and {depth_max} meters.",
         "abstract": "Gridded Time Series Product: This file contains {VoI} readings from all instruments deployed at the {site_code} mooring site. The source of the values is the Hourly Time Series Product where TIME is fixed to 1-hour interval. The variable values are interpolated to a fixed target depths using a linear interpolation between consecutive existing depths. Only values flagged as 1 or 2 are used in the interpolation.",
+       "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
+        "author": "Klein, Eduardo",
+        "author_email": "eduardo.kleinsalas@utas.edu.au",
+        "citation": "The citation in a list of references is: \"IMOS [year-of-data-download], [Title], [data-access-URL], accessed [date-of-access].\".",
+        "Conventions": "CF-1.6,IMOS-1.4",
+        "data_centre": "Australian Ocean Data Network (AODN)",
+        "data_centre_email": "info@aodn.org.au",
+        "disclaimer": "Data, products and services from IMOS are provided \"as is\" without any warranty as to fitness for a particular purpose.",
         "lineage": "The Variable of Interest (VoI) is produced by sequentially interpolating linearly the individual values at pre-defined target depths using the 1-hour binned data from the Hourly Time Series Product. The number of instruments used for the interpolation at each timestamp is recorded in the VoI_count variable. If less that two instrument readings are present in the timestamp, fill values are stored in all depth bins. The resulting variable has dimensions TIME and DEPTH.  ",
         "file_version": "Level 2 - Gridded Data",
-        "featureType" : "timeSeriesProfile"
+        "featureType" : "timeSeriesProfile",
+        "institution_references": "http://imos.org.au/facilities/aodn/",
+        "keywords_vocabulary": "IMOS parameter names. See https://github.com/aodn/imos-toolbox/blob/master/IMOS/imosParameters.txt",
+        "license": "http://creativecommons.org/licenses/by/4.0/",
+        "naming_authority": "IMOS",
+        "project": "Integrated Marine Observing System (IMOS)",
+        "references": "http://www.imos.org.au",
+        "source": "Mooring",
+        "standard_name_vocabulary": "NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table 45"
     }
 }

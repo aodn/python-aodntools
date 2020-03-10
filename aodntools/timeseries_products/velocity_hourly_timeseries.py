@@ -176,12 +176,12 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     for index, file in enumerate(files_to_agg):
         print(index, end=',', flush=True)
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
-            nc = utils.in_water(nc)
             error_list = check_file(nc, site_code)
             if error_list:
                 bad_files.append([file, error_list])
                 rejected_files.append(file)
     print(" ")
+    print(bad_files)
 
     ## remove bad files form the list
     for file in bad_files:
@@ -189,7 +189,6 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
     ## sort the files in chronological order
     files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
-    n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions (unlimited) and variables
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
@@ -237,7 +236,6 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
     CELL_INDEX = ds.createVariable(varname='CELL_INDEX', **obs_int_template)
 
-    #SECONDS_TO_MIDDLE = ds.createVariable(varname='SECONDS_TO_MIDDLE', **inst_float_template)
 
 
     ## main loop
@@ -261,33 +259,41 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             else:
                 is_WCUR = False
 
-            ## in-water data only
-            nc = utils.in_water(nc)
-            n_measurements = len(nc.TIME)
 
-            ## move timestamp to the middle of the measurement window
-            # time_delta_ns = int(nc['TIME'].seconds_to_middle_of_measurement * 10**9)
-            # nc['TIME'] = nc['TIME'] + np.timedelta64(time_delta_ns, 'ns')
+            ## process in chunks
+            ## in water only
+            chunk_start = np.datetime64(nc.attrs['time_deployment_start'])
+            chunk_end = np.datetime64(nc.attrs['time_deployment_end'])
 
-            if is_2D:
-                ## process all cells, one by one
-                cells = nc.HEIGHT_ABOVE_SENSOR.values
-                for cell_idx, cell in enumerate(cells):
-                    ## get cell data, drop HEIGHT_ABOVE_SENSOR dim
-                    nc_cell = nc.where(nc.HEIGHT_ABOVE_SENSOR == cell, drop=True).squeeze('HEIGHT_ABOVE_SENSOR')
-                    ## convert to absolute DEPTH
-                    nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell
-                    slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
+            time_increment = 60*60*24*90    ## secs x mins x hours x days
+            chunk_increment = np.timedelta64(time_increment, 's')
+            chunk_partial = chunk_start + chunk_increment
+            chunk_index = 0
+            while chunk_start < chunk_partial and chunk_start <= chunk_end:
+                nc_chunk = nc.where((nc.TIME >= chunk_start) & (nc.TIME < chunk_partial), drop=True)
+                if is_2D:
+                    ## process all cells, one by one
+                    cells = nc_chunk.HEIGHT_ABOVE_SENSOR.values
+                    for cell_idx, cell in enumerate(cells):
+                        ## get cell data, drop HEIGHT_ABOVE_SENSOR dim
+                        nc_cell = nc_chunk.where(nc.HEIGHT_ABOVE_SENSOR == cell, drop=True).squeeze('HEIGHT_ABOVE_SENSOR')
+                        ## convert to absolute DEPTH
+                        nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell
+                        slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
+                                                         epoch, one_day, is_WCUR)
+                        CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)
+
+                        slice_start = slice_end
+                else:
+                    slice_end = get_resampled_values(nc_chunk, ds, slice_start, varlist, binning_fun,
                                                      epoch, one_day, is_WCUR)
-                    CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)
+                    CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, 0, dtype=np.uint32)
 
                     slice_start = slice_end
-            else:
-                slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
-                                                 epoch, one_day, is_WCUR)
-                CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, 0, dtype=np.uint32)
+                chunk_start = chunk_partial
+                chunk_partial += chunk_increment
+                chunk_index += 1
 
-                slice_start = slice_end
 
             ## metadata variables
             instrument_index[slice_instrument_start:slice_end] = np.repeat(index, slice_end - slice_instrument_start)

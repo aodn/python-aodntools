@@ -7,6 +7,7 @@ Documentation:
 - [Hourly time series (non-velocity)](Documentation/Hourly_timeseries.md)
 - [Gridded time series (Temperature)](Documentation/Gridded_timeseries.md)
 - [Velocity aggregated time series](Documentation/Velocity_agrregated_timeseries.md)
+- [Velocity hourly time series](Documentation/velocity_hourly_timeseries.md)
 
 
 Please use the [issue tracker](https://github.com/aodn/python-aodntools/issues) for feedback and suggestions related to these products.

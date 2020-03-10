@@ -90,6 +90,8 @@ In order to keep track of the provenance of the aggregated file, accessory varia
 - `LONGITUDE(INSTRUMENT)`: LONGITUDE per instrument.
 - `NOMINAL_DEPTH(INSTRUMENT)`: nominal depth per instrument, from the input file’s variable `NOMINAL_DEPTH` or global attribute instrument_nominal_depth.
 - `SECONDS_TO_MIDDLE(INSTRUMENT)`:  offset from the timestamp to the middle of the measurement window for each deployment
+- CELL_INDEX(OBSERVATION): index of the corresponding measuring cell
+
 
 
 ### Attributes

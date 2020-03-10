@@ -193,7 +193,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     ## create ncdf file, dimensions (unlimited) and variables
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
     OBSERVATION = ds.createDimension('OBSERVATION', size=None)
-    INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
+    INSTRUMENT = ds.createDimension('INSTRUMENT', size=len(files_to_agg))
     STRING256 = ds.createDimension("strlen", size=256)
 
     obs_double_template = {'datatype': np.float64, 'zlib': True, 'dimensions': ('OBSERVATION'), "fill_value": 99999.0}

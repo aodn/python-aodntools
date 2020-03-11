@@ -168,6 +168,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     bad_files = []
     rejected_files = []
 
+    chunk_size = 90  ## size in days
+
     ## default name for temporary file. It will be renamed at the end
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
@@ -181,7 +183,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 bad_files.append([file, error_list])
                 rejected_files.append(file)
     print(" ")
-    print(bad_files)
+
 
     ## remove bad files form the list
     for file in bad_files:
@@ -265,7 +267,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             chunk_start = np.datetime64(nc.attrs['time_deployment_start'])
             chunk_end = np.datetime64(nc.attrs['time_deployment_end'])
 
-            time_increment = 60*60*24*90    ## secs x mins x hours x days
+            time_increment = 60*60*24*chunk_size    ## secs x mins x hours x days
             chunk_increment = np.timedelta64(time_increment, 's')
             chunk_partial = chunk_start + chunk_increment
             chunk_index = 0

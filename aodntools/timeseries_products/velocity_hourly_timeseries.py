@@ -88,13 +88,13 @@ def cell_velocity_resample(df, binning_function, is_WCUR):
     :return: binned U, v, W CUR according to the binning function
     """
     df_binned = df.apply(binning_function)
-    UCUR = df_binned['UCUR']
-    VCUR = df_binned['VCUR']
+    UCUR = np.array(df_binned['UCUR'])
+    VCUR = np.array(df_binned['VCUR'])
     if is_WCUR:
-        WCUR = df_binned['WCUR']
+        WCUR = np.array(df_binned['WCUR'])
     else:
         WCUR = np.full(len(df), np.nan)
-    DEPTH = df_binned['DEPTH']
+    DEPTH = np.array(df_binned['DEPTH'])
 
     return UCUR, VCUR, WCUR, DEPTH
 

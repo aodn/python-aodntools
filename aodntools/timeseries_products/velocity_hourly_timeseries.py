@@ -113,7 +113,7 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
     :return: end index of the slice
     """
     nc_cell = nc_cell.where(nc_cell.DEPTH_quality_control < 4, drop=True)
-    nc_cell = nc_cell[varlist]
+    nc_cell = nc_cell[varlist].squeeze()
     nc_cell = nc_cell.to_dataframe()
     ## back the index 30min
     nc_cell.index = nc_cell.index - pd.Timedelta(30, units='m')

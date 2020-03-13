@@ -145,9 +145,9 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
 def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                         download_url_prefix=None, opendap_url_prefix=None):
     """
-    Aggregate U, V and W CUR variables from all deployments at one site.
-    the vertical cells are flattened and related to its depth
-    additional metadata variables are stored to track the origin of the data
+    Aggregate U, V and W CUR variables from the given files (from the same site) and average into hourly bins.
+    The vertical cells are flattened and the actual depth of each is calculated.
+    Additional metadata variables are stored to track the origin of the data.
     :param files_to_agg: list of files to aggregate
     :param site_code: site code
     :param input_dir: base path where source files are stored

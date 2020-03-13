@@ -378,7 +378,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     facility_code = utils.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
     data_code = 'VZ'
     product_type = 'hourly-timeseries'
-    file_version = 1
+    file_version = 2
     output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),
                             ("velocity-"+product_type),
                             ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'

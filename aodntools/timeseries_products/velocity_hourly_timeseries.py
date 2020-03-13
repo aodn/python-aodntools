@@ -142,8 +142,8 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
 
 
 ## MAIN FUNCTION
-def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
-                        download_url_prefix=None, opendap_url_prefix=None):
+def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
+                               download_url_prefix=None, opendap_url_prefix=None):
     """
     Aggregate U, V and W CUR variables from all deployments at one site.
     the vertical cells are flattened and related to its depth
@@ -278,7 +278,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                     cells = nc_chunk.HEIGHT_ABOVE_SENSOR.values
                     for cell_idx, cell in enumerate(cells):
                         ## get cell data, drop HEIGHT_ABOVE_SENSOR dim
-                        nc_cell = nc_chunk.where(nc.HEIGHT_ABOVE_SENSOR == cell, drop=True).squeeze('HEIGHT_ABOVE_SENSOR')
+                        nc_cell = nc_chunk.sel(HEIGHT_ABOVE_SENSOR=cell)
                         ## convert to absolute DEPTH
                         nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell
                         slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
@@ -409,6 +409,6 @@ if __name__ == "__main__":
         files_to_agg = [line.rstrip() for line in ff]
 
 
-    print(velocity_aggregated(files_to_agg=files_to_agg, site_code=args.site_code,
-                              input_dir=args.input_dir, output_dir=args.output_dir,
-                              download_url_prefix=args.download_url, opendap_url_prefix=args.opendap_url))
+    print(velocity_hourly_aggregated(files_to_agg=files_to_agg, site_code=args.site_code,
+                                     input_dir=args.input_dir, output_dir=args.output_dir,
+                                     download_url_prefix=args.download_url, opendap_url_prefix=args.opendap_url))

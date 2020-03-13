@@ -115,7 +115,7 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
     nc_cell = nc_cell[varlist].squeeze()
     nc_cell = nc_cell.to_dataframe()
     ## back the index 30min
-    nc_cell.index = nc_cell.index - pd.Timedelta(30, units='m')
+    nc_cell.index = nc_cell.index - pd.Timedelta(minutes=30)
 
     nc_cell_1H = nc_cell.resample('1H')
     slice_end = len(nc_cell_1H) + slice_start
@@ -144,9 +144,9 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
 def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                                download_url_prefix=None, opendap_url_prefix=None):
     """
-    Aggregate U, V and W CUR variables from all deployments at one site.
-    the vertical cells are flattened and related to its depth
-    additional metadata variables are stored to track the origin of the data
+    Aggregate U, V and W CUR variables from the given files (from the same site) and average into hourly bins.
+    The vertical cells are flattened and the actual depth of each is calculated.
+    Additional metadata variables are stored to track the origin of the data.
     :param files_to_agg: list of files to aggregate
     :param site_code: site code
     :param input_dir: base path where source files are stored
@@ -362,7 +362,8 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
 
     ## add version
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
-                      '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__))
+                      '{v}/aodntools/timeseries_products/{f}'.format(v=__version__, f=os.path.basename(__file__))
+                      )
     global_attribute_dictionary['lineage'] += github_comment
 
     global_attribute_dictionary.update(add_attribute)
@@ -381,7 +382,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     facility_code = utils.get_facility_code(os.path.join(input_dir, files_to_agg[0]))
     data_code = 'VZ'
     product_type = 'hourly-timeseries'
-    file_version = 1
+    file_version = 2
     output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),
                             ("velocity-"+product_type),
                             ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'

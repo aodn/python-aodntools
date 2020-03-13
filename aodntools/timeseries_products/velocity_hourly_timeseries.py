@@ -112,7 +112,6 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
     :param is_WCUR: flag indicating if WCUR is present
     :return: end index of the slice
     """
-    nc_cell = nc_cell.where(nc_cell.DEPTH_quality_control < 4, drop=True)
     nc_cell = nc_cell[varlist].squeeze()
     nc_cell = nc_cell.to_dataframe()
     ## back the index 30min
@@ -260,6 +259,10 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
                 is_WCUR = True
             else:
                 is_WCUR = False
+
+            ## mask values with QC flag>2
+            for var in varlist:
+                nc[var] = nc[var].where(nc[var+'_quality_control']<3)
 
 
             ## process in chunks

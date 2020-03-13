@@ -116,7 +116,7 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
     nc_cell = nc_cell[varlist].squeeze()
     nc_cell = nc_cell.to_dataframe()
     ## back the index 30min
-    nc_cell.index = nc_cell.index - pd.Timedelta(30, units='m')
+    nc_cell.index = nc_cell.index - pd.Timedelta(minutes=30)
 
     nc_cell_1H = nc_cell.resample('1H')
     slice_end = len(nc_cell_1H) + slice_start

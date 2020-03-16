@@ -310,6 +310,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     obs_int_template = {'datatype': np.int16, 'zlib': True, 'dimensions': ('OBSERVATION',)}
     inst_S256_template = {'datatype': 'S1', 'dimensions': ('INSTRUMENT', "strlen")}
     inst_float_template = {'datatype': np.float32, 'dimensions': ('INSTRUMENT',), "fill_value": 99999.0}
+    inst_double_template = {'datatype': np.float64, 'dimensions': ('INSTRUMENT',), "fill_value": 99999.0}
 
     agg_variable = ds.createVariable(varname=var_to_agg, **obs_float_template)
     agg_variable_qc = ds.createVariable(varname=var_to_agg + '_quality_control', **obs_byte_template)
@@ -325,8 +326,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
 
     source_file = ds.createVariable(varname='source_file', **inst_S256_template)
     instrument_id = ds.createVariable(varname='instrument_id', **inst_S256_template)
-    LATITUDE = ds.createVariable(varname='LATITUDE', **obs_double_template)
-    LONGITUDE = ds.createVariable(varname='LONGITUDE', **obs_double_template)
+    LATITUDE = ds.createVariable(varname='LATITUDE', **inst_double_template)
+    LONGITUDE = ds.createVariable(varname='LONGITUDE', **inst_double_template)
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
 
     ## main loop

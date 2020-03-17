@@ -8,6 +8,14 @@ INSTALL_REQUIRES = [
     'xarray>=0.11.3,<0.14.0'
 ]
 
+TESTS_REQUIRE = [
+    'pytest'
+]
+
+EXTRAS_REQUIRE = {
+    'testing': TESTS_REQUIRE
+}
+
 PACKAGE_DATA = {
     'aodntools.ncwriter': ['*.json'],
     'aodntools.timeseries_products': ['*.json']
@@ -29,6 +37,8 @@ setup(
     zip_safe=False,
     python_requires='>=3.5',
     install_requires=INSTALL_REQUIRES,
+    tests_require=TESTS_REQUIRE,
+    extras_require=EXTRAS_REQUIRE,
     test_suite='test_aodntools',
     classifiers=[
         'Development Status :: 5 - Production/Stable',

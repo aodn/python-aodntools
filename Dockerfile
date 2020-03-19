@@ -7,6 +7,7 @@ ENV LANG C.UTF-8
 ENV PATH /home/builder/.local/bin:$PATH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     ca-certificates \
     git \
     libxml2-dev \
@@ -26,6 +27,7 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py \
 
 RUN pip install \
     Cython==0.29 \
+    numpy>=1.13.0 \
     bump2version==0.5.10
 
 RUN useradd --create-home --no-log-init --shell /bin/bash --uid $BUILDER_UID builder

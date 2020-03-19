@@ -52,30 +52,29 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_function, ep
     :param is_WCUR: flag indicating if WCUR is present
     :return: end index of the slice
     """
-    nc_cell = nc_cell[varlist].squeeze()
-    nc_cell = nc_cell.to_dataframe()
+    df_cell = nc_cell[varlist].squeeze().to_dataframe()
     ## back the index 30min
-    nc_cell.index = nc_cell.index - pd.Timedelta(minutes=30)
+    df_cell.index = df_cell.index - pd.Timedelta(minutes=30)
     # TODO: shift timestamps to centre of sampling interval
 
-    nc_cell_1H = nc_cell.resample('1H')
-    slice_end = len(nc_cell_1H) + slice_start
+    df_cell_1H = df_cell.resample('1H')
+    slice_end = len(df_cell_1H) + slice_start
 
     ## move time it forward and get it
-    time_slice = ((np.fromiter(nc_cell_1H.groups.keys(), dtype='M8[ns]') + np.timedelta64(1, 'h')) - epoch) / one_day
+    time_slice = ((np.fromiter(df_cell_1H.groups.keys(), dtype='M8[ns]') + np.timedelta64(1, 'h')) - epoch) / one_day
     ds['TIME'][slice_start:slice_end] = time_slice
 
     # take the mean of the variables
     ds['UCUR'][slice_start:slice_end], \
     ds['VCUR'][slice_start:slice_end], \
     ds['WCUR'][slice_start:slice_end], \
-    ds['DEPTH'][slice_start:slice_end] = cell_velocity_resample(nc_cell_1H, 'mean', is_WCUR)
+    ds['DEPTH'][slice_start:slice_end] = cell_velocity_resample(df_cell_1H, 'mean', is_WCUR)
 
     for method in binning_function:
         ds['UCUR_' + method][slice_start:slice_end], \
         ds['VCUR_' + method][slice_start:slice_end], \
         ds['WCUR_' + method][slice_start:slice_end], \
-        ds['DEPTH_' + method][slice_start:slice_end] = cell_velocity_resample(nc_cell_1H, method, is_WCUR)
+        ds['DEPTH_' + method][slice_start:slice_end] = cell_velocity_resample(df_cell_1H, method, is_WCUR)
 
     return slice_end
 

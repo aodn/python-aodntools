@@ -11,6 +11,7 @@ import argparse
 from pkg_resources import resource_filename
 from aodntools import __version__
 import aodntools.timeseries_products.aggregated_timeseries as utils
+from aodntools.timeseries_products.velocity_aggregated_timeseries import check_file
 
 import xarray as xr
 import pandas as pd
@@ -18,62 +19,6 @@ import pandas as pd
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
 
-
-def check_file(nc, site_code):
-    """
-    Return list of errors found in the file:
-    Variables of interest are present
-    TIME, DEPTH, LATITUDE, LONGITUDE,  is present
-    NOMINAL_DEPTH is not present as variable or attribute
-    file_version is not FV01
-    if LATITUDE or LONIGITUDE dimension has length >1
-
-    :param nc: xarray dataset
-    :param site_code: code of the mooring site
-    :return: dictionary with the file name and list of failed tests
-    """
-
-    attributes = list(nc.attrs)
-    variables = list(nc.variables)
-    allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE', 'HEIGHT_ABOVE_SENSOR']
-    required_variables = ['UCUR', 'VCUR', 'WCUR', 'DEPTH']
-    error_list = []
-
-    if nc.site_code != site_code:
-        error_list.append('Wrong site_code: ' + nc.site_code)
-
-    if 'Level 1' not in nc.file_version:
-        error_list.append('Wrong file version: ' + nc.file_version)
-    if 'DEPTH' not in variables:
-        error_list.append('DEPTH variable missing')
-    if 'DEPTH' not in variables and 'HEIGHT_ABOVE_SENSOR' not in variables:
-        error_list.append('DEPTH and HEIGHT_ABOVE_SENSOR missing')
-    if 'TIME' not in variables:
-        error_list.append('TIME variable missing')
-    if 'LATITUDE' not in variables:
-        error_list.append('LATITUDE variable missing')
-    if 'LONGITUDE' not in variables:
-        error_list.append('LONGITUDE variable missing')
-
-    for variable in required_variables:
-        if variable not in variables:
-            error_list.append(variable + ' variable missing')
-        else:
-            VoIdimensions = list(nc[variable].dims)
-            if 'TIME' not in VoIdimensions:
-                error_list.append('TIME is not a dimension for ' + variable)
-            if 'LATITUDE' in VoIdimensions and len(nc.LATITUDE) > 1:
-                error_list.append('more than one LATITUDE for ' + variable)
-            if 'LONGITUDE' in VoIdimensions and len(nc.LONGITUDE) > 1:
-                error_list.append('more than one LONGITUDE for ' + variable)
-            for dim in VoIdimensions:
-                if dim not in allowed_dimensions:
-                    error_list.append('not allowed dimension: ' + dim)
-
-    if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
-        error_list.append('no NOMINAL_DEPTH')
-
-    return error_list
 
 def cell_velocity_resample(df, binning_function, is_WCUR):
     """

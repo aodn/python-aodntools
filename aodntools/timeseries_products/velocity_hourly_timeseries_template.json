@@ -186,18 +186,20 @@
             },
         "CELL_INDEX": {
             "long_name": "index of the corresponding measuring cell",
-            "comment": "the closest cell to the sensor is cell 0"
+            "comment": "Cell index is included for reference only and cannot be used to extract values at constant depth. The number and vertical spacing of cells can vary by instrument and deployment. The actual depth of any given cell can change between deployments, and also varies with time during a deployment. The closest cell to the sensor has index 0."
         },
         "SECONDS_TO_MIDDLE": {
-            "long_name": "number of seconds from timestamp to middle of the measurement window"
+            "long_name": "offset from recorded timestamp to middle of the measurement window in the input file",
+            "units": "s"
         }
     },
     "_global":{
-        "abstract": "Hourly Time-series Product: This file contains all measurements of quality controled U, V and W sea water velocity variables from all instruments deployed at the selected site. Timestamps are chronologically ordered, and binned into 1 hour time intervals. Instrument details are stored as a variable in order to keep a record of the origin of each measurement. Out-of-water measurements have been excluded.",
+        "abstract": "Hourly Time-series Product: This file contains all measurements of quality-controlled U, V and W sea water velocity variables from all instruments deployed at the selected site, binned into 1-hour time intervals. Out-of-water measurements, and those flagged as bad by IMOS standard automated quality-control procedures, have been excluded. Timestamps in the input files indicate the start of each measurement interval (up to an hour in duration), and these have not been shifted to the centre of the interval before binning. Instrument details are stored as variables in order to keep a record of the origin of each measurement.",
         "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
         "author": "Klein, Eduardo",
         "author_email": "eduardo.kleinsalas@utas.edu.au",
         "citation": "The citation in a list of references is: \"IMOS [year-of-data-download], [Title], [data-access-URL], accessed [date-of-access].\".",
+        "comment": "Timestamps in the input files indicate the start of each measurement interval (instrument-dependent; up to an hour in duration), and these have not been shifted to the centre of the interval before binning. This could lead to an artificial shift of up to half an hour in the output data. The size of this shift, where known, has been recorded in the SECONDS_TO_MIDDLE variable.",
         "Conventions": "CF-1.6,IMOS-1.4",
         "data_centre": "Australian Ocean Data Network (AODN)",
         "data_centre_email": "info@aodn.org.au",

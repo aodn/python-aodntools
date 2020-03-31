@@ -27,7 +27,6 @@ def check_file(nc, site_code):
     NOMINAL_DEPTH is not present as variable or attribute
     file_version is not FV01
     if LATITUDE or LONIGITUDE dimension has length >1
-    if TIME.seconds_to_middle_of_measurement exist
 
     :param nc: xarray dataset
     :param site_code: code of the mooring site
@@ -55,8 +54,6 @@ def check_file(nc, site_code):
         error_list.append('LATITUDE variable missing')
     if 'LONGITUDE' not in variables:
         error_list.append('LONGITUDE variable missing')
-    # if 'seconds_to_middle_of_measurement' not in nc['TIME'].attrs:
-    #     error_list.append('seconds_to_middle_of_measurement not present in TIME')
 
     for variable in required_variables:
         if variable not in variables:
@@ -116,6 +113,7 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
     nc_cell = nc_cell.to_dataframe()
     ## back the index 30min
     nc_cell.index = nc_cell.index - pd.Timedelta(minutes=30)
+    # TODO: shift timestamps to centre of sampling interval
 
     nc_cell_1H = nc_cell.resample('1H')
     slice_end = len(nc_cell_1H) + slice_start

@@ -96,7 +96,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     :param output_dir: path where the result file will be written
     :param download_url_prefix: URL prefix for file download (to be prepended to paths in files_to_agg)
     :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
-    :return: file path of the aggregated product, list of rejected files
+    :return: file path of the hourly aggregated product, dict of rejected files: errors
     """
 
     varlist = ['UCUR', 'VCUR', 'WCUR', 'DEPTH']
@@ -107,8 +107,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     epoch = np.datetime64("1950-01-01T00:00:00")
     one_day = np.timedelta64(1, 'D')
 
-    bad_files = []
-    rejected_files = []
+    bad_files = {}
 
     chunk_size = 90  ## size in days
 
@@ -122,14 +121,12 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             error_list = check_file(nc, site_code)
             if error_list:
-                bad_files.append([file, error_list])
-                rejected_files.append(file)
+                bad_files.update({file: error_list})
     print(" ")
 
-
     ## remove bad files form the list
-    for file in bad_files:
-        files_to_agg.remove(file[0])
+    for file in bad_files.keys():
+        files_to_agg.remove(file)
 
     ## sort the files in chronological order
     files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
@@ -296,7 +293,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
                     'date_created':             datetime.utcnow().strftime(timeformat),
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
                     'keywords':                 ', '.join(varlist + ['AGGREGATED']),
-                    'rejected_files':           "\n".join(rejected_files),
+                    'rejected_files':           "\n".join(bad_files.keys()),
                     'contributor_name':        "; ".join(contributor_name),
                     'contributor_email':       "; ".join(contributor_email),
                     'contributor_role':        "; ".join(contributor_role),

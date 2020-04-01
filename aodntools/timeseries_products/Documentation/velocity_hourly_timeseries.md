@@ -1,4 +1,4 @@
-# Velocity Aggregated Time Series Product
+# Velocity Hourly Time Series Product
 
 - [Objective](#objective)
 - [Input](#input)
@@ -10,7 +10,7 @@
 
 ## Objective
 
-This product provides aggregated quality controlled U, V, and W velocity time-series files for each mooring site, without any interpolation or filtering, except for the exclusion of the out-of-water data, binned into 1-hour intervals. For the profiling (ADCP) instruments, the absolute depth of the measuring cell is calculated using the `DEPTH` measured at the instrument and the `HEIGHT_ABOVE_SENSOR`.
+This product provides aggregated quality controlled U, V, and W velocity time-series files for each mooring site, binned into 1-hour intervals, including only in-water data flagged as "good" or "probably good" in the input files. QC flags are not included. Statistics related to the averaging process will be stored as variables (standard deviation, minimum and maximum values, number of records binned). For the profiling (ADCP) instruments, the absolute depth of each measuring cell is calculated using the `DEPTH` measured at the instrument and the `HEIGHT_ABOVE_SENSOR` coordinate.
 
 The output from a single run of the code will be an aggregated file of all available measurements of the velocity components UCUR, VCUR and (where available) WCUR at one mooring site, binned into 1-hour intervals.
 
@@ -74,13 +74,15 @@ The dimensions of the resulting file  are determined as follows:
 
 ### Variables
 
-Only values flagged as “good” or “probably good” are included. The velocity variables are produced by flattening, and concatenating the arrays in each of the input files. The time of the measurement is shifted according to the seconds_to_middle_of_measurement attribute. The values are then averaged into one-hour time bins (independently within each depth cell for ADCPs). The resulting variables have dimension `OBSERVATION`. 
+Only in-water velocity measurements flagged as “good” or “probably good” in the input files are included. These values are averaged into one-hour time bins (independently within each depth cell for ADCPs). Timestamps in the input files indicate the start of each measurement interval, and these _have not been shifted to the centre of the interval before binning_. This could lead to an artificial shift of up to half an hour in the output data. The size of this shift, where known, has been recorded in the `SECONDS_TO_MIDDLE` variable.
 
-The variable `TIME` from input files is re-shaped to match the flattened velocity variables, and replaced by one-hour timestamps. The binning intervals will be one hour long, centred on the hour (i.e. HH:00:00). Each timestamp will be repeated once for each ADCP depth cell.
+After this averaging, the velocity variables are flattened into one dimensional arrays, and the arrays from each input file are concatenated into the output file. The resulting variables have dimension `OBSERVATION`. 
+
+The binning intervals will be one hour long, centred on the hour (i.e. HH:00:00). Each timestamp will be repeated once for each ADCP depth cell, in order to match the shape of the velocity variables. The `TIME` coordinate variable in the output file also has dimension `OBSERVATION`.
 
 The `DEPTH` variables from input files are averaged into the same one-hour bins, and concatenated into a variable `DEPTH(OBSERVATION)`. In the case of ADCP instruments, the `HEIGHT_ABOVE_SENSOR`  is converted to absolute depth by subtracting each of the height values from the depth measurements at the instrument. 
 
-All output variables with the `INSTRUMENT` dimension are sorted in chronological order, and the input files aggregated chronologically, according to the global attribute time_deployment_start.
+All output variables with the `INSTRUMENT` dimension are sorted in chronological order, and the input files aggregated chronologically, according to the global attribute `time_deployment_start`.
 
 In order to keep track of the provenance of the aggregated file, accessory variables are created:
 
@@ -99,7 +101,7 @@ In order to keep track of the provenance of the aggregated file, accessory varia
 
 The variable attributes will comply with the IMOS metadata standards.
 
-The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](../velocity_aggregated_timeseries_template.json) that contains the {key:value} pairs for each of them.
+The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](../velocity_hourly_timeseries_template.json) that contains the {key:value} pairs for each of them.
 
 Attributes specific to each aggregated product, are added as follows:
 

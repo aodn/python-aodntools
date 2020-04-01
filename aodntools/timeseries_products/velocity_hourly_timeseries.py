@@ -1,31 +1,29 @@
-import os
-import sys
-import tempfile
-import shutil
-import numpy as np
-from netCDF4 import Dataset, num2date, stringtochar
-import json
-from datetime import datetime
 import argparse
+import json
+import os
+import shutil
+import tempfile
+from datetime import datetime
 
+import numpy as np
+import pandas as pd
+import xarray as xr
+from netCDF4 import Dataset, num2date, stringtochar
 from pkg_resources import resource_filename
-from aodntools import __version__
+
 import aodntools.timeseries_products.aggregated_timeseries as utils
+from aodntools import __version__
 from aodntools.timeseries_products.velocity_aggregated_timeseries import check_file
 
-import xarray as xr
-import pandas as pd
-
-
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
-
+QC_FLAG_MAX = 2
 
 def cell_velocity_resample(df, binning_function, is_WCUR):
     """
     Resample a dataset to a specific time_interval.
     if WCUR not present, returns nan
     :param df: grouped dataframe
-    :param binning_function: function used for binning as non string standard numpy function
+    :param binning_function: name of standard numpy function used for binning
     :param is_WCUR: True if WCUR is present in nc, False otherwise
     :return: binned U, v, W CUR according to the binning function
     """
@@ -41,14 +39,14 @@ def cell_velocity_resample(df, binning_function, is_WCUR):
     return UCUR, VCUR, WCUR, DEPTH
 
 
-def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, one_day, is_WCUR):
+def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_function, epoch, one_day, is_WCUR):
     """
     get U, V, W current values resampled
     :param nc_cell: xarray DATASET
     :param ds: netcdf4 dataset
     :param slice_start: start index of the slice
     :param varlist: list of variable names to subset the dataset
-    :param binnig_fun: list of function names for binning
+    :param binning_function: list of numpy function names for binning
     :param one_day: timedelta one day
     :param epoch: base epoch
     :param is_WCUR: flag indicating if WCUR is present
@@ -73,7 +71,7 @@ def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun, epoch, 
     ds['WCUR'][slice_start:slice_end], \
     ds['DEPTH'][slice_start:slice_end] = cell_velocity_resample(nc_cell_1H, 'mean', is_WCUR)
 
-    for method in binning_fun:
+    for method in binning_function:
         ds['UCUR_' + method][slice_start:slice_end], \
         ds['VCUR_' + method][slice_start:slice_end], \
         ds['WCUR_' + method][slice_start:slice_end], \
@@ -132,7 +130,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
 
     ## create ncdf file, dimensions (unlimited) and variables
-    ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
+    ds = Dataset(temp_outfile, 'w', format='NETCDF4_CLASSIC')
     OBSERVATION = ds.createDimension('OBSERVATION', size=None)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=len(files_to_agg))
     STRING256 = ds.createDimension("strlen", size=256)
@@ -190,20 +188,12 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
 
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
-            if 'HEIGHT_ABOVE_SENSOR' in list(nc.variables):
-                is_2D = True
-            else:
-                is_2D = False
-
-            if 'WCUR' in list(nc.data_vars):
-                is_WCUR = True
-            else:
-                is_WCUR = False
+            is_2D = 'HEIGHT_ABOVE_SENSOR' in list(nc.variables)
+            is_WCUR = 'WCUR' in list(nc.data_vars)
 
             ## mask values with QC flag>2
             for var in varlist:
-                nc[var] = nc[var].where(nc[var+'_quality_control']<3)
-
+                nc[var] = nc[var].where(nc[var+'_quality_control'] <= QC_FLAG_MAX)
 
             ## process in chunks
             ## in water only
@@ -218,12 +208,12 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
                 nc_chunk = nc.where((nc.TIME >= chunk_start) & (nc.TIME < chunk_partial), drop=True)
                 if is_2D:
                     ## process all cells, one by one
-                    cells = nc_chunk.HEIGHT_ABOVE_SENSOR.values
-                    for cell_idx, cell in enumerate(cells):
+                    heights = nc_chunk.HEIGHT_ABOVE_SENSOR.values
+                    for cell_idx, cell_height in enumerate(heights):
                         ## get cell data, drop HEIGHT_ABOVE_SENSOR dim
-                        nc_cell = nc_chunk.sel(HEIGHT_ABOVE_SENSOR=cell)
+                        nc_cell = nc_chunk.sel(HEIGHT_ABOVE_SENSOR=cell_height)
                         ## convert to absolute DEPTH
-                        nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell
+                        nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell_height
                         slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
                                                          epoch, one_day, is_WCUR)
                         CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)

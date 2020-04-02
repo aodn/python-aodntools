@@ -17,20 +17,24 @@ from aodntools.timeseries_products.velocity_aggregated_timeseries import check_f
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
 QC_FLAG_MAX = 2
+TIME_UNITS = "days since 1950-01-01 00:00:00 UTC"
+TIME_CALENDAR = "gregorian"
+TIME_EPOCH = np.datetime64("1950-01-01T00:00:00")
+ONE_DAY = np.timedelta64(1, 'D')
 
-def cell_velocity_resample(df, binning_function, is_WCUR):
+
+def cell_velocity_resample(df, binning_function):
     """
     Resample a dataset to a specific time_interval.
     if WCUR not present, returns nan
     :param df: grouped dataframe
     :param binning_function: name of standard numpy function used for binning
-    :param is_WCUR: True if WCUR is present in nc, False otherwise
     :return: binned U, v, W CUR according to the binning function
     """
     df_binned = df.apply(binning_function)
     UCUR = np.array(df_binned['UCUR'])
     VCUR = np.array(df_binned['VCUR'])
-    if is_WCUR:
+    if 'WCUR' in df_binned:
         WCUR = np.array(df_binned['WCUR'])
     else:
         WCUR = np.full(len(df), np.nan)
@@ -39,42 +43,40 @@ def cell_velocity_resample(df, binning_function, is_WCUR):
     return UCUR, VCUR, WCUR, DEPTH
 
 
-def get_resampled_values(nc_cell, ds, slice_start, varlist, binning_function, epoch, one_day, is_WCUR):
+def append_resampled_values(nc_cell, ds, slice_start, binning_functions):
     """
-    get U, V, W current values resampled
-    :param nc_cell: xarray DATASET
-    :param ds: netcdf4 dataset
+    Resample U, V, W current and depth values from a single ADCP cell into hourly bins, and
+    append the mean values to the corresponding variables in the output dataset (starting at
+    index slice_start), along with additional statistical variables specified by binning_functions.
+    :param nc_cell: input xarray Dataset representing a single ADCP cell (or point time series)
+    :param ds: output netcdf4 Dataset to update with resampled values
     :param slice_start: start index of the slice
-    :param varlist: list of variable names to subset the dataset
-    :param binning_function: list of numpy function names for binning
-    :param one_day: timedelta one day
-    :param epoch: base epoch
-    :param is_WCUR: flag indicating if WCUR is present
+    :param binning_functions: list of numpy function names for binning
     :return: end index of the slice
     """
-    df_cell = nc_cell[varlist].squeeze().to_dataframe()
-    ## back the index 30min
+    df_cell = nc_cell.squeeze().to_dataframe()
+    # shift the index forward 30min to centre the bins on the hour
     df_cell.index = df_cell.index + pd.Timedelta(minutes=30)
     # TODO: shift timestamps to centre of sampling interval
 
     df_cell_1H = df_cell.resample('1H')
     slice_end = len(df_cell_1H) + slice_start
 
-    ## move time it forward and get it
-    time_slice = (np.fromiter(df_cell_1H.groups.keys(), dtype='M8[ns]') - epoch) / one_day
+    # set binned timestamps
+    time_slice = (np.fromiter(df_cell_1H.groups.keys(), dtype='M8[ns]') - TIME_EPOCH) / ONE_DAY
     ds['TIME'][slice_start:slice_end] = time_slice
 
     # take the mean of the variables
     ds['UCUR'][slice_start:slice_end], \
     ds['VCUR'][slice_start:slice_end], \
     ds['WCUR'][slice_start:slice_end], \
-    ds['DEPTH'][slice_start:slice_end] = cell_velocity_resample(df_cell_1H, 'mean', is_WCUR)
+    ds['DEPTH'][slice_start:slice_end] = cell_velocity_resample(df_cell_1H, 'mean')
 
-    for method in binning_function:
+    for method in binning_functions:
         ds['UCUR_' + method][slice_start:slice_end], \
         ds['VCUR_' + method][slice_start:slice_end], \
         ds['WCUR_' + method][slice_start:slice_end], \
-        ds['DEPTH_' + method][slice_start:slice_end] = cell_velocity_resample(df_cell_1H, method, is_WCUR)
+        ds['DEPTH_' + method][slice_start:slice_end] = cell_velocity_resample(df_cell_1H, method)
 
     return slice_end
 
@@ -98,11 +100,6 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
 
     varlist = ['UCUR', 'VCUR', 'WCUR', 'DEPTH']
     binning_fun = ['max', 'min', 'std', 'count']
-    
-    time_units="days since 1950-01-01 00:00:00 UTC"
-    time_calendar="gregorian"
-    epoch = np.datetime64("1950-01-01T00:00:00")
-    one_day = np.timedelta64(1, 'D')
 
     bad_files = {}
 
@@ -188,7 +185,6 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
             is_2D = 'HEIGHT_ABOVE_SENSOR' in list(nc.variables)
-            is_WCUR = 'WCUR' in list(nc.data_vars)
 
             ## mask values with QC flag>2
             for var in varlist:
@@ -213,14 +209,12 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
                         nc_cell = nc_chunk.sel(HEIGHT_ABOVE_SENSOR=cell_height)
                         ## convert to absolute DEPTH
                         nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell_height
-                        slice_end = get_resampled_values(nc_cell, ds, slice_start, varlist, binning_fun,
-                                                         epoch, one_day, is_WCUR)
+                        slice_end = append_resampled_values(nc_cell[varlist], ds, slice_start, binning_fun)
                         CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)
 
                         slice_start = slice_end
                 else:
-                    slice_end = get_resampled_values(nc_chunk, ds, slice_start, varlist, binning_fun,
-                                                     epoch, one_day, is_WCUR)
+                    slice_end = append_resampled_values(nc_chunk[varlist], ds, slice_start, binning_fun)
                     CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, 0, dtype=np.uint32)
 
                     slice_start = slice_end
@@ -260,10 +254,10 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     timeformat = '%Y-%m-%dT%H:%M:%SZ'
     file_timeformat = '%Y%m%d'
 
-    time_start = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(timeformat)
-    time_end = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(timeformat)
-    time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
-    time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
+    time_start = num2date(np.min(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(timeformat)
+    time_end = num2date(np.max(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(timeformat)
+    time_start_filename = num2date(np.min(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(file_timeformat)
+    time_end_filename = num2date(np.max(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(file_timeformat)
 
 
     contributor_name, contributor_email, contributor_role = utils.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)

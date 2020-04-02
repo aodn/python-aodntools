@@ -1,0 +1,3 @@
+cftime<1.1.1;python_version=='3.5'
+pandas<0.25.0;python_version=='3.5'
+xarray<0.14.0;python_version=='3.5'

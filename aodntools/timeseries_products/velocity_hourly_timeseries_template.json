@@ -1,0 +1,219 @@
+{
+    "_variables": {
+        "TIME": {
+            "axis": "T",
+            "comment": "time stamp corresponds to the hour and represents binned data [30,30) minutes before and after the hour",
+            "long_name": "time",
+            "standard_name": "time",
+            "valid_max": 90000.0,
+            "valid_min": 0.0,
+            "units": "days since 1950-01-01 00:00:00 UTC",
+            "calendar": "gregorian"
+            },
+        "LATITUDE":{
+            "axis": "Y",
+            "long_name": "latitude",
+            "reference_datum": "WGS84 geographic coordinate system",
+            "standard_name": "latitude",
+            "units": "degrees_north",
+            "valid_max": 90.0,
+            "valid_min": -90.0
+            },
+        "LONGITUDE": {
+            "axis": "X",
+            "long_name": "longitude",
+            "reference_datum": "WGS84 geographic coordinate system",
+            "standard_name": "longitude",
+            "units": "degrees_east",
+            "valid_max": 180.0,
+            "valid_min": -180.0
+            },
+        "DEPTH": {
+            "coordinates": "TIME LATITUDE LONGITUDE NOMINAL DEPTH",
+            "DEPTH:ancillary_variables": "DEPTH_min DEPTH_max DEPTH_std DEPTH_count",
+            "long_name": "mean actual depth",
+            "positive": "down",
+            "reference_datum": "sea surface",
+            "standard_name": "depth",
+            "units": "m",
+            "valid_max": 12000.0,
+            "valid_min": -5.0,
+            "cell_methods": "TIME: mean"
+            },
+        "DEPTH_max": {
+            "units": "m",
+            "standard_name": "depth",
+            "long_name": "maximum depth value in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: maximum"
+            },
+        "DEPTH_min": {
+            "units": "m",
+            "standard_name": "depth",
+            "long_name": "minimum depth value in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: minimum"
+            },
+        "DEPTH_std": {
+            "units": "m",
+            "standard_name": "depth",
+            "long_name": "standard deviation of depth values in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: standard_deviation"
+            },
+        "DEPTH_count": {
+            "standard_name": "depth number_of_observations",
+            "units": "1",
+            "long_name": "number of depth observations in the bin, after rejection of flagged data"
+            },
+        "NOMINAL_DEPTH": {
+            "axis": "Z",
+            "long_name": "nominal depth",
+            "positive": "down",
+            "reference_datum": "sea surface",
+            "standard_name": "depth",
+            "units": "m",
+            "valid_max": 12000.0,
+            "valid_min": -5.0
+            },
+        "instrument_index": {
+            "long_name": "which instrument this obs is for",
+            "instance_dimension": "INSTRUMENT"
+            },
+        "instrument_id": {
+            "long_name": "source deployment code, instrument make, model, serial_number"
+            },
+        "source_file": {
+            "long_name": "source file for this instrument"
+            },
+        "UCUR": {
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
+            "ancillary_variables": "UCUR_max, UCUR_min, UCUR_std, UCUR_count",
+            "long_name": "eastward_sea_water_velocity",
+            "standard_name": "eastward_sea_water_velocity",
+            "units": "m s-1",
+            "cell_methods": "TIME: mean",
+            "valid_max": 10.0,
+            "valid_min": -10.0
+            },
+        "UCUR_max": {
+            "units": "m s-1",
+            "standard_name": "eastward_sea_water_velocity",
+            "long_name": "maximum eastward_sea_water_velocity value in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: maximum"
+            },
+        "UCUR_min": {
+            "units": "m s-1",
+            "standard_name": "eastward_sea_water_velocity",
+            "long_name": "minimum eastward_sea_water_velocity value in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: minimum"
+            },
+        "UCUR_std": {
+            "units": "m s-1",
+            "standard_name": "eastward_sea_water_velocity",
+            "long_name": "standard deviation of eastward_sea_water_velocity values in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: standard_deviation"
+            },
+        "UCUR_count": {
+            "standard_name": "eastward_sea_water_velocity number_of_observations",
+            "units": "1",
+            "long_name": "number of eastward_sea_water_velocity observations in the bin, after rejection of flagged data"
+            },
+        "VCUR": {
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
+            "ancillary_variables": "VCUR_max, VCUR_min, VCUR_std, VCUR_count",
+            "long_name": "northward_sea_water_velocity",
+            "standard_name": "northward_sea_water_velocity",
+            "units": "m s-1",
+            "cell_methods": "TIME: mean",
+            "valid_max": 10.0,
+            "valid_min": -10.0
+            },
+        "VCUR_max": {
+            "units": "m s-1",
+            "standard_name": "northward_sea_water_velocity",
+            "long_name": "maximum northward_sea_water_velocity value in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: maximum"
+            },
+        "VCUR_min": {
+            "units": "m s-1",
+            "standard_name": "northward_sea_water_velocity",
+            "long_name": "minimum northward_sea_water_velocity value in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: minimum"
+            },
+        "VCUR_std": {
+            "units": "m s-1",
+            "standard_name": "northward_sea_water_velocity",
+            "long_name": "standard deviation of northward_sea_water_velocity values in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: standard_deviation"
+            },
+        "VCUR_count": {
+            "standard_name": "northward_sea_water_velocity number_of_observations",
+            "units": "1",
+            "long_name": "number of northward_sea_water_velocity observations in the bin, after rejection of flagged data"
+            },
+
+        "WCUR": {
+            "coordinates": "TIME DEPTH LATITUDE LONGITUDE",
+            "ancillary_variables": "WCUR_max, WCUR_min, WCUR_std, WCUR_count",
+            "long_name": "upward_sea_water_velocity",
+            "standard_name": "upward_sea_water_velocity",
+            "units": "m s-1",
+            "cell_methods": "TIME: mean",
+            "valid_max": 5.0,
+            "valid_min": -5.0
+            },
+        "WCUR_max": {
+            "units": "m s-1",
+            "standard_name": "upward_sea_water_velocity",
+            "long_name": "maximum upward_sea_water_velocity value in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: maximum"
+            },
+        "WCUR_min": {
+            "units": "m s-1",
+            "standard_name": "upward_sea_water_velocity",
+            "long_name": "minimum upward_sea_water_velocity value in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: minimum"
+            },
+        "WCUR_std": {
+            "units": "m s-1",
+            "standard_name": "upward_sea_water_velocity",
+            "long_name": "standard deviation of upward_sea_water_velocity values in the bin, after rejection of flagged data",
+            "cell_methods": "TIME: standard_deviation"
+            },
+        "WCUR_count": {
+            "standard_name": "upward_sea_water_velocity number_of_observations",
+            "units": "1",
+            "long_name": "number of upward_sea_water_velocity observations in the bin, after rejection of flagged data"
+            },
+        "CELL_INDEX": {
+            "long_name": "index of the corresponding measuring cell",
+            "comment": "Cell index is included for reference only and cannot be used to extract values at constant depth. The number and vertical spacing of cells can vary by instrument and deployment. The actual depth of any given cell can change between deployments, and also varies with time during a deployment. The closest cell to the sensor has index 0."
+        },
+        "SECONDS_TO_MIDDLE": {
+            "long_name": "offset from recorded timestamp to middle of the measurement window in the input file",
+            "units": "s"
+        }
+    },
+    "_global":{
+        "abstract": "Hourly Time-series Product: This file contains all measurements of quality-controlled U, V and W sea water velocity variables from all instruments deployed at the selected site, binned into 1-hour time intervals. Out-of-water measurements, and those flagged as bad by IMOS standard automated quality-control procedures, have been excluded. Timestamps in the input files indicate the start of each measurement interval (up to an hour in duration), and these have not been shifted to the centre of the interval before binning. Instrument details are stored as variables in order to keep a record of the origin of each measurement.",
+        "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
+        "author": "Klein, Eduardo",
+        "author_email": "info@aodn.org.au",
+        "citation": "The citation in a list of references is: \"IMOS [year-of-data-download], [Title], [data-access-URL], accessed [date-of-access].\".",
+        "comment": "Timestamps in the input files indicate the start of each measurement interval (instrument-dependent; up to an hour in duration), and these have not been shifted to the centre of the interval before binning. This could lead to an artificial shift of up to half an hour in the output data. The size of this shift, where known, has been recorded in the SECONDS_TO_MIDDLE variable.",
+        "Conventions": "CF-1.6,IMOS-1.4",
+        "data_centre": "Australian Ocean Data Network (AODN)",
+        "data_centre_email": "info@aodn.org.au",
+        "disclaimer": "Data, products and services from IMOS are provided \"as is\" without any warranty as to fitness for a particular purpose.",
+        "featureType": "timeSeries",
+        "file_version": "Level 2 - Quality Controlled Data",
+        "file_version_quality_control": "Quality controlled data have been through quality assurance procedures such as automated routines and sensor calibration or visual inspection and flag of obvious errors. The data are in physical units using standard SI metric units with calibration and other pre-processing routines applied, all time and location values are in absolute coordinates to comply with standards and datum. Data includes flags for each measurement to indicate the estimated quality of the measurement. Metadata exists for the data or for the higher level dataset that the data belongs to. This is the standard IMOS data level and is what should be made available to AODN and to the IMOS community.",
+        "institution_references": "http://imos.org.au/facilities/aodn/",
+        "keywords_vocabulary": "IMOS parameter names. See https://github.com/aodn/imos-toolbox/blob/master/IMOS/imosParameters.txt",
+        "license": "http://creativecommons.org/licenses/by/4.0/",
+        "naming_authority": "IMOS",
+        "project": "Integrated Marine Observing System (IMOS)",
+        "references": "http://www.imos.org.au",
+        "source": "Mooring",
+        "standard_name_vocabulary": "NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table 45",
+        "lineage": "The aggregated UCUR, VCUR and WCUR are produced by sequentially concatenating the individual values in each of the input files after being binned into 1 hour fixed interval. In the case of ADCPs, the current values at each measuring cell are referenced to its absolute DEPTH. The resulting variable has dimension OBSERVATION. The DEPTH variable is calculated from the DEPTH measurements at the instrument and the HEIGHT_ABOVE_SENSOR distance corresponding to each measurement cell. The values are summarised using the arithmetic mean. Additional variables derived from the binning process are also stored: minimum, maximum, standard deviation and number of observations in each time bin. The resulting variables have dimension OBSERVATION. The variable TIME from input files and centered to the hour is concatenated into a variable TIME(OBSERVATION). The DEPTH variable from input files is averaged into the same 1 hour bin and concatenated into a variable DEPTH(OBSERVATION). If not present, fill values are stored. All output variables with the INSTRUMENT dimension are sorted in chronological order. In order to keep track of the provenance of VoI in the aggregated file, accessory variables are created."
+        }
+}

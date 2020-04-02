@@ -4,8 +4,8 @@ INSTALL_REQUIRES = [
     'jsonschema>=2.6.0,<3.0.0',
     'numpy>=1.13.0',
     'netCDF4>=1.5.3',
-    'pandas>=0.24.2',
-    'xarray>=0.11.3'
+    'pandas>=0.24.2,<0.25.0',
+    'xarray>=0.11.3,<0.14.0'
 ]
 
 TESTS_REQUIRE = [
@@ -26,7 +26,7 @@ PACKAGE_NAME = 'aodntools'
 
 setup(
     name=PACKAGE_NAME,
-    version='1.2.9',
+    version='1.3.0',
     packages=find_packages(exclude=PACKAGE_EXCLUDES),
     package_data=PACKAGE_DATA,
     url='https://github.com/aodn',

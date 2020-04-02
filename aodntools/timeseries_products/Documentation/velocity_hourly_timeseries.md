@@ -1,4 +1,4 @@
-# Velocity Aggregated Time Series Product
+# Velocity Hourly Time Series Product
 
 - [Objective](#objective)
 - [Input](#input)
@@ -10,8 +10,9 @@
 
 ## Objective
 
-This product provides aggregated U, V, and W velocity time-series files for each mooring site, without any interpolation or filtering, except for the exclusion of the out-of-water data. For the profiling (ADCP) instruments, the absolute depth of the measuring cell is calculated using the `DEPTH` measured at the instrument and the `HEIGHT_ABOVE_SENSOR`, The Quality Control (QC) flags are preserved.
+This product provides aggregated quality controlled U, V, and W velocity time-series files for each mooring site, binned into 1-hour intervals, including only in-water data flagged as "good" or "probably good" in the input files. QC flags are not included. Statistics related to the averaging process will be stored as variables (standard deviation, minimum and maximum values, number of records binned). For the profiling (ADCP) instruments, the absolute depth of each measuring cell is calculated using the `DEPTH` measured at the instrument and the `HEIGHT_ABOVE_SENSOR` coordinate.
 
+The output from a single run of the code will be an aggregated file of all available measurements of the velocity components UCUR, VCUR and (where available) WCUR at one mooring site, binned into 1-hour intervals.
 
 ## Input
 
@@ -26,7 +27,7 @@ The code aggregates variables and files that meet the following requirements:
 - All files to be aggregated are from the same site, and have the same `site_code` attribute; 
 - Variables to be aggregated have `TIME` and (optionally) `HEIGHT_ABOVE_SENSOR` as their only dimensions (or if `LATITUDE` and `LONGITUDE` are included as dimensions, they have size 1);
 - The in-water data are bounded by the global attributes `time_deployment_start` and `time_deployment_end`;
-- The `TIME` variable has an attribute `seconds_to_middle_of_measurement` to indicate the offset from each recorded timestamp to the centre of the averaging period.
+
 
 
 The code is able to access the input files either locally, or remotely via the OPeNDAP protocol. 
@@ -73,15 +74,18 @@ The dimensions of the resulting file  are determined as follows:
 
 ### Variables
 
-The velocity variables are produced by flattening, then concatenating the arrays in each of the input files. The resulting variable has dimension `OBSERVATION`. Each variable’s ancillary_variables, in particular the corresponding quality-control flags, are also included, with dimension `OBSERVATION`. If the quality control variable is absent in any input file, the corresponding flags in the output file will  be set to 0 (“no QC performed”).
+Only in-water velocity measurements flagged as “good” or “probably good” in the input files are included. These values are averaged into one-hour time bins (independently within each depth cell for ADCPs). Timestamps in the input files indicate the start of each measurement interval, and these _have not been shifted to the centre of the interval before binning_. This could lead to an artificial shift of up to half an hour in the output data. The size of this shift, where known, has been recorded in the `SECONDS_TO_MIDDLE` variable.
 
-The variable `TIME` from input files is re-shaped to match the flattened velocity variables, then concatenated into a variable `TIME(OBSERVATION)`. This will result in a non-uniform time interval and repeated timestamps.
+After this averaging, the velocity variables are flattened into one dimensional arrays, and the arrays from each input file are concatenated into the output file. The resulting variables have dimension `OBSERVATION`. 
 
-The `DEPTH` variable from input files is concatenated into a variable `DEPTH(OBSERVATION)`. In the case of ADCP instruments, the `HEIGH_ABOVE_SENSOR`  is converted to absolute depth by subtracting each of the height values from the depth measurements at the instrument. `DEPTH_quality_control`, if present, is also included. 
+The binning intervals will be one hour long, centred on the hour (i.e. HH:00:00). Each timestamp will be repeated once for each ADCP depth cell, in order to match the shape of the velocity variables. The `TIME` coordinate variable in the output file also has dimension `OBSERVATION`.
 
-All output variables with the `INSTRUMENT` dimension are sorted in chronological order, and the input files aggregated chronologically, according to the global attribute time_deployment_start.
+The `DEPTH` variables from input files are averaged into the same one-hour bins, and concatenated into a variable `DEPTH(OBSERVATION)`. In the case of ADCP instruments, the `HEIGHT_ABOVE_SENSOR`  is converted to absolute depth by subtracting each of the height values from the depth measurements at the instrument. 
+
+All output variables with the `INSTRUMENT` dimension are sorted in chronological order, and the input files aggregated chronologically, according to the global attribute `time_deployment_start`.
 
 In order to keep track of the provenance of the aggregated file, accessory variables are created:
+
 
 - `instrument_index(OBSERVATION)`: index [0:number of files] of the instrument used, referencing the `INSTRUMENT` dimension.
 - `source_file(INSTRUMENT, strlen)`: URLs of the files used
@@ -89,8 +93,7 @@ In order to keep track of the provenance of the aggregated file, accessory varia
 - `LATITUDE(INSTRUMENT)`: LATITUDE per instrument.
 - `LONGITUDE(INSTRUMENT)`: LONGITUDE per instrument.
 - `NOMINAL_DEPTH(INSTRUMENT)`: nominal depth per instrument, from the input file’s variable `NOMINAL_DEPTH` or global attribute instrument_nominal_depth.
-- `SECONDS_TO_MIDDLE(INSTRUMENT)`:  offset from the timestamp to the middle of the measurement window for each deployment
-- CELL_INDEX(OBSERVATION): index of the corresponding measuring cell
+- `CELL_INDEX(OBSERVATION)`: index of the corresponding measuring cell.
 
 
 
@@ -98,7 +101,7 @@ In order to keep track of the provenance of the aggregated file, accessory varia
 
 The variable attributes will comply with the IMOS metadata standards.
 
-The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](../velocity_aggregated_timeseries_template.json) that contains the {key:value} pairs for each of them.
+The global metadata will be a set of IMOS standard attributes. Fixed attributes are read from a [JSON file](../velocity_hourly_timeseries_template.json) that contains the {key:value} pairs for each of them.
 
 Attributes specific to each aggregated product, are added as follows:
 
@@ -111,7 +114,7 @@ Attributes specific to each aggregated product, are added as follows:
 - `history`: set to “<date_created>: Aggregated file created.”;
 - `keywords`: set to a comma-separated list of the main variable names (“UCUR, VCUR, WCUR, DEPTH, AGGREGATED”);
 - `lineage`: a statement about how the file was created, including a link to the code used; 
-- `title`: "Long Timeseries Velocity Aggregated product: UCUR, VCUR, WCUR, DEPTH at <site_code>  between <time_coverage_start> and <time_coverage_end>"; 
+- `title`: "Long Timeseries Velocity Hourly Aggregated product: UCUR, VCUR, WCUR, DEPTH at <site_code>  between <time_coverage_start> and <time_coverage_end>"; 
 - `rejected_files`: a list of URLs for files that were in the input files list, but did not meet the input requirements. 
 
 
@@ -119,6 +122,6 @@ Attributes specific to each aggregated product, are added as follows:
 
 The output from a single run of the code will be an aggregated file of all available current velocity measurements at one mooring site.
 
-The product will be delivered, in netCDF4 format, compliant with the CF-1.6 and IMOS-1.4 conventions, and structured according to the [indexed ragged array representation](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_indexed_ragged_array_representation).
+The product will be delivered, in netCDF4 classic format, compliant with the CF-1.6 and IMOS-1.4 conventions, and structured according to the [indexed ragged array representation](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_indexed_ragged_array_representation).
 
 

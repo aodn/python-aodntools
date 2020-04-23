@@ -422,17 +422,17 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Aggregate ONE variable from ALL instruments from ALL deployments from ONE site")
-    parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
-    parser.add_argument('-var', dest='varname', help='variable to aggregate, like TEMP', required=True)
-    parser.add_argument('-files', dest='filenames',
+    parser.add_argument('--site', dest='site_code', help='site code, like NRMMAI',  required=True)
+    parser.add_argument('--var', dest='varname', help='variable to aggregate, like TEMP', required=True)
+    parser.add_argument('--files', dest='filenames',
                         help='name of the file that contains the source URLs (relative to inpath, if given)',
                         required=True)
-    parser.add_argument('-indir', dest='input_dir', help='base path of input files', default='', required=False)
-    parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default ./',
+    parser.add_argument('--indir', dest='input_dir', help='base path of input files', default='', required=False)
+    parser.add_argument('--outdir', dest='output_dir', help='path where the result file will be written. Default ./',
                         default='./', required=False)
-    parser.add_argument('-download_url', dest='download_url', help='path to the download_url_prefix',
+    parser.add_argument('--download_url', dest='download_url', help='path to the download_url_prefix',
                         default='', required=False)
-    parser.add_argument('-opendap_url', dest='opendap_url', help='path to the opendap_url_prefix',
+    parser.add_argument('--opendap_url', dest='opendap_url', help='path to the opendap_url_prefix',
                         default='', required=False)
     args = parser.parse_args()
 

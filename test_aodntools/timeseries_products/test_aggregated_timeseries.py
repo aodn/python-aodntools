@@ -17,6 +17,9 @@ INPUT_FILES = [
     'IMOS_ANMN-NRS_BCKOSTUZ_20181213T080038Z_NRSROT_FV01_NRSROT-1812-WQM-55_END-20181215T013118Z_C-20190828T000000Z.nc',
     BAD_FILE
 ]
+EXPECTED_OUTPUT_FILE = os.path.join(
+    TEST_ROOT, 'IMOS_ANMN-NRS_TZ_20181213_NRSROT_FV01_TEMP-aggregated-timeseries_END-20190523_C-20200622.nc'
+)
 
 
 class TestAggregatedTimeseries(BaseTestCase):
@@ -59,6 +62,12 @@ class TestAggregatedTimeseries(BaseTestCase):
         self.assertEqual(__version__, dataset.generating_code_version)
         self.assertIn(__version__, dataset.lineage)
         self.assertIn(BAD_FILE, dataset.rejected_files)
+
+        # check aggregated variable values
+        expected = Dataset(EXPECTED_OUTPUT_FILE)
+        non_match_vars = []
+        for var in ('TIME', 'TEMP', 'TEMP_quality_control', 'NOMINAL_DEPTH', 'instrument_index'):
+            self.assertTrue(all(dataset[var][:] == expected[var][:]), "{} values don't match up!".format(var))
 
     def test_source_file_attributes(self):
         output_file, bad_files = main_aggregator(INPUT_FILES, 'PSAL', 'NRSROT', input_dir=TEST_ROOT,

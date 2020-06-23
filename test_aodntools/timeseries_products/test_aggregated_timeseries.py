@@ -30,7 +30,12 @@ class TestAggregatedTimeseries(BaseTestCase):
         self.assertEqual(1, len(bad_files))
         for file, errors in bad_files.items():
             self.assertEqual(BAD_FILE, file)
-            self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH', 'Wrong file version: Level 0 - Raw Data'})
+            self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH',
+                                              'Wrong file version: Level 0 - Raw Data',
+                                              'no time_deployment_start attribute',
+                                              'no time_deployment_end attribute'
+                                              }
+                                )
 
         dataset = Dataset(output_file)
 

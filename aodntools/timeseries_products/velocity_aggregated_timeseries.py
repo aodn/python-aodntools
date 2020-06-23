@@ -27,6 +27,7 @@ def check_file(nc, site_code):
     file_version is not FV01
     the variable has one or more dimension not in allowed dimensions
     if LATITUDE or LONGITUDE dimension has length >1
+    Global attributes time_deployment_start or time_deployment_end don't exist
 
     :param nc: xarray dataset
     :param site_code: code of the mooring site
@@ -68,6 +69,11 @@ def check_file(nc, site_code):
 
     if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
         error_list.append('no NOMINAL_DEPTH')
+
+    if 'time_deployment_start' not in attributes:
+        error_list.append('no time_deployment_start attribute')
+    if 'time_deployment_end' not in attributes:
+        error_list.append('no time_deployment_end attribute')
 
     return error_list
 

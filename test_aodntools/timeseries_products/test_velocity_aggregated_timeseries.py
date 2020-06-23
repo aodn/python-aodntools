@@ -10,10 +10,12 @@ from aodntools.timeseries_products.velocity_aggregated_timeseries import velocit
 from test_aodntools.base_test import BaseTestCase
 
 TEST_ROOT = os.path.dirname(__file__)
+BAD_FILE = 'IMOS_ANMN-NRS_TZ_20181213T080000Z_NRSROT_FV00_NRSROT-1812-SBE39-43_END-20181214T004000Z_C-20190827T000000Z.nc'
 INPUT_FILES = [
     'IMOS_ANMN-NRS_AETVZ_20181213T080000Z_NRSROT-ADCP_FV01_NRSROT-ADCP-1812-Sentinel-or-Monitor-Workhorse-ADCP-44_END-20181215T100000Z_C-20200430T000000Z.nc',
     'IMOS_ANMN-NRS_AETVZ_20180816T080000Z_NRSROT-ADCP_FV01_NRSROT-ADCP-1808-Sentinel-or-Monitor-Workhorse-ADCP-44_END-20180822T053000Z_C-20200623T000000Z.nc',
     'IMOS_ANMN-NRS_AETVZ_20191016T080000Z_NRSROT-ADCP_FV01_NRSROT-ADCP-1910-Sentinel-or-Monitor-Workhorse-ADCP-44_END-20191018T100000Z_C-20200430T000000Z.nc',
+    BAD_FILE
 ]
 EXPECTED_OUTPUT_FILE = os.path.join(
     TEST_ROOT, 'IMOS_ANMN-NRS_VZ_20180816_NRSROT_FV01_velocity-aggregated-timeseries_END-20191018_C-20200623.nc'
@@ -23,7 +25,18 @@ class TestVelocityAggregatedTimeseries(BaseTestCase):
     def test_main_aggregator(self):
         output_file, bad_files = velocity_aggregated(INPUT_FILES, 'NRSROT', input_dir=TEST_ROOT, output_dir='/tmp')
 
-        self.assertEqual(0, len(bad_files))
+        self.assertEqual(1, len(bad_files))
+        for file, errors in bad_files.items():
+            self.assertEqual(BAD_FILE, file)
+            self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH',
+                                              'Wrong file version: Level 0 - Raw Data',
+                                              'DEPTH variable missing',
+                                              'UCUR variable missing',
+                                              'VCUR variable missing',
+                                              'no time_deployment_start attribute',
+                                              'no time_deployment_end attribute'
+                                              }
+                                )
 
         dataset = Dataset(output_file)
 

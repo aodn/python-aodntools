@@ -47,7 +47,12 @@ class TestHourlyTimeseries(BaseTestCase):
         self.assertEqual(1, len(bad_files))
         for path, errors in bad_files.items():
             self.assertEqual(os.path.join(TEST_ROOT, BAD_FILE), path)
-            self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH', 'Wrong file version: Level 0 - Raw Data'})
+            self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH',
+                                              'Wrong file version: Level 0 - Raw Data',
+                                              'no time_deployment_start attribute',
+                                              'no time_deployment_end attribute'
+                                              }
+                                )
 
         dataset = Dataset(output_file)
         self.assertSetEqual(set(dataset.dimensions), {'OBSERVATION', 'INSTRUMENT', 'string256'})

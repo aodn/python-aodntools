@@ -43,6 +43,7 @@ def check_file(nc, site_code, VoI):
     * NOMINAL_DEPTH is present as variable or attribute
     * file_version is FV01
     * if LATITUDE or LONIGUTDE are dimension, they have length 1
+    * Global attributes time_deployment_start and time_deployment_end exist
 
     :param nc: xarray dataset
     :param site_code: code of the mooring site
@@ -88,6 +89,11 @@ def check_file(nc, site_code, VoI):
 
     if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
         error_list.append('no NOMINAL_DEPTH')
+
+    if 'time_deployment_start' not in attributes:
+        error_list.append('no time_deployment_start attribute')
+    if 'time_deployment_end' not in attributes:
+        error_list.append('no time_deployment_end attribute')
 
     return error_list
 

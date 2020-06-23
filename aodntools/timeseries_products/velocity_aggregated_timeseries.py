@@ -121,36 +121,32 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     epoch = np.datetime64("1950-01-01T00:00:00")
     one_day = np.timedelta64(1, 'D')
 
-    varlen_list = []
     bad_files = {}
 
     # default name for temporary file. It will be renamed at the end
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
-    ## sort the file list in chronological order
-    files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
-
     ## check files and get total number of flattened obs
+    n_obs = 0
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             error_list = check_file(nc, site_code)
             if not error_list:
                 nc = utils.in_water(nc)
-                varlen_list.append(get_number_flatvalues(nc)[0])
+                n_obs += get_number_flatvalues(nc)[0]
             else:
                 bad_files.update({file: error_list})
 
-    ## remove bad files form the list
+    # remove bad files form the list and sort in chronological order
     for file in bad_files.keys():
         files_to_agg.remove(file)
+    files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
 
-    varlen_list = [0] + varlen_list
-    varlen_total = sum(varlen_list)
     n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions and variables
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format="NETCDF4_CLASSIC")
-    OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
+    OBSERVATION = ds.createDimension('OBSERVATION', size=n_obs)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
     STRING256 = ds.createDimension("strlen", 256)
 
@@ -182,6 +178,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     CELL_INDEX = ds.createVariable(varname='CELL_INDEX', **obs_int_template)
 
     ## main loop
+    start = 0
     for index, file in enumerate(files_to_agg):
         print(index)
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
@@ -190,10 +187,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             nc = utils.in_water(nc)
             n_measurements = len(nc.TIME)
 
-
-            start = sum(varlen_list[:index + 1])
-            end = sum(varlen_list[:index + 2])
-            n_cells = get_number_flatvalues(nc)[1]
+            n_obs, n_cells = get_number_flatvalues(nc)
+            end = start + n_obs
             UCUR[start:end] = flat_variable(nc, 'UCUR')
             UCURqc[start:end] = flat_variable(nc, 'UCUR_quality_control')
             VCUR[start:end] = flat_variable(nc, 'VCUR')
@@ -202,8 +197,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 WCUR[start:end] = flat_variable(nc, 'WCUR')
                 WCURqc[start:end] = flat_variable(nc, 'WCUR_quality_control')
             else:
-                WCUR[start:end] = np.full(varlen_list[index + 1], np.nan)
-                WCURqc[start:end] = np.full(varlen_list[index + 1], 9)
+                WCUR[start:end] = np.full(n_obs, np.nan)
+                WCURqc[start:end] = np.full(n_obs, 9)
 
             ##calculate depth and add CELL_INDEX
             if 'HEIGHT_ABOVE_SENSOR' in nc.dims:
@@ -214,11 +209,11 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             else:
                 DEPTH[start:end] = nc.DEPTH.values
                 DEPTHqc[start:end] = nc.DEPTH_quality_control.values
-                CELL_INDEX[start:end] = np.full(varlen_list[index + 1], 0, dtype=np.uint32)
+                CELL_INDEX[start:end] = np.full(n_obs, 0, dtype=np.uint32)
 
             ## set TIME and instrument index
             TIME[start:end] = (np.repeat(flat_variable(nc, 'TIME'), n_cells) - epoch) / one_day
-            instrument_index[start:end] = np.repeat(index, varlen_list[index + 1])
+            instrument_index[start:end] = np.repeat(index, n_obs)
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
@@ -230,6 +225,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 SECONDS_TO_MIDDLE[index] = nc.TIME.seconds_to_middle_of_measurement
             else:
                 SECONDS_TO_MIDDLE[index] = np.nan
+        start = end
 
     ## add atributes
     with open(TEMPLATE_JSON) as json_file:

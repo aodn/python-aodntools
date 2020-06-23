@@ -267,39 +267,35 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     epoch = np.datetime64("1950-01-01T00:00:00")
     one_day = np.timedelta64(1, 'D')
 
-    varlen_list = []
     bad_files = {}
     rejected_files = []
 
     # default name for temporary file. It will be renamed at the end
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
-    ## sort the file list in chronological order
-    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
-
     ## check files and get total number of flattened obs
+    n_obs = 0
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
             error_list = check_file(nc, site_code, var_to_agg)
             if not error_list:
                 nc = in_water(nc)
-                varlen_list.append(len(nc.TIME))
+                n_obs += len(nc.TIME)
             else:
                 bad_files.update({file: error_list})
                 rejected_files.append(file)
 
-    ## remove bad files form the list
+    ## remove bad files form the list and sort in chronological order
     for file in bad_files.keys():
         files_to_agg.remove(file)
+    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
-    varlen_list = [0] + varlen_list
-    varlen_total = sum(varlen_list)
     n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions and variables
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
-    OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
+    OBSERVATION = ds.createDimension('OBSERVATION', size=n_obs)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
     STRING256 = ds.createDimension("strlen", 256)
 
@@ -331,11 +327,12 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
 
     ## main loop
+    start = 0
     for index, file in enumerate(files_to_agg):
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             nc = in_water(nc)
-            start = sum(varlen_list[:index + 1])
-            end = sum(varlen_list[:index + 2])
+            n_obs = len(nc.TIME)
+            end = start + n_obs
             agg_variable[start:end], agg_variable_qc[start:end] = get_variable_values(nc, var_to_agg)
             DEPTH[start:end], DEPTHqc[start:end] = get_variable_values(nc, 'DEPTH')
             PRES[start:end], PRESqc[start:end] = get_variable_values(nc, 'PRESS')
@@ -343,13 +340,15 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
 
             ## set TIME and instrument index
             TIME[start:end] = (nc.TIME.values - epoch) / one_day
-            instrument_index[start:end] = np.repeat(index, varlen_list[index+1])
+            instrument_index[start:end] = np.repeat(index, n_obs)
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = get_nominal_depth(nc)
             source_file[index] = stringtochar(np.array(file, dtype='S256'))
             instrument_id[index] = stringtochar(np.array(get_instrument_id(nc), dtype='S256'))
+
+        start = end
 
 
     ## add atributes

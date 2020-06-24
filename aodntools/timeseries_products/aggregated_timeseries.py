@@ -129,7 +129,10 @@ def get_instrument_id(nc):
     :param nc: xarray dataset
     :return: instrumentID as string
     """
-    return '; '.join([nc.deployment_code, nc.instrument, nc.instrument_serial_number])
+    deployment_code = nc.attrs.get('deployment_code', '[unknown deployment]')
+    instrument = nc.attrs.get('instrument', '[unknown instrument]')
+    instrument_serial_number = nc.attrs.get('instrument_serial_number', '[unknown serial number]')
+    return '; '.join([deployment_code, instrument, instrument_serial_number])
 
 
 def in_water(nc):

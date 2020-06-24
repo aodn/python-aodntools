@@ -13,6 +13,7 @@ from pkg_resources import resource_filename
 
 import aodntools.timeseries_products.aggregated_timeseries as utils
 from aodntools import __version__
+from aodntools.timeseries_products.common import NoInputFilesError
 from aodntools.timeseries_products.velocity_aggregated_timeseries import check_file
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
@@ -121,6 +122,8 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     ## remove bad files form the list
     for file in bad_files.keys():
         files_to_agg.remove(file)
+    if len(files_to_agg) == 0:
+        raise NoInputFilesError("no valid input files to aggregate")
 
     ## sort the files in chronological order
     files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)

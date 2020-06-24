@@ -13,6 +13,7 @@ from aodntools import __version__
 import xarray as xr
 
 from aodntools.timeseries_products import aggregated_timeseries as utils
+from aodntools.timeseries_products.common import NoInputFilesError
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
 
@@ -146,6 +147,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     # remove bad files form the list and sort in chronological order
     for file in bad_files.keys():
         files_to_agg.remove(file)
+    if len(files_to_agg) == 0:
+        raise NoInputFilesError("no valid input files to aggregate")
     files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
 
     n_files = len(files_to_agg)

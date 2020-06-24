@@ -14,6 +14,7 @@ from pkg_resources import resource_filename
 
 from aodntools import __version__
 from aodntools.timeseries_products import aggregated_timeseries as utils
+from aodntools.timeseries_products.common import NoInputFilesError
 
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
@@ -94,6 +95,8 @@ def check_files(file_list, site_code, parameter_names_accepted, input_dir=''):
 
     file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
     file_list = file_list_dataframe['url'].to_list()
+    if file_list == []:
+        raise NoInputFilesError("no valid input files to aggregate")
 
     return file_list, error_dict
 

@@ -7,6 +7,7 @@ from netCDF4 import Dataset, chartostring
 
 from test_aodntools.base_test import BaseTestCase
 from aodntools import __version__
+from aodntools.timeseries_products.common import NoInputFilesError
 from aodntools.timeseries_products.hourly_timeseries import hourly_aggregator
 
 
@@ -91,6 +92,9 @@ class TestHourlyTimeseries(BaseTestCase):
         self.assertEqual(dataset['source_file'].opendap_url_prefix, 'http://test.opendap.url')
         for f in chartostring(dataset['source_file'][:]):
             self.assertIn(f, INPUT_FILES)
+
+    def test_all_rejected(self):
+        self.assertRaises(NoInputFilesError, hourly_aggregator, [BAD_FILE], 'NRSROT', (1, 2), input_dir=TEST_ROOT)
 
 
 if __name__ == '__main__':

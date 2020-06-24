@@ -7,6 +7,7 @@ from netCDF4 import Dataset, chartostring
 
 from aodntools import __version__
 from aodntools.timeseries_products.aggregated_timeseries import main_aggregator
+from aodntools.timeseries_products.common import NoInputFilesError
 from test_aodntools.base_test import BaseTestCase
 
 TEST_ROOT = os.path.dirname(__file__)
@@ -82,6 +83,9 @@ class TestAggregatedTimeseries(BaseTestCase):
         dataset = Dataset(output_file)
         self.assertEqual(dataset['source_file'].download_url_prefix, 'http://test.download.url')
         self.assertEqual(dataset['source_file'].opendap_url_prefix, 'http://test.opendap.url')
+
+    def test_all_rejected(self):
+        self.assertRaises(NoInputFilesError, main_aggregator, [BAD_FILE], 'TEMP', 'NRSROT', input_dir=TEST_ROOT)
 
 
 if __name__ == '__main__':

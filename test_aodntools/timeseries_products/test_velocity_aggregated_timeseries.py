@@ -6,6 +6,7 @@ import unittest
 from netCDF4 import Dataset, chartostring
 
 from aodntools import __version__
+from aodntools.timeseries_products.common import NoInputFilesError
 from aodntools.timeseries_products.velocity_aggregated_timeseries import velocity_aggregated
 from test_aodntools.base_test import BaseTestCase
 
@@ -70,6 +71,9 @@ class TestVelocityAggregatedTimeseries(BaseTestCase):
         for var in ('TIME', 'UCUR', 'UCUR_quality_control', 'VCUR', 'VCUR_quality_control', 'NOMINAL_DEPTH',
                     'CELL_INDEX', 'instrument_index', 'DEPTH', 'DEPTH_quality_control'):
             self.assertTrue(all(dataset[var][:] == expected[var][:]), "{} values don't match up!".format(var))
+
+    def test_all_rejected(self):
+        self.assertRaises(NoInputFilesError, velocity_aggregated, [BAD_FILE], 'NRSROT', input_dir=TEST_ROOT)
 
 
 if __name__ == '__main__':

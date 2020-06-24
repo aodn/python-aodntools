@@ -13,6 +13,7 @@ from netCDF4 import Dataset, num2date, stringtochar
 from pkg_resources import resource_filename
 
 from aodntools import __version__
+from aodntools.timeseries_products.common import NoInputFilesError
 
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
@@ -298,6 +299,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     ## remove bad files form the list and sort in chronological order
     for file in bad_files.keys():
         files_to_agg.remove(file)
+    if len(files_to_agg) == 0:
+        raise NoInputFilesError("no valid input files to aggregate")
     files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
     n_files = len(files_to_agg)

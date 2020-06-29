@@ -522,14 +522,12 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
     nc_aggregated = nc_aggregated.drop('OBSERVATION')
 
     ## add global attributes
-    contributor_name, contributor_email, contributor_role = utils.get_contributors(files_to_aggregate, input_dir=input_dir)
-    add_attribute = {'contributor_name': "; ".join(contributor_name),
-                     'contributor_email': "; ".join(contributor_email),
-                     'contributor_role': "; ".join(contributor_role),
-                     'rejected_files': "\n".join(list(bad_files)),
+    add_attribute = {'rejected_files': "\n".join(list(bad_files)),
                      'included_values_flagged_as':  ", ".join([qcflags_names[flag] for flag in qcflags]),
                      'generating_code_version': __version__
                      }
+    add_attribute.update(utils.get_contributors(files_to_aggregate, input_dir=input_dir))
+
     nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
     nc_aggregated.attrs['abstract'] = nc_aggregated.attrs['abstract'].format(
         site_code=site_code,

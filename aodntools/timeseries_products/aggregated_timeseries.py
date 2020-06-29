@@ -171,7 +171,7 @@ def get_contributors(files_to_agg, input_dir=''):
 
     :param files_to_agg: list of files
     :param input_dir: base path where source files are stored
-    :return: list: contributor_name, email and role
+    :return: dict of attributes contributor_name, contributor_email and contributor_role
     """
 
     contributors = set()
@@ -189,7 +189,10 @@ def get_contributors(files_to_agg, input_dir=''):
         contributor_email.append(item[1])
         contributor_role.append(item[2])
 
-    return contributor_name, contributor_email, contributor_role
+    return {'contributor_name': "; ".join(contributor_name),
+            'contributor_email': "; ".join(contributor_email),
+            'contributor_role': "; ".join(contributor_role)
+            }
 
 
 def get_data_code(VoI):
@@ -385,7 +388,6 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
     time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Aggregated product: " + var_to_agg + " at " +
                                                  site_code + " between " + time_start + " and " + time_end),
@@ -402,10 +404,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
                     'keywords':                 ', '.join([var_to_agg, 'AGGREGATED']),
                     'rejected_files':           "\n".join(rejected_files),
-                    'contributor_name':         "; ".join(contributor_name),
-                    'contributor_email':        "; ".join(contributor_email),
-                    'contributor_role':         "; ".join(contributor_role),
                     'generating_code_version':  __version__}
+    add_attribute.update(get_contributors(files_to_agg=files_to_agg, input_dir=input_dir))
 
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
                       '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)

@@ -13,6 +13,7 @@ from netCDF4 import Dataset, num2date, stringtochar
 from pkg_resources import resource_filename
 
 from aodntools import __version__
+from aodntools.timeseries_products.common import NoInputFilesError
 
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
@@ -43,6 +44,7 @@ def check_file(nc, site_code, VoI):
     * NOMINAL_DEPTH is present as variable or attribute
     * file_version is FV01
     * if LATITUDE or LONIGUTDE are dimension, they have length 1
+    * Global attributes time_deployment_start and time_deployment_end exist
 
     :param nc: xarray dataset
     :param site_code: code of the mooring site
@@ -89,6 +91,11 @@ def check_file(nc, site_code, VoI):
     if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
         error_list.append('no NOMINAL_DEPTH')
 
+    if 'time_deployment_start' not in attributes:
+        error_list.append('no time_deployment_start attribute')
+    if 'time_deployment_end' not in attributes:
+        error_list.append('no time_deployment_end attribute')
+
     return error_list
 
 
@@ -123,7 +130,10 @@ def get_instrument_id(nc):
     :param nc: xarray dataset
     :return: instrumentID as string
     """
-    return '; '.join([nc.deployment_code, nc.instrument, nc.instrument_serial_number])
+    deployment_code = nc.attrs.get('deployment_code', '[unknown deployment]')
+    instrument = nc.attrs.get('instrument', '[unknown instrument]')
+    instrument_serial_number = nc.attrs.get('instrument_serial_number', '[unknown serial number]')
+    return '; '.join([deployment_code, instrument, instrument_serial_number])
 
 
 def in_water(nc):
@@ -161,7 +171,7 @@ def get_contributors(files_to_agg, input_dir=''):
 
     :param files_to_agg: list of files
     :param input_dir: base path where source files are stored
-    :return: list: contributor_name, email and role
+    :return: dict of attributes contributor_name, contributor_email and contributor_role
     """
 
     contributors = set()
@@ -179,7 +189,10 @@ def get_contributors(files_to_agg, input_dir=''):
         contributor_email.append(item[1])
         contributor_role.append(item[2])
 
-    return contributor_name, contributor_email, contributor_role
+    return {'contributor_name': "; ".join(contributor_name),
+            'contributor_email': "; ".join(contributor_email),
+            'contributor_role': "; ".join(contributor_role)
+            }
 
 
 def get_data_code(VoI):
@@ -267,39 +280,37 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     epoch = np.datetime64("1950-01-01T00:00:00")
     one_day = np.timedelta64(1, 'D')
 
-    varlen_list = []
     bad_files = {}
     rejected_files = []
 
     # default name for temporary file. It will be renamed at the end
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
-    ## sort the file list in chronological order
-    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
-
     ## check files and get total number of flattened obs
+    n_obs_total = 0
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
             error_list = check_file(nc, site_code, var_to_agg)
             if not error_list:
                 nc = in_water(nc)
-                varlen_list.append(len(nc.TIME))
+                n_obs_total += len(nc.TIME)
             else:
                 bad_files.update({file: error_list})
                 rejected_files.append(file)
 
-    ## remove bad files form the list
+    ## remove bad files form the list and sort in chronological order
     for file in bad_files.keys():
         files_to_agg.remove(file)
+    if len(files_to_agg) == 0:
+        raise NoInputFilesError("no valid input files to aggregate")
+    files_to_agg = sort_files(files_to_agg, input_dir=input_dir)
 
-    varlen_list = [0] + varlen_list
-    varlen_total = sum(varlen_list)
     n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions and variables
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
-    OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
+    OBSERVATION = ds.createDimension('OBSERVATION', size=n_obs_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
     STRING256 = ds.createDimension("strlen", 256)
 
@@ -331,11 +342,12 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     NOMINAL_DEPTH = ds.createVariable(varname='NOMINAL_DEPTH', **inst_float_template)
 
     ## main loop
+    start = 0
     for index, file in enumerate(files_to_agg):
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             nc = in_water(nc)
-            start = sum(varlen_list[:index + 1])
-            end = sum(varlen_list[:index + 2])
+            n_obs = len(nc.TIME)
+            end = start + n_obs
             agg_variable[start:end], agg_variable_qc[start:end] = get_variable_values(nc, var_to_agg)
             DEPTH[start:end], DEPTHqc[start:end] = get_variable_values(nc, 'DEPTH')
             PRES[start:end], PRESqc[start:end] = get_variable_values(nc, 'PRESS')
@@ -343,13 +355,15 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
 
             ## set TIME and instrument index
             TIME[start:end] = (nc.TIME.values - epoch) / one_day
-            instrument_index[start:end] = np.repeat(index, varlen_list[index+1])
+            instrument_index[start:end] = np.repeat(index, n_obs)
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = get_nominal_depth(nc)
             source_file[index] = stringtochar(np.array(file, dtype='S256'))
             instrument_id[index] = stringtochar(np.array(get_instrument_id(nc), dtype='S256'))
+
+        start = end
 
 
     ## add atributes
@@ -374,7 +388,6 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
     time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    contributor_name, contributor_email, contributor_role = get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Aggregated product: " + var_to_agg + " at " +
                                                  site_code + " between " + time_start + " and " + time_end),
@@ -391,10 +404,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
                     'keywords':                 ', '.join([var_to_agg, 'AGGREGATED']),
                     'rejected_files':           "\n".join(rejected_files),
-                    'contributor_name':         "; ".join(contributor_name),
-                    'contributor_email':        "; ".join(contributor_email),
-                    'contributor_role':         "; ".join(contributor_role),
                     'generating_code_version':  __version__}
+    add_attribute.update(get_contributors(files_to_agg=files_to_agg, input_dir=input_dir))
 
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
                       '{v}/aodntools/timeseries_products/aggregated_timeseries.py'.format(v=__version__)

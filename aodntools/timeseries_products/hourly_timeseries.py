@@ -13,7 +13,8 @@ from dateutil.parser import parse
 from pkg_resources import resource_filename
 
 from aodntools import __version__
-from aodntools.timeseries_products.aggregated_timeseries import get_contributors, source_file_attributes
+from aodntools.timeseries_products import aggregated_timeseries as utils
+from aodntools.timeseries_products.common import NoInputFilesError
 
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
@@ -94,6 +95,8 @@ def check_files(file_list, site_code, parameter_names_accepted, input_dir=''):
 
     file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
     file_list = file_list_dataframe['url'].to_list()
+    if file_list == []:
+        raise NoInputFilesError("no valid input files to aggregate")
 
     return file_list, error_dict
 
@@ -363,26 +366,6 @@ def write_netCDF_aggfile(nc_aggregated, ncout_filename, encoding):
     return ncout_filename
 
 
-def append_aux_variables(filename, nc, df):
-    """
-    appends metadata variables to a dataframe
-
-    :param filename: str name of the source data file
-    :param nc: xarray dataset
-    :param df: pandas dataframe metadata variables
-    :return: pandas dataframe
-    """
-    df_temp = pd.DataFrame({'FILENAME': filename,
-                            'INSTRUMENT_TYPE': nc.attrs['deployment_code'] + '; ' + nc.attrs['instrument'] + '; ' +
-                                               nc.attrs['instrument_serial_number'],
-                            'LONGITUDE': nc.LONGITUDE.squeeze().values,
-                            'LATITUDE': nc.LATITUDE.squeeze().values,
-                            'NOMINAL_DEPTH': nc.NOMINAL_DEPTH.squeeze().values},
-                           index=[0])
-
-    return df.append(df_temp, sort=False, ignore_index=True)
-
-
 def PDresample_by_hour(df, function_dict, function_stats):
     """
     resample a dataframe by hour and calculate aggregation statistics
@@ -491,8 +474,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
             qc_count_all = update_QCcount(qc_count_all, qc_count)
             nc_clean = good_data_only(nc_clean, qcflags)  # good quality data only
             df_metadata = df_metadata.append({'source_file': file,
-                                              'instrument_id': nc.attrs['deployment_code'] + '; ' + nc.attrs[
-                                                  'instrument'] + '; ' + nc.attrs['instrument_serial_number'],
+                                              'instrument_id': utils.get_instrument_id(nc),
                                               'LONGITUDE': nc.LONGITUDE.squeeze().values,
                                               'LATITUDE': nc.LATITUDE.squeeze().values,
                                               'NOMINAL_DEPTH': get_nominal_depth(nc)},
@@ -540,14 +522,12 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
     nc_aggregated = nc_aggregated.drop('OBSERVATION')
 
     ## add global attributes
-    contributor_name, contributor_email, contributor_role = get_contributors(files_to_aggregate, input_dir=input_dir)
-    add_attribute = {'contributor_name': "; ".join(contributor_name),
-                     'contributor_email': "; ".join(contributor_email),
-                     'contributor_role': "; ".join(contributor_role),
-                     'rejected_files': "\n".join(list(bad_files)),
+    add_attribute = {'rejected_files': "\n".join(list(bad_files)),
                      'included_values_flagged_as':  ", ".join([qcflags_names[flag] for flag in qcflags]),
                      'generating_code_version': __version__
                      }
+    add_attribute.update(utils.get_contributors(files_to_aggregate, input_dir=input_dir))
+
     nc_aggregated.attrs = set_globalattr(nc_aggregated, TEMPLATE_JSON, site_code, add_attribute, parameter_names)
     nc_aggregated.attrs['abstract'] = nc_aggregated.attrs['abstract'].format(
         site_code=site_code,
@@ -568,7 +548,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
     variable_attributes = variable_attribute_dictionary
     variable_attributes['PRES_REL'].update({'applied_offset_by_instrument': applied_offset})
     if download_url_prefix or opendap_url_prefix:
-        variable_attributes['source_file'].update(source_file_attributes(download_url_prefix, opendap_url_prefix))
+        variable_attributes['source_file'].update(utils.source_file_attributes(download_url_prefix, opendap_url_prefix))
 
     time_units = variable_attributes['TIME'].pop('units')
     time_calendar = variable_attributes['TIME'].pop('calendar')

@@ -13,6 +13,7 @@ from pkg_resources import resource_filename
 
 import aodntools.timeseries_products.aggregated_timeseries as utils
 from aodntools import __version__
+from aodntools.timeseries_products.common import NoInputFilesError
 from aodntools.timeseries_products.velocity_aggregated_timeseries import check_file
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
@@ -121,6 +122,8 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     ## remove bad files form the list
     for file in bad_files.keys():
         files_to_agg.remove(file)
+    if len(files_to_agg) == 0:
+        raise NoInputFilesError("no valid input files to aggregate")
 
     ## sort the files in chronological order
     files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
@@ -260,7 +263,6 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     time_end_filename = num2date(np.max(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(file_timeformat)
 
 
-    contributor_name, contributor_email, contributor_role = utils.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Hourly Aggregated product: " + ', '.join(varlist) + " at " +
                                                   site_code + " between " + time_start + " and " + time_end),
@@ -277,11 +279,9 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
                     'keywords':                 ', '.join(varlist + ['AGGREGATED']),
                     'rejected_files':           "\n".join(bad_files.keys()),
-                    'contributor_name':        "; ".join(contributor_name),
-                    'contributor_email':       "; ".join(contributor_email),
-                    'contributor_role':        "; ".join(contributor_role),
                     'generating_code_version':  __version__
     }
+    add_attribute.update(utils.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir))
 
     ## add version
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'

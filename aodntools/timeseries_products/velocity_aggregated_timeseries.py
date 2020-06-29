@@ -13,6 +13,7 @@ from aodntools import __version__
 import xarray as xr
 
 from aodntools.timeseries_products import aggregated_timeseries as utils
+from aodntools.timeseries_products.common import NoInputFilesError
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
 
@@ -27,6 +28,7 @@ def check_file(nc, site_code):
     file_version is not FV01
     the variable has one or more dimension not in allowed dimensions
     if LATITUDE or LONGITUDE dimension has length >1
+    Global attributes time_deployment_start or time_deployment_end don't exist
 
     :param nc: xarray dataset
     :param site_code: code of the mooring site
@@ -68,6 +70,11 @@ def check_file(nc, site_code):
 
     if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
         error_list.append('no NOMINAL_DEPTH')
+
+    if 'time_deployment_start' not in attributes:
+        error_list.append('no time_deployment_start attribute')
+    if 'time_deployment_end' not in attributes:
+        error_list.append('no time_deployment_end attribute')
 
     return error_list
 
@@ -121,36 +128,34 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     epoch = np.datetime64("1950-01-01T00:00:00")
     one_day = np.timedelta64(1, 'D')
 
-    varlen_list = []
     bad_files = {}
 
     # default name for temporary file. It will be renamed at the end
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
-    ## sort the file list in chronological order
-    files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
-
     ## check files and get total number of flattened obs
+    n_obs_total = 0
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             error_list = check_file(nc, site_code)
             if not error_list:
                 nc = utils.in_water(nc)
-                varlen_list.append(get_number_flatvalues(nc)[0])
+                n_obs_total += get_number_flatvalues(nc)[0]
             else:
                 bad_files.update({file: error_list})
 
-    ## remove bad files form the list
+    # remove bad files form the list and sort in chronological order
     for file in bad_files.keys():
         files_to_agg.remove(file)
+    if len(files_to_agg) == 0:
+        raise NoInputFilesError("no valid input files to aggregate")
+    files_to_agg = utils.sort_files(files_to_agg, input_dir=input_dir)
 
-    varlen_list = [0] + varlen_list
-    varlen_total = sum(varlen_list)
     n_files = len(files_to_agg)
 
     ## create ncdf file, dimensions and variables
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format="NETCDF4_CLASSIC")
-    OBSERVATION = ds.createDimension('OBSERVATION', size=varlen_total)
+    OBSERVATION = ds.createDimension('OBSERVATION', size=n_obs_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
     STRING256 = ds.createDimension("strlen", 256)
 
@@ -182,6 +187,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     CELL_INDEX = ds.createVariable(varname='CELL_INDEX', **obs_int_template)
 
     ## main loop
+    start = 0
     for index, file in enumerate(files_to_agg):
         print(index)
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
@@ -190,10 +196,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             nc = utils.in_water(nc)
             n_measurements = len(nc.TIME)
 
-
-            start = sum(varlen_list[:index + 1])
-            end = sum(varlen_list[:index + 2])
-            n_cells = get_number_flatvalues(nc)[1]
+            n_obs, n_cells = get_number_flatvalues(nc)
+            end = start + n_obs
             UCUR[start:end] = flat_variable(nc, 'UCUR')
             UCURqc[start:end] = flat_variable(nc, 'UCUR_quality_control')
             VCUR[start:end] = flat_variable(nc, 'VCUR')
@@ -202,8 +206,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 WCUR[start:end] = flat_variable(nc, 'WCUR')
                 WCURqc[start:end] = flat_variable(nc, 'WCUR_quality_control')
             else:
-                WCUR[start:end] = np.full(varlen_list[index + 1], np.nan)
-                WCURqc[start:end] = np.full(varlen_list[index + 1], 9)
+                WCUR[start:end] = np.full(n_obs, np.nan)
+                WCURqc[start:end] = np.full(n_obs, 9)
 
             ##calculate depth and add CELL_INDEX
             if 'HEIGHT_ABOVE_SENSOR' in nc.dims:
@@ -214,11 +218,11 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
             else:
                 DEPTH[start:end] = nc.DEPTH.values
                 DEPTHqc[start:end] = nc.DEPTH_quality_control.values
-                CELL_INDEX[start:end] = np.full(varlen_list[index + 1], 0, dtype=np.uint32)
+                CELL_INDEX[start:end] = np.full(n_obs, 0, dtype=np.uint32)
 
             ## set TIME and instrument index
             TIME[start:end] = (np.repeat(flat_variable(nc, 'TIME'), n_cells) - epoch) / one_day
-            instrument_index[start:end] = np.repeat(index, varlen_list[index + 1])
+            instrument_index[start:end] = np.repeat(index, n_obs)
             ## get and store deployment metadata
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
@@ -230,6 +234,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 SECONDS_TO_MIDDLE[index] = nc.TIME.seconds_to_middle_of_measurement
             else:
                 SECONDS_TO_MIDDLE[index] = np.nan
+        start = end
 
     ## add atributes
     with open(TEMPLATE_JSON) as json_file:
@@ -253,7 +258,6 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
     time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
 
-    contributor_name, contributor_email, contributor_role = utils.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir)
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Aggregated product: " + ', '.join(varlist) + " at " +
                                                   site_code + " between " + time_start + " and " + time_end),
@@ -270,11 +274,9 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
                     'keywords':                 ', '.join(varlist + ['AGGREGATED']),
                     'rejected_files':           "\n".join(bad_files.keys()),
-                    'contributor_name':        "; ".join(contributor_name),
-                    'contributor_email':       "; ".join(contributor_email),
-                    'contributor_role':        "; ".join(contributor_role),
                     'generating_code_version':  __version__
     }
+    add_attribute.update(utils.get_contributors(files_to_agg=files_to_agg, input_dir=input_dir))
 
     ## add version
     github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'

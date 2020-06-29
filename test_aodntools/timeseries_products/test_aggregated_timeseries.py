@@ -7,6 +7,7 @@ from netCDF4 import Dataset, chartostring
 
 from aodntools import __version__
 from aodntools.timeseries_products.aggregated_timeseries import main_aggregator
+from aodntools.timeseries_products.common import NoInputFilesError
 from test_aodntools.base_test import BaseTestCase
 
 TEST_ROOT = os.path.dirname(__file__)
@@ -17,6 +18,9 @@ INPUT_FILES = [
     'IMOS_ANMN-NRS_BCKOSTUZ_20181213T080038Z_NRSROT_FV01_NRSROT-1812-WQM-55_END-20181215T013118Z_C-20190828T000000Z.nc',
     BAD_FILE
 ]
+EXPECTED_OUTPUT_FILE = os.path.join(
+    TEST_ROOT, 'IMOS_ANMN-NRS_TZ_20181213_NRSROT_FV01_TEMP-aggregated-timeseries_END-20190523_C-20200622.nc'
+)
 
 
 class TestAggregatedTimeseries(BaseTestCase):
@@ -27,7 +31,12 @@ class TestAggregatedTimeseries(BaseTestCase):
         self.assertEqual(1, len(bad_files))
         for file, errors in bad_files.items():
             self.assertEqual(BAD_FILE, file)
-            self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH', 'Wrong file version: Level 0 - Raw Data'})
+            self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH',
+                                              'Wrong file version: Level 0 - Raw Data',
+                                              'no time_deployment_start attribute',
+                                              'no time_deployment_end attribute'
+                                              }
+                                )
 
         dataset = Dataset(output_file)
 
@@ -60,6 +69,14 @@ class TestAggregatedTimeseries(BaseTestCase):
         self.assertIn(__version__, dataset.lineage)
         self.assertIn(BAD_FILE, dataset.rejected_files)
 
+        # check aggregated variable values
+        expected = Dataset(EXPECTED_OUTPUT_FILE)
+        compare_vars = ('TIME', 'TEMP', 'TEMP_quality_control', 'NOMINAL_DEPTH', 'instrument_index')
+        non_match_vars = [var for var in compare_vars
+                          if not all(dataset[var][:] == expected[var][:])
+                          ]
+        self.assertEqual(non_match_vars, [])
+
     def test_source_file_attributes(self):
         output_file, bad_files = main_aggregator(INPUT_FILES, 'PSAL', 'NRSROT', input_dir=TEST_ROOT,
                                                  output_dir='/tmp', download_url_prefix='http://test.download.url',
@@ -68,6 +85,9 @@ class TestAggregatedTimeseries(BaseTestCase):
         dataset = Dataset(output_file)
         self.assertEqual(dataset['source_file'].download_url_prefix, 'http://test.download.url')
         self.assertEqual(dataset['source_file'].opendap_url_prefix, 'http://test.opendap.url')
+
+    def test_all_rejected(self):
+        self.assertRaises(NoInputFilesError, main_aggregator, [BAD_FILE], 'TEMP', 'NRSROT', input_dir=TEST_ROOT)
 
 
 if __name__ == '__main__':

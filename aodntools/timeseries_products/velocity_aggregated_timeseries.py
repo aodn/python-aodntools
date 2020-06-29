@@ -134,13 +134,13 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
     ## check files and get total number of flattened obs
-    n_obs = 0
+    n_obs_total = 0
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             error_list = check_file(nc, site_code)
             if not error_list:
                 nc = utils.in_water(nc)
-                n_obs += get_number_flatvalues(nc)[0]
+                n_obs_total += get_number_flatvalues(nc)[0]
             else:
                 bad_files.update({file: error_list})
 
@@ -155,7 +155,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
 
     ## create ncdf file, dimensions and variables
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format="NETCDF4_CLASSIC")
-    OBSERVATION = ds.createDimension('OBSERVATION', size=n_obs)
+    OBSERVATION = ds.createDimension('OBSERVATION', size=n_obs_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
     STRING256 = ds.createDimension("strlen", 256)
 

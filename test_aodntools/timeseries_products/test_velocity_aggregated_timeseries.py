@@ -67,10 +67,12 @@ class TestVelocityAggregatedTimeseries(BaseTestCase):
 
         # check aggregated variable values
         expected = Dataset(EXPECTED_OUTPUT_FILE)
-        non_match_vars = []
-        for var in ('TIME', 'UCUR', 'UCUR_quality_control', 'VCUR', 'VCUR_quality_control', 'NOMINAL_DEPTH',
-                    'CELL_INDEX', 'instrument_index', 'DEPTH', 'DEPTH_quality_control'):
-            self.assertTrue(all(dataset[var][:] == expected[var][:]), "{} values don't match up!".format(var))
+        compare_vars = ('TIME', 'UCUR', 'UCUR_quality_control', 'VCUR', 'VCUR_quality_control', 'NOMINAL_DEPTH',
+                        'CELL_INDEX', 'instrument_index', 'DEPTH', 'DEPTH_quality_control')
+        non_match_vars = [var for var in compare_vars
+                          if not all(dataset[var][:] == expected[var][:])
+                          ]
+        self.assertEqual(non_match_vars, [])
 
     def test_all_rejected(self):
         self.assertRaises(NoInputFilesError, velocity_aggregated, [BAD_FILE], 'NRSROT', input_dir=TEST_ROOT)

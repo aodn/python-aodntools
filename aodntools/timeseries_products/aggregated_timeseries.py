@@ -287,14 +287,14 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
 
     ## check files and get total number of flattened obs
-    n_obs = 0
+    n_obs_total = 0
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
             error_list = check_file(nc, site_code, var_to_agg)
             if not error_list:
                 nc = in_water(nc)
-                n_obs += len(nc.TIME)
+                n_obs_total += len(nc.TIME)
             else:
                 bad_files.update({file: error_list})
                 rejected_files.append(file)
@@ -310,7 +310,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
 
     ## create ncdf file, dimensions and variables
     ds = Dataset(os.path.join(output_dir, temp_outfile), 'w', format='NETCDF4_CLASSIC')
-    OBSERVATION = ds.createDimension('OBSERVATION', size=n_obs)
+    OBSERVATION = ds.createDimension('OBSERVATION', size=n_obs_total)
     INSTRUMENT = ds.createDimension('INSTRUMENT', size=n_files)
     STRING256 = ds.createDimension("strlen", 256)
 

@@ -1,5 +1,4 @@
 import os
-import sys
 import tempfile
 import shutil
 from  netCDF4 import Dataset, num2date, stringtochar
@@ -13,70 +12,9 @@ from aodntools import __version__
 import xarray as xr
 
 from aodntools.timeseries_products import aggregated_timeseries as utils
-from aodntools.timeseries_products.common import NoInputFilesError
+from aodntools.timeseries_products.common import NoInputFilesError, check_file
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
-
-
-def check_file(nc, site_code):
-    """
-    Return list of errors found in the file if:
-    site_code does not correspond to provided site code
-    Variables of interest are not  present
-    TIME, DEPTH, LATITUDE, LONGITUDE, are not present
-    NOMINAL_DEPTH is not present as variable or attribute
-    file_version is not FV01
-    the variable has one or more dimension not in allowed dimensions
-    if LATITUDE or LONGITUDE dimension has length >1
-    Global attributes time_deployment_start or time_deployment_end don't exist
-
-    :param nc: xarray dataset
-    :param site_code: code of the mooring site
-    :return: list of failed tests
-    """
-
-    attributes = list(nc.attrs)
-    variables = list(nc.variables)
-    allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE', 'HEIGHT_ABOVE_SENSOR']
-    required_variables = ['UCUR', 'VCUR']
-    error_list = []
-
-    if nc.site_code != site_code:
-        error_list.append('Wrong site_code: ' + nc.site_code)
-
-    nc_file_version = nc.file_version
-    if 'Level 1' not in nc_file_version:
-        error_list.append('Wrong file version: ' + nc_file_version)
-
-    required_coordinates = ['TIME', 'DEPTH', 'LATITUDE', 'LONGITUDE']
-    for coord in required_coordinates:
-        if coord not in variables:
-            error_list.append('{coord} variable missing'.format(coord=coord))
-
-    for variable in required_variables:
-        if variable not in variables:
-            error_list.append(variable + ' variable missing')
-        else:
-            VoIdimensions = list(nc[variable].dims)
-            if 'TIME' not in VoIdimensions:
-                error_list.append('TIME is not a dimension for ' + variable)
-            if 'LATITUDE' in VoIdimensions and len(nc.LATITUDE) > 1:
-                error_list.append('more than one LATITUDE for ' + variable)
-            if 'LONGITUDE' in VoIdimensions and len(nc.LONGITUDE) > 1:
-                error_list.append('more than one LONGITUDE for ' + variable)
-            for dim in VoIdimensions:
-                if dim not in allowed_dimensions:
-                    error_list.append('not allowed dimension: ' + dim)
-
-    if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
-        error_list.append('no NOMINAL_DEPTH')
-
-    if 'time_deployment_start' not in attributes:
-        error_list.append('no time_deployment_start attribute')
-    if 'time_deployment_end' not in attributes:
-        error_list.append('no time_deployment_end attribute')
-
-    return error_list
 
 
 def get_number_flatvalues(nc):
@@ -137,7 +75,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     n_obs_total = 0
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
-            error_list = check_file(nc, site_code)
+            error_list = check_file(nc, site_code, 'velocity')
             if not error_list:
                 nc = utils.in_water(nc)
                 n_obs_total += get_number_flatvalues(nc)[0]

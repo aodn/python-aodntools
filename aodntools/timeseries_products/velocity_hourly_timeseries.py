@@ -13,8 +13,7 @@ from pkg_resources import resource_filename
 
 import aodntools.timeseries_products.aggregated_timeseries as utils
 from aodntools import __version__
-from aodntools.timeseries_products.common import NoInputFilesError
-from aodntools.timeseries_products.velocity_aggregated_timeseries import check_file
+from aodntools.timeseries_products.common import NoInputFilesError, check_file
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
 QC_FLAG_MAX = 2
@@ -114,7 +113,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     for index, file in enumerate(files_to_agg):
         print(index, end=',', flush=True)
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
-            error_list = check_file(nc, site_code)
+            error_list = check_file(nc, site_code, 'velocity')
             if error_list:
                 bad_files.update({file: error_list})
     print(" ")

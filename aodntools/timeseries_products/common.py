@@ -14,7 +14,7 @@ def check_file(nc, site_code, variables_of_interest):
     Checks applied:
     * Correct site_code
     * file_version is FV01
-    * Coordinate variables TIME, LATITUDE and LONGITUDE are present
+    * Coordinate variables TIME, LATITUDE, LONGITUDE (& DEPTH for velocity) are present
     * NOMINAL_DEPTH is present as variable or attribute (instrument_nominal_depth)
     * At least one variable of interest is present
     * All variables of interest have only the allowed dimensions 
@@ -24,15 +24,23 @@ def check_file(nc, site_code, variables_of_interest):
     :param nc: open xarray dataset
     :param site_code: code of the mooring site
     :param variables_of_interest: variable name or list of names to be included in the product
+                                  (the string 'velocity' implies checks specific to velocity files,
+                                  with variabls 'UCUR' AND 'VCUR' required)
     :return: list of failed tests
     """
 
+    if variables_of_interest == 'velocity':
+        variables_of_interest = {'UCUR', 'VCUR', 'WCUR'}
+        required_variables = {'TIME', 'DEPTH', 'LATITUDE', 'LONGITUDE', 'UCUR', 'VCUR'}
+        allowed_dimensions = {'TIME', 'LATITUDE', 'LONGITUDE', 'HEIGHT_ABOVE_SENSOR'}
+    else:
+        required_variables = allowed_dimensions = {'TIME', 'LATITUDE', 'LONGITUDE'}
+
     if isinstance(variables_of_interest, str):
-        variables_of_interest = [variables_of_interest]
+        variables_of_interest = {variables_of_interest}
+
     attributes = list(nc.attrs)
     variables = list(nc.variables)
-    allowed_dimensions = {'TIME', 'LATITUDE', 'LONGITUDE'}
-    required_coordinates = {'TIME', 'LATITUDE', 'LONGITUDE'}
     required_attributes = {'time_deployment_start', 'time_deployment_end'}
     error_list = []
 
@@ -43,13 +51,13 @@ def check_file(nc, site_code, variables_of_interest):
     if 'Level 1' not in nc_file_version:
         error_list.append('Wrong file version: ' + nc_file_version)
 
-    for coord in required_coordinates:
-        if coord not in variables:
-            error_list.append('{coord} variable missing'.format(coord=coord))
+    for var in required_variables:
+        if var not in variables:
+            error_list.append('{var} variable missing'.format(var=var))
 
     variables_to_aggregate = set(variables_of_interest) & set(variables)
     if not variables_to_aggregate:
-        error_list.append('no variable to aggregate')
+        error_list.append('no variables to aggregate')
 
     for var in variables_to_aggregate:
         dims = set(nc[var].dims)
@@ -59,7 +67,7 @@ def check_file(nc, site_code, variables_of_interest):
             error_list.append('more than one LATITUDE')
         if 'LONGITUDE' in dims and len(nc.LONGITUDE) > 1:
             error_list.append('more than one LONGITUDE')
-        other_dims = dims - allowed_dimensions
+        other_dims = dims - set(allowed_dimensions)
         if other_dims:
             error_list.append(
                 'dimension(s) {other_dims} not allowed for {var}'.format(other_dims=other_dims, var=var)

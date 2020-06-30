@@ -21,10 +21,15 @@ class TestCheckFile(unittest.TestCase):
             error_list = check_file(nc, 'NRSROT', 'TEMP')
         self.assertEqual(error_list, [])
 
+    def test_variable_list(self):
+        with xr.open_dataset(GOOD_FILE) as nc:
+            error_list = check_file(nc, 'NRSROT', ['TEMP', 'PSAL', 'DEPTH'])
+        self.assertEqual(error_list, [])
+
     def test_wrong_site_and_var(self):
         with xr.open_dataset(GOOD_FILE) as nc:
             error_list = check_file(nc, 'NO_SITE', 'OTHER')
-        self.assertEqual(set(error_list), {'Wrong site_code: NRSROT', 'OTHER not in file'})
+        self.assertEqual(set(error_list), {'Wrong site_code: NRSROT', 'no variable to aggregate'})
 
     def test_bad_file(self):
         with xr.open_dataset(BAD_FILE) as nc:

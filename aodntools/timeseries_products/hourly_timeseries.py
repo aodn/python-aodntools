@@ -14,7 +14,7 @@ from pkg_resources import resource_filename
 
 from aodntools import __version__
 from aodntools.timeseries_products import aggregated_timeseries as utils
-from aodntools.timeseries_products.common import NoInputFilesError
+from aodntools.timeseries_products.common import NoInputFilesError, check_file
 
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
@@ -35,57 +35,9 @@ def check_files(file_list, site_code, parameter_names_accepted, input_dir=''):
     file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
     error_dict = {}
 
-
-    for file_index, file in enumerate(file_list):
-
+    for file in file_list:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
-            attributes = list(nc.attrs)
-            variables = list(nc.variables)
-            allowed_dimensions = ['TIME', 'LATITUDE', 'LONGITUDE']
-            error_list = []
-
-            if not any([i in parameter_names_accepted for i in variables]):
-                error_list.append('no variable to aggregate')
-
-            if 'time_deployment_start' not in attributes:
-                error_list.append('no time_deployment_start attribute')
-
-            if 'time_deployment_end'not in attributes:
-                error_list.append('no time_deployment_end attribute')
-
-            nc_site_code = getattr(nc, 'site_code', '')
-            if nc_site_code != site_code:
-                error_list.append('Wrong site_code: ' + nc_site_code)
-
-            nc_file_version = getattr(nc, 'file_version', '')
-            if 'Level 1' not in nc_file_version:
-                error_list.append('Wrong file version: ' + nc_file_version)
-
-            if 'TIME' not in variables:
-                error_list.append('TIME variable missing')
-
-            if 'LATITUDE' not in variables:
-                error_list.append('LATITUDE variable missing')
-
-            if 'LONGITUDE' not in variables:
-                error_list.append('LONGITUDE variable missing')
-
-            if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
-                error_list.append('no NOMINAL_DEPTH')
-
-            param_list = list(set(variables) & set(parameter_names_accepted))
-            for param in param_list:
-                VoIdimensions = list(nc[param].dims)
-                if 'TIME' not in VoIdimensions:
-                    error_list.append('TIME is not a dimension')
-                if 'LATITUDE' in VoIdimensions and len(nc.LATITUDE) > 1:
-                    error_list.append('more than one LATITUDE')
-                if 'LONGITUDE' in VoIdimensions and len(nc.LONGITUDE) > 1:
-                    error_list.append('more than one LONGITUDE')
-                for dimension in VoIdimensions:
-                    if dimension not in allowed_dimensions:
-                        error_list.append('not allowed dimensions: ' + dimension)
-                        break
+            error_list = check_file(nc, site_code, parameter_names_accepted)
             if error_list:
                 error_dict.update({file: error_list})
             else:

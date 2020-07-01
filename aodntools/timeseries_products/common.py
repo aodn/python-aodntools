@@ -6,6 +6,50 @@ class NoInputFilesError(Exception):
     pass
 
 
+def get_qc_variable_names(nc):
+    """
+    Return a list of the variables in a file with names ending in '_quality_control'
+
+    :param nc: open xarray Dataset
+    :return: list of variable names
+    """
+    varlist = list(nc.variables)
+    return [v for v in varlist if v.endswith('_quality_control')]
+
+def check_imos_flag_conventions(nc, varnames=None):
+    """
+    Check that the given QC variables are using the IMOS flag conventions (according to the
+    quality_control_conventions variable attribute).
+    If no variable names given, check all variables with names ending in '_quality_control'.
+    Returns a list of error messages (empty if all ok).
+
+    :param nc: open xarray Dataset
+    :param varnames: list of variables to check, or None to check all QC variables
+    :return: list of error messages
+    """
+    if varnames is None:
+        varnames = get_qc_variable_names(nc)
+    if isinstance(varnames, str):
+        varnames = [varnames]
+
+    # accept two variants on the convention name, used in versions 1.3 and 1.4 of the
+    # IMOS NetCDF Conventions document
+    accepted_conventions = {"IMOS standard flags", "IMOS standard set using the IODE flags"}
+    errors = set()
+    for var in varnames:
+        if var not in nc.variables:
+            errors.add('variable {var} not in file'.format(var=var))
+            continue
+        conventions = getattr(nc[var], 'quality_control_conventions', None)
+        if conventions is None:
+            errors.add('variable {var} missing quality_control_conventions'.format(var=var))
+            continue
+        if conventions not in accepted_conventions:
+            errors.add('unexpected quality_control_conventions: "{conventions}"'.format(conventions=conventions))
+
+    return sorted(errors)
+
+
 def check_file(nc, site_code, variables_of_interest):
     """
     Check that a file meets the requirements for inclusion in a product.
@@ -20,6 +64,7 @@ def check_file(nc, site_code, variables_of_interest):
     * All variables of interest have only the allowed dimensions 
     * If LATITUDE or LONIGUTDE are dimension, they have length 1
     * Global attributes time_deployment_start and time_deployment_end exist
+    * QC flag variables use the IMOS flag conventions
 
     :param nc: open xarray dataset
     :param site_code: code of the mooring site
@@ -79,5 +124,8 @@ def check_file(nc, site_code, variables_of_interest):
     for attr in required_attributes:
         if attr not in attributes:
             error_list.append('no {} attribute'.format(attr))
+
+    # check qc flag conventions for VoI and depth/pressure
+    error_list.extend(check_imos_flag_conventions(nc))
 
     return error_list

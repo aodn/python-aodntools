@@ -14,7 +14,7 @@ from pkg_resources import resource_filename
 
 from aodntools import __version__
 from aodntools.timeseries_products import aggregated_timeseries as utils
-from aodntools.timeseries_products.common import NoInputFilesError, check_file
+from aodntools.timeseries_products.common import NoInputFilesError, check_file, get_qc_variable_names
 
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
@@ -52,17 +52,6 @@ def check_files(file_list, site_code, parameter_names_accepted, input_dir=''):
 
     return file_list, error_dict
 
-
-
-def get_qc_variable_names(nc):
-    """
-    get the names of the variables with _quality_control ancillary var
-
-    :param nc: xarray dataset
-    :return: list of names
-    """
-    varlist = list(nc.variables)
-    return [v for v in varlist if '_quality_control' in v]
 
 
 def get_parameter_names(nc):

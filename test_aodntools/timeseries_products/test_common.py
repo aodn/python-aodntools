@@ -5,7 +5,8 @@ import unittest
 
 import xarray as xr
 
-from aodntools.timeseries_products.common import check_file, get_qc_variable_names, check_imos_flag_conventions
+from aodntools.timeseries_products.common import (check_file, check_velocity_file, get_qc_variable_names,
+                                                  check_imos_flag_conventions)
 
 TEST_ROOT = os.path.dirname(__file__)
 GOOD_TZ_FILE = os.path.join(
@@ -71,12 +72,12 @@ class TestCheckFile(unittest.TestCase):
 
     def test_good_velocity_file(self):
         with xr.open_dataset(GOOD_V_FILE) as nc:
-            error_list = check_file(nc, 'NRSROT', 'velocity')
+            error_list = check_velocity_file(nc, 'NRSROT')
         self.assertEqual(error_list, [])
 
     def test_bad_velocity_file(self):
         with xr.open_dataset(BAD_V_FILE) as nc:
-            error_list = check_file(nc, 'NWSROW', 'velocity')
+            error_list = check_velocity_file(nc, 'NWSROW')
         self.assertEqual(set(error_list), {'VCUR variable missing',
                                            'DEPTH variable missing',
                                            "dimension(s) {'DIST_ALONG_BEAMS'} not allowed for UCUR"

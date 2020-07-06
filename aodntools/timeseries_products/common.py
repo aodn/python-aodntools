@@ -50,7 +50,10 @@ def check_imos_flag_conventions(nc, varnames=None):
     return sorted(errors)
 
 
-def check_file(nc, site_code, variables_of_interest):
+def check_file(nc, site_code, variables_of_interest,
+               required_variables=('TIME', 'LATITUDE', 'LONGITUDE'),
+               allowed_dimensions=('TIME', 'LATITUDE', 'LONGITUDE')
+               ):
     """
     Check that a file meets the requirements for inclusion in a product.
     Return a list of errors
@@ -58,10 +61,10 @@ def check_file(nc, site_code, variables_of_interest):
     Checks applied:
     * Correct site_code
     * file_version is FV01
-    * Coordinate variables TIME, LATITUDE, LONGITUDE (& DEPTH for velocity) are present
+    * Coordinate variables (TIME, LATITUDE, LONGITUDE) are present
     * NOMINAL_DEPTH is present as variable or attribute (instrument_nominal_depth)
     * At least one variable of interest is present
-    * All variables of interest have only the allowed dimensions 
+    * All variables of interest have only the allowed dimensions (TIME, LATITUDE, LONGITUDE)
     * If LATITUDE or LONIGUTDE are dimension, they have length 1
     * Global attributes time_deployment_start and time_deployment_end exist
     * QC flag variables use the IMOS flag conventions
@@ -69,17 +72,10 @@ def check_file(nc, site_code, variables_of_interest):
     :param nc: open xarray dataset
     :param site_code: code of the mooring site
     :param variables_of_interest: variable name or list of names to be included in the product
-                                  (the string 'velocity' implies checks specific to velocity files,
-                                  with variabls 'UCUR' AND 'VCUR' required)
+    :param required_variables: list of variables that *all* must be present in the file
+    :param allowed_dimensions: list of dimensions that variables of interest are allowed to have
     :return: list of failed tests
     """
-
-    if variables_of_interest == 'velocity':
-        variables_of_interest = {'UCUR', 'VCUR', 'WCUR'}
-        required_variables = {'TIME', 'DEPTH', 'LATITUDE', 'LONGITUDE', 'UCUR', 'VCUR'}
-        allowed_dimensions = {'TIME', 'LATITUDE', 'LONGITUDE', 'HEIGHT_ABOVE_SENSOR'}
-    else:
-        required_variables = allowed_dimensions = {'TIME', 'LATITUDE', 'LONGITUDE'}
 
     if isinstance(variables_of_interest, str):
         variables_of_interest = {variables_of_interest}
@@ -129,3 +125,33 @@ def check_file(nc, site_code, variables_of_interest):
     error_list.extend(check_imos_flag_conventions(nc))
 
     return error_list
+
+
+def check_velocity_file(nc, site_code,
+                        required_variables=('TIME', 'DEPTH', 'LATITUDE', 'LONGITUDE', 'UCUR', 'VCUR'),
+                        allowed_dimensions=('TIME', 'LATITUDE', 'LONGITUDE', 'HEIGHT_ABOVE_SENSOR')
+                        ):
+    """
+    Check that a file meets the requirements for inclusion in a product.
+    Return a list of errors
+
+    Checks applied:
+    * Correct site_code
+    * file_version is FV01
+    * Coordinate variables (TIME, DEPTH, LATITUDE, LONGITUDE) are present
+    * NOMINAL_DEPTH is present as variable or attribute (instrument_nominal_depth)
+    * Velocity variables UCUR *and* VCUR are present
+    * All variables of interest have only the allowed dimensions (TIME, LATITUDE, LONGITUDE, HEIGHT_ABOVE_SENSOR)
+    * If LATITUDE or LONIGUTDE are dimension, they have length 1
+    * Global attributes time_deployment_start and time_deployment_end exist
+    * QC flag variables use the IMOS flag conventions
+
+    :param nc: open xarray dataset
+    :param site_code: code of the mooring site
+    :param required_variables: list of variables that *all* must be present in the file
+    :param allowed_dimensions: list of dimensions that variables of interest are allowed to have
+    :return: list of failed tests
+    """
+
+    return check_file(nc, site_code, variables_of_interest=('UCUR', 'VCUR', 'WCUR'),
+                      required_variables=required_variables, allowed_dimensions=allowed_dimensions)

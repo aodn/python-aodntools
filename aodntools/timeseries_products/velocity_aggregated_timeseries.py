@@ -12,7 +12,7 @@ from aodntools import __version__
 import xarray as xr
 
 from aodntools.timeseries_products import aggregated_timeseries as utils
-from aodntools.timeseries_products.common import NoInputFilesError, check_file
+from aodntools.timeseries_products.common import NoInputFilesError, check_velocity_file
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
 
@@ -75,7 +75,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     n_obs_total = 0
     for file in files_to_agg:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
-            error_list = check_file(nc, site_code, 'velocity')
+            error_list = check_velocity_file(nc, site_code)
             if not error_list:
                 nc = utils.in_water(nc)
                 n_obs_total += get_number_flatvalues(nc)[0]

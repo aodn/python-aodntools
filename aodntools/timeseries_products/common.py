@@ -80,9 +80,8 @@ def check_file(nc, site_code, variables_of_interest,
     if isinstance(variables_of_interest, str):
         variables_of_interest = {variables_of_interest}
 
-    attributes = list(nc.attrs)
-    variables = list(nc.variables)
-    required_attributes = {'time_deployment_start', 'time_deployment_end'}
+    attributes = set(nc.attrs)
+    variables = set(nc.variables)
     error_list = []
 
     if site_code != nc.attrs.get('site_code', '[missing]'):
@@ -92,11 +91,10 @@ def check_file(nc, site_code, variables_of_interest,
     if 'Level 1' not in nc_file_version:
         error_list.append('Wrong file version: ' + nc_file_version)
 
-    for var in required_variables:
-        if var not in variables:
-            error_list.append('{var} variable missing'.format(var=var))
+    for var in set(required_variables) - variables:
+        error_list.append('{var} variable missing'.format(var=var))
 
-    variables_to_aggregate = set(variables_of_interest) & set(variables)
+    variables_to_aggregate = set(variables_of_interest) & variables
     if not variables_to_aggregate:
         error_list.append('no variables to aggregate')
 
@@ -117,9 +115,9 @@ def check_file(nc, site_code, variables_of_interest,
     if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
         error_list.append('no NOMINAL_DEPTH')
 
-    for attr in required_attributes:
-        if attr not in attributes:
-            error_list.append('no {} attribute'.format(attr))
+    required_attributes = {'time_deployment_start', 'time_deployment_end'}
+    for attr in required_attributes - attributes:
+        error_list.append('no {} attribute'.format(attr))
 
     # check qc flag conventions for VoI and depth/pressure
     error_list.extend(check_imos_flag_conventions(nc))

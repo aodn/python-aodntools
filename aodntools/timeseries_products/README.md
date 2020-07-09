@@ -6,7 +6,7 @@ Documentation:
 - [Aggregated time series (non-velocity)](Documentation/aggregated_timeseries.md)
 - [Hourly time series (non-velocity)](Documentation/Hourly_timeseries.md)
 - [Gridded time series (Temperature)](Documentation/Gridded_timeseries.md)
-- [Velocity aggregated time series](Documentation/Velocity_agrregated_timeseries.md)
+- [Velocity aggregated time series](Documentation/velocity_aggregated_timeseries.md)
 - [Velocity hourly time series](Documentation/velocity_hourly_timeseries.md)
 
 

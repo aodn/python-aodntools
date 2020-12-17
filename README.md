@@ -1,5 +1,5 @@
 # python-aodntools
-[![build](https://travis-ci.org/aodn/python-aodntools.png?branch=master)](https://travis-ci.org/aodn/python-aodntools)
+![python-aodntools](https://github.com/aodn/python-aodntools/workflows/python-aodntools/badge.svg)
 [![coverage](https://codecov.io/gh/aodn/python-aodntools/branch/master/graph/badge.svg)](https://codecov.io/gh/aodn/python-aodntools)
 
 

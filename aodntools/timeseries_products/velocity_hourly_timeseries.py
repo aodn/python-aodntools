@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import argparse
 import json
 import os
@@ -320,15 +321,14 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Concatenate X,Y,Z velocity variables from ALL instruments from ALL deployments from ONE site")
-    parser.add_argument('--site', dest='site_code', help='site code, like NRMMAI',  required=True)
-    parser.add_argument('--files', dest='filenames', help='name of the file that contains the source URLs', required=True)
-    parser.add_argument('--indir', dest='input_dir', help='base path of input files', default='', required=False)
-    parser.add_argument('--outdir', dest='output_dir', help='path where the result file will be written. Default ./',
-                        default='./', required=False)
-    parser.add_argument('--download_url', dest='download_url', help='path to the download_url_prefix',
-                        default='', required=False)
-    parser.add_argument('--opendap_url', dest='opendap_url', help='path to the opendap_url_prefix',
-                        default='', required=False)
+    parser.add_argument('site_code', help='site code, like NRSMAI')
+    parser.add_argument('filenames',
+                        help='path of file listing the source URLs (relative to input_dir, if given)')
+    parser.add_argument('-i', '--input_dir', help='base path of input files', default='')
+    parser.add_argument('-o', '--output_dir', help='path where the result file will be written. Default ./',
+                        default='./')
+    parser.add_argument('--download_url', help='path to the download_url_prefix', default='')
+    parser.add_argument('--opendap_url', help='path to the opendap_url_prefix', default='')
 
     args = parser.parse_args()
 

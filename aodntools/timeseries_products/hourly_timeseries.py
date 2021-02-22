@@ -641,18 +641,25 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Concatenate ALL variables from ALL instruments from ALL deployments from ONE site at 1hr time bin")
-    parser.add_argument('-site', dest='site_code', help='site code, like NRMMAI',  required=True)
-    parser.add_argument('-files', dest='filenames', help='name of the file that contains the source URLs', required=True)
-    parser.add_argument('-qc', dest='qcflags', help='list of QC flags to select variable values to keep', nargs='+', required=True)
-    parser.add_argument('-indir', dest='input_dir', help='base path of input files', default='', required=False)
-    parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default ./',
-                        default='./', required=False)
+    parser = argparse.ArgumentParser(
+        description="Concatenate ALL variables from ALL instruments from ALL deployments from ONE site at 1hr time bin"
+    )
+    parser.add_argument('site_code', help='site code, like NRSMAI')
+    parser.add_argument('filenames',
+                        help='path of file listing the source URLs (relative to input_dir, if given)')
+    parser.add_argument('--qcflags', default='1,2',
+                        help='QC flags to select variable values to keep (comma-separated, no spaces; default=1,2)')
+    parser.add_argument('-i', '--input_dir', help='base path of input files', default='')
+    parser.add_argument('-o', '--output_dir', help='path where the result file will be written. Default ./',
+                        default='./')
+    parser.add_argument('--download_url', help='path to the download_url_prefix', default='')
+    parser.add_argument('--opendap_url', help='path to the opendap_url_prefix', default='')
     args = parser.parse_args()
 
     with open(args.filenames, 'r') as file:
         files_to_aggregate = [i.strip() for i in file.readlines()]
-    qcflags = [int(i) for i in args.qcflags]
+    qcflags = [int(i) for i in args.qcflags.split(',')]
 
     hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, qcflags=qcflags,
-                      input_dir=args.input_dir, output_dir=args.output_path)
+                      input_dir=args.input_dir, output_dir=args.output_dir,
+                      download_url_prefix=args.download_url, opendap_url_prefix=args.opendap_url)

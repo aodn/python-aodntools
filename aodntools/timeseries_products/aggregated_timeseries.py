@@ -414,29 +414,28 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
                             (var_to_agg + "-" + product_type),
                             ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
     ncout_path = os.path.join(output_dir, output_name)
-    shutil.move(temp_outfile, os.path.join(output_dir, ncout_path))
+    shutil.move(temp_outfile, ncout_path)
 
     return ncout_path, bad_files
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Aggregate ONE variable from ALL instruments from ALL deployments from ONE site")
-    parser.add_argument('--site', dest='site_code', help='site code, like NRMMAI',  required=True)
-    parser.add_argument('--var', dest='varname', help='variable to aggregate, like TEMP', required=True)
-    parser.add_argument('--files', dest='filenames',
-                        help='name of the file that contains the source URLs (relative to inpath, if given)',
-                        required=True)
-    parser.add_argument('--indir', dest='input_dir', help='base path of input files', default='', required=False)
-    parser.add_argument('--outdir', dest='output_dir', help='path where the result file will be written. Default ./',
-                        default='./', required=False)
-    parser.add_argument('--download_url', dest='download_url', help='path to the download_url_prefix',
-                        default='', required=False)
-    parser.add_argument('--opendap_url', dest='opendap_url', help='path to the opendap_url_prefix',
-                        default='', required=False)
+    parser = argparse.ArgumentParser(
+        description="Aggregate ONE variable from ALL instruments from ALL deployments from ONE site"
+    )
+    parser.add_argument('site_code', help='site code, like NRSMAI')
+    parser.add_argument('varname', help='variable to aggregate, like TEMP')
+    parser.add_argument('filenames',
+                        help='path of file listing the source URLs (relative to input_dir, if given)')
+    parser.add_argument('-i', '--input_dir', help='base path of input files', default='')
+    parser.add_argument('-o', '--output_dir', help='path where the result file will be written. Default ./',
+                        default='./')
+    parser.add_argument('--download_url', help='path to the download_url_prefix', default='')
+    parser.add_argument('--opendap_url', help='path to the opendap_url_prefix', default='')
     args = parser.parse_args()
 
-    with open(os.path.join(args.input_dir,args.filenames)) as ff:
+    with open(args.filenames) as ff:
         files_to_agg = [line.rstrip() for line in ff]
 
     print(main_aggregator(files_to_agg=files_to_agg, var_to_agg=args.varname, site_code=args.site_code,

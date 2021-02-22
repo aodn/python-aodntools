@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import numpy as np
 import bisect
 import argparse
@@ -319,17 +320,24 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Gridded time series: interpolate ONE variable from ALL instruments from ALL deployments from ONE site into 1hr timestamps and fixed depth bins")
-    parser.add_argument('--var', dest='var', help='name of the variable to concatenate. Like TEMP, PSAL', default='TEMP', required=False)
-    parser.add_argument('--file', dest='filename', help='name of the Hourly Time Series Product file that contains the data', default=None, required=False)
-    parser.add_argument('--depth_bins', dest='depth_bins', help='list of depth where the VoI will be interpolated', default=None, nargs='+', required=False)
-    parser.add_argument('--max_separation', dest='max_separation', help='maximum difference between instruments to allow interpolation', default=50, required=False)
-    parser.add_argument('--depth_bins_increment', dest='depth_bins_increment', help='increment in meters for the automatic generated depth bins', default=10, required=False)
-    parser.add_argument('--indir', dest='input_dir', help='base path of input file. Default .', default='.',
-                        required=False)
-    parser.add_argument('--outdir', dest='output_dir', help='path where the result file will be written. Default .',
-                        default='.', required=False)
-    parser.add_argument('--config', dest='config_file', help='JSON configuration file', default=None, required=False)
+    parser = argparse.ArgumentParser(
+        description="Gridded time series: interpolate ONE variable from ALL instruments from ALL deployments"
+                    " from ONE site into 1hr timestamps and fixed depth bins"
+    )
+    parser.add_argument('input_file',
+                        help='name of the Hourly Time Series Product file that contains the data')
+    parser.add_argument('-v', '--var', default='TEMP',
+                        help='name of the variable to grid (default TEMP)')
+    parser.add_argument('--depth_bins', help='list of depth where the variable will be interpolated',
+                        nargs='+', type=float)
+    parser.add_argument('--max_separation',  default=50,
+                        help='maximum difference between instruments to allow interpolation (default 50m)')
+    parser.add_argument('--depth_bins_increment', default=10,
+                        help='increment in meters for the automatic generated depth bins (default 10)')
+    parser.add_argument('-i', '--input_dir', help='base path of input files', default='')
+    parser.add_argument('-o', '--output_dir', help='path where the result file will be written. Default ./',
+                        default='./')
+    parser.add_argument('--config_file', help='JSON configuration file', default=None)
     args = parser.parse_args()
 
     if args.config_file:
@@ -349,8 +357,6 @@ if __name__ == "__main__":
         input_dir = args.input_dir
         output_dir = args.output_dir
 
-    file_name = args.filename
-
-    print(grid_variable(input_file=file_name, VoI=VoI, depth_bins=depth_bins,
+    print(grid_variable(input_file=args.input_file, VoI=VoI, depth_bins=depth_bins,
                         max_separation=int(max_separation), depth_bins_increment=int(depth_bins_increment),
                         input_dir=input_dir, output_dir=output_dir))

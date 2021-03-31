@@ -285,8 +285,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
             end = start + n_obs
             agg_variable[start:end], agg_variable_qc[start:end] = get_variable_values(nc, var_to_agg)
             DEPTH[start:end], DEPTHqc[start:end] = get_variable_values(nc, 'DEPTH')
-            PRES[start:end], PRESqc[start:end] = get_variable_values(nc, 'PRESS')
-            PRES_REL[start:end], PRES_RELqc[start:end] = get_variable_values(nc, 'PRESS_REL')
+            PRES[start:end], PRESqc[start:end] = get_variable_values(nc, 'PRES')
+            PRES_REL[start:end], PRES_RELqc[start:end] = get_variable_values(nc, 'PRES_REL')
 
             ## set TIME and instrument index
             TIME[start:end] = (nc.TIME.values - epoch) / one_day

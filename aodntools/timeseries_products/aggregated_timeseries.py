@@ -51,10 +51,10 @@ def get_variable_values(nc, variable):
         if variable+'_quality_control' in file_variables:
             variableQC_values = nc[variable+'_quality_control'].values
         else:
-            variableQC_values = np.repeat(0, n_records)
+            variableQC_values = 0
     else:
-        variable_values = np.repeat(np.nan, n_records)
-        variableQC_values = np.repeat(9, n_records)
+        variable_values = np.ma.masked
+        variableQC_values = 9
 
     return variable_values, variableQC_values
 

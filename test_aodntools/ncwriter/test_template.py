@@ -348,12 +348,16 @@ class TestDataValues(TemplateTestCase):
                 'X': {
                     '_dimensions': ['TIME'],
                     '_datatype': 'float32',
+                    'valid_min': 1,
+                    'valid_max': 5,
                     '_FillValue': -999.,
                     '_data': self.data_array
                 },
                 'Y': {
                     '_dimensions': ['TIME'],
                     '_datatype': 'float32',
+                    'valid_min': -4,
+                    'valid_max': 5,
                     '_fill_value': -999.,
                     '_data': self.data_masked
                 }
@@ -385,6 +389,21 @@ class TestDataValues(TemplateTestCase):
         self.assertEqual((1, 8), self.template.get_data_range('TIME'))
         self.assertEqual((1, 5), self.template.get_data_range('X'))
         self.assertEqual((1, 5), self.template.get_data_range('Y'))
+
+    def test_var_attr_datatype_conversion(self):
+        """
+        test to check the conversion of some attributes matches the datatype of the variable as
+        defined in the template
+        """
+        self.template.to_netcdf(self.temp_nc_file)
+        dataset = Dataset(self.temp_nc_file)
+
+        for varname in ('X', 'Y'):
+            dsvar = dataset.variables[varname]
+
+            self.assertTrue(isinstance(dsvar.valid_min, np.float))
+            self.assertTrue(isinstance(dsvar.valid_max, np.float))
+
 
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)

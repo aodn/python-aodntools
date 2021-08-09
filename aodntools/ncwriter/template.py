@@ -295,6 +295,11 @@ class DatasetTemplate(NetCDFGroupDict):
         **kwargs are included here to overload all options for all variables
         like `zlib` and friends.
         """
+
+        # variable attributes to convert to the same type as the variable
+        # datatype
+        varattrs_to_convert_to_datatype = ['valid_min', 'valid_max', 'valid_range']
+
         for varname, varattr in self.variables.items():
             if not varattr['_dimensions']:  # no kwargs in createVariable
                 ncvar = self.ncobj.createVariable(varname, varattr['_datatype'])
@@ -307,6 +312,11 @@ class DatasetTemplate(NetCDFGroupDict):
             # add variable values
             if varattr['_data'] is not None:
                 ncvar[:] = varattr['_data']
+
+            # convert some variables attribute to variable datatype
+            for varattr_to_convert in varattrs_to_convert_to_datatype:
+                if varattr_to_convert in varattr.keys():
+                    varattr[varattr_to_convert] = np.array(varattr[varattr_to_convert], dtype=varattr['_datatype'])
 
             # add variable attributes
             ncvar.setncatts(metadata_attributes(varattr))

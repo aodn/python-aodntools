@@ -342,20 +342,32 @@ class TestDataValues(TemplateTestCase):
             variables={
                 'TIME': {
                     '_dimensions': ['TIME'],
-                    '_datatype': 'float32',
+                    '_datatype': 'float64',
+                    'valid_min': 0,
+                    'valid_max': 10,
                     '_data': np.array([np.nan, np.nan, 1, 2, 3, 4, 5, 6, 7, 8])
                 },
                 'X': {
                     '_dimensions': ['TIME'],
                     '_datatype': 'float32',
-                    '_FillValue': -999.,
+                    'valid_min': 1,
+                    'valid_max': 5,
+                    '_FillValue': -999,
                     '_data': self.data_array
                 },
                 'Y': {
                     '_dimensions': ['TIME'],
                     '_datatype': 'float32',
-                    '_fill_value': -999.,
+                    'valid_range': [-4, 5],
+                    '_fill_value': -999,
                     '_data': self.data_masked
+                },
+                'N': {
+                    '_dimensions': ['TIME'],
+                    '_datatype': 'int32',
+                    'valid_range': [-4, 5],
+                    '_fill_value': -999,
+                    '_data': self.data_array
                 }
             }
         )
@@ -385,6 +397,28 @@ class TestDataValues(TemplateTestCase):
         self.assertEqual((1, 8), self.template.get_data_range('TIME'))
         self.assertEqual((1, 5), self.template.get_data_range('X'))
         self.assertEqual((1, 5), self.template.get_data_range('Y'))
+
+    def test_var_attr_datatype_conversion(self):
+        """
+        test to check the conversion of some attributes matches the datatype of the variable as
+        defined in the template
+        """
+        self.template.to_netcdf(self.temp_nc_file)
+        dataset = Dataset(self.temp_nc_file)
+
+        TIME = dataset.variables['TIME']
+        self.assertEqual(TIME.dtype, TIME.valid_min.dtype)
+        self.assertEqual(TIME.dtype, TIME.valid_max.dtype)
+
+        X = dataset.variables['X']
+        self.assertEqual(X.dtype, X.valid_min.dtype)
+        self.assertEqual(X.dtype, X.valid_max.dtype)
+        self.assertEqual(X.dtype, X._FillValue.dtype)
+
+        for v in ['Y', 'N']:
+            var = dataset.variables[v]
+            self.assertEqual(var.dtype, var.valid_range.dtype)
+            self.assertEqual(var.dtype, var._FillValue.dtype)
 
 # TODO: add data from multiple numpy arrays
 # e.g. template.add_data(TIME=time_values, TEMP=temp_values, PRES=pres_values)

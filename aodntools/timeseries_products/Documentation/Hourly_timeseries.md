@@ -118,10 +118,10 @@ Attributes specific to each aggregated product, are added as follows:
 The output from a single run of the code will be an aggregated file of all available measurements of all non-velocity variable at one mooring site.
 
 Two different files could be produced according to the values retained for the aggregation. One with values flagged as "Good_data" or "Probably_good_data" will have *"hourly-timeseries"* as product type. 
-e.g. *IMOS_ABOS-DA_STZ_20120421_EAC1_FV02_hourly-timeseries_END-20130823_C-20191007.nc* 
+e.g. *IMOS_DWM-DA_STZ_20120421_EAC1_FV02_hourly-timeseries_END-20130823_C-20191007.nc* 
 
 The product that also includes "No_QC_performed" values will have *"hourly-timeseries-including-non-QC"* as product type. 
-e.g. *IMOS_ABOS-DA_STZ_20120421_EAC1_FV02_hourly-timeseries-including-non-QC_END-20130823_C-20191007.nc*
+e.g. *IMOS_DWM-DA_STZ_20120421_EAC1_FV02_hourly-timeseries-including-non-QC_END-20130823_C-20191007.nc*
 
 
 The product will be delivered, in netCDF4 format, compliant with the CF-1.6 and IMOS-1.4 conventions, and

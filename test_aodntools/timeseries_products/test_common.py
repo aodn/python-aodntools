@@ -6,7 +6,7 @@ import unittest
 import xarray as xr
 
 from aodntools.timeseries_products.common import (check_file, check_velocity_file, get_qc_variable_names,
-                                                  check_imos_flag_conventions)
+                                                  check_imos_flag_conventions, in_water_index, in_water)
 
 TEST_ROOT = os.path.dirname(__file__)
 GOOD_TZ_FILE = os.path.join(
@@ -80,7 +80,8 @@ class TestCheckFile(unittest.TestCase):
             error_list = check_velocity_file(nc, 'NWSROW')
         self.assertEqual(set(error_list), {'VCUR variable missing',
                                            'DEPTH variable missing',
-                                           "dimension(s) {'DIST_ALONG_BEAMS'} not allowed for UCUR"
+                                           "dimension(s) {'DIST_ALONG_BEAMS'} not allowed for UCUR",
+                                           'no in-water data'
                                            }
                          )
 
@@ -93,6 +94,30 @@ class TestCheckFile(unittest.TestCase):
                                            'unexpected quality_control_conventions: "WOCE quality control procedure"'
                                            }
                          )
+
+
+class TestInWater(unittest.TestCase):
+    def test_in_water_index_ok(self):
+        with xr.open_dataset(BAD_TZ_FILE) as nc:
+            nc.attrs['time_deployment_start'] = '2018-12-13T08:00:00Z'
+            nc.attrs['time_deployment_end'] = '2018-12-14T00:30:00Z'
+            index = in_water_index(nc)
+        self.assertTrue(all(index[:-2]))
+        self.assertFalse(any(index[-2:]))
+
+    def test_in_water_index_bad(self):
+        with xr.open_dataset(BAD_V_FILE) as nc:
+            index = in_water_index(nc)
+        self.assertFalse(all(index))
+
+    def test_in_water_ok(self):
+        with xr.open_dataset(BAD_TZ_FILE) as nc:
+            nc.attrs['time_deployment_start'] = '2018-12-13T08:00:00Z'
+            nc.attrs['time_deployment_end'] = '2018-12-14T00:30:00Z'
+            nc_in = in_water(nc)
+
+            self.assertEqual(len(nc_in.TIME), len(nc.TIME) - 2)
+            self.assertTrue(all(nc_in.TIME.values == nc.TIME[:-2].values))
 
 if __name__ == '__main__':
     unittest.main()

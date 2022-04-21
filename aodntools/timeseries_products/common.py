@@ -67,7 +67,8 @@ def check_file(nc, site_code, variables_of_interest,
     * At least one variable of interest is present
     * All variables of interest have only the allowed dimensions (TIME, LATITUDE, LONGITUDE)
     * If LATITUDE or LONIGUTDE are dimension, they have length 1
-    * Global attributes time_deployment_start and time_deployment_end exist
+    * Global attributes time_deployment_start and time_deployment_end exist, and there is at least one
+      value of the TIME variable that falls within the range they define.
     * QC flag variables use the IMOS flag conventions
 
     :param nc: open xarray dataset
@@ -117,8 +118,14 @@ def check_file(nc, site_code, variables_of_interest,
         error_list.append('no NOMINAL_DEPTH')
 
     required_attributes = {'time_deployment_start', 'time_deployment_end'}
+    have_time_attributes = True
     for attr in required_attributes - attributes:
         error_list.append('no {} attribute'.format(attr))
+        have_time_attributes = False
+
+    # check for existence of in-water data
+    if have_time_attributes and not in_water_index(nc).any():
+        error_list.append('no in-water data')
 
     # check qc flag conventions for VoI and depth/pressure
     error_list.extend(check_imos_flag_conventions(nc))
@@ -156,6 +163,19 @@ def check_velocity_file(nc, site_code,
                       required_variables=required_variables, allowed_dimensions=allowed_dimensions)
 
 
+def in_water_index(nc):
+    """
+    Return a boolean index of only the in-water data in a dataset.
+    In-water period is defined by the global attributes time_deployment_start and time_deployment_end.
+
+    :param nc: xarray dataset
+    :return: numpy.ndarray boolean index array
+    """
+    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
+    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
+    TIME = nc['TIME'][:]
+    return (TIME >= time_deployment_start) & (TIME <= time_deployment_end)
+
 def in_water(nc):
     """
     cut data to in-water only timestamps, dropping resulting NaN.
@@ -163,7 +183,4 @@ def in_water(nc):
     :param nc: xarray dataset
     :return: xarray dataset
     """
-    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
-    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
-    TIME = nc['TIME'][:]
-    return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)
+    return nc.where(in_water_index(nc), drop=True)

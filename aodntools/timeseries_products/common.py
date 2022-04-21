@@ -1,4 +1,5 @@
 """Code shared by all timeseries product generating code"""
+import numpy as np
 
 
 class NoInputFilesError(Exception):
@@ -153,3 +154,16 @@ def check_velocity_file(nc, site_code,
 
     return check_file(nc, site_code, variables_of_interest=('UCUR', 'VCUR', 'WCUR'),
                       required_variables=required_variables, allowed_dimensions=allowed_dimensions)
+
+
+def in_water(nc):
+    """
+    cut data to in-water only timestamps, dropping resulting NaN.
+
+    :param nc: xarray dataset
+    :return: xarray dataset
+    """
+    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
+    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
+    TIME = nc['TIME'][:]
+    return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)

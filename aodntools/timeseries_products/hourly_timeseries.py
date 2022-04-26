@@ -326,6 +326,8 @@ def PDresample_by_hour(df, function_dict, function_stats):
     df_data = pd.DataFrame()
     for variable in varnames:
         ds_var = df[variable]
+        print("    {type} {name} {n} ({variable})".format(variable=variable, type=type(ds_var.index),
+                                                          name=ds_var.index.name, n=len(ds_var)))
         ds_var_mean = ds_var.resample('1H').apply(function_dict[variable]).astype(np.float32)
         df_data = pd.concat([df_data, ds_var_mean], axis=1, sort=False)
         for stat_method in function_stats:
@@ -398,7 +400,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
     qc_count_all = {}
 
     for file_index, file in enumerate(files_to_aggregate):
-        print(file_index)
+        print(file_index, file)
         with xr.open_dataset(os.path.join(input_dir, file), mask_and_scale=True, decode_times=True) as nc:
             parameter_names = list(set(list(nc.variables)) & set(parameter_names_accepted))
             parameter_names_all += parameter_names

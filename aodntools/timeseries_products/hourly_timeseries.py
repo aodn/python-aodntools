@@ -578,4 +578,4 @@ if __name__ == "__main__":
     qcflags = [int(i) for i in args.qcflags]
 
     hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, qcflags=qcflags,
-                      input_dir=args.input_dir, output_dir=args.output_path)
+                      input_dir=args.input_dir, output_dir=args.output_dir)

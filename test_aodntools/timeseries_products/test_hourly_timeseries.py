@@ -33,6 +33,13 @@ for v in measured_variables:
     for s in function_stats:
         OBS_VARIABLES.add(v + s)
 
+NO_INWATER_DATA_FILE = 'IMOS_ANMN-NSW_TZ_PH100_NO_INWATER_DATA.nc'
+PH100_FILES = [
+    'IMOS_ANMN-NSW_TZ_20200703T001500Z_PH100_FV01_PH100-2007-Aqualogger-520T-96_END-20200907T233000Z_C-20210112T044909Z.nc',
+    'IMOS_ANMN-NSW_TZ_PH100_ALL_FLAGGED_BAD.nc',
+    NO_INWATER_DATA_FILE
+]
+
 
 class TestHourlyTimeseries(BaseTestCase):
     def test_hourly_aggregator(self):
@@ -95,6 +102,19 @@ class TestHourlyTimeseries(BaseTestCase):
 
     def test_all_rejected(self):
         self.assertRaises(NoInputFilesError, hourly_aggregator, [BAD_FILE], 'NRSROT', (1, 2), input_dir=TEST_ROOT)
+
+    def test_some_files_without_good_data(self):
+        output_file, bad_files = hourly_aggregator(files_to_aggregate=PH100_FILES,
+                                                   site_code='PH100',
+                                                   qcflags=(1, 2),
+                                                   input_dir=TEST_ROOT,
+                                                   output_dir='/tmp'
+                                                   )
+        # The "NO_INWATER_DATA" file should be in the bad_files list
+        self.assertEqual(1, len(bad_files))
+        for path, errors in bad_files.items():
+            self.assertEqual(os.path.join(TEST_ROOT, NO_INWATER_DATA_FILE), path)
+            self.assertIn('no in-water data', errors)
 
 
 if __name__ == '__main__':

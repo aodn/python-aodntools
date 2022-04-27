@@ -43,6 +43,10 @@ PH100_FILES = [
     NO_INWATER_DATA_FILE
 ]
 
+SYD100_FILES = [
+    'IMOS_ANMN-NSW_TZ_SYD100_BAD_TIMESTAMPS.nc',
+]
+
 
 class TestHourlyTimeseries(BaseTestCase):
     def test_hourly_aggregator(self):
@@ -126,6 +130,15 @@ class TestHourlyTimeseries(BaseTestCase):
         for path, errors in bad_files.items():
             self.assertEqual(NO_INWATER_DATA_FILE, path)
             self.assertIn('no in-water data', errors)
+
+    def test_bad_timestamps(self):
+        output_file, bad_files = hourly_aggregator(files_to_aggregate=SYD100_FILES,
+                                                   site_code='SYD100',
+                                                   qcflags=(1, 2),
+                                                   input_dir=TEST_ROOT,
+                                                   output_dir='/tmp'
+                                                   )
+        self.assertEqual(1, len(bad_files))
 
 
 if __name__ == '__main__':

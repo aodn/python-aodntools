@@ -117,5 +117,24 @@ class TestHourlyTimeseries(BaseTestCase):
             self.assertIn('no in-water data', errors)
 
 
+
+### Temp tests for debugging
+
+SYD100_LIST = [
+    'IMOS_ANMN-NSW_TZ_20100807T130000Z_SYD100_FV01_SYD100-1008-Aqualogger-520T-42_END-20101014T021000Z_C-20160809T050432Z.nc',
+    'IMOS_ANMN-NSW_TZ_20080729T130004Z_SYD100_FV01_SYD100-0807-Aqualogger-520PT-97_END-20080826T074504Z_C-20160809T001556Z.nc',
+]
+
+class TestHourlyTimeseriesDebugging(BaseTestCase):
+    def test_typeerror_syd100(self):
+        output_file, bad_files = hourly_aggregator(files_to_aggregate=SYD100_LIST,
+                                                   site_code='SYD100',
+                                                   qcflags=(1, 2),
+                                                   input_dir=TEST_ROOT,
+                                                   output_dir='/tmp'
+                                                   )
+        self.assertEqual(0, len(bad_files))
+
+
 if __name__ == '__main__':
     unittest.main()

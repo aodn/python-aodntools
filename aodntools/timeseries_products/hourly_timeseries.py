@@ -407,10 +407,9 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
                                               'NOMINAL_DEPTH': get_nominal_depth(nc)},
                                              ignore_index=True)
 
-            df_temp = nc_clean.to_dataframe()
+            # reindex in case TIME had out-of-range values before cleaning
+            df_temp = nc_clean.reindex({'TIME': nc_clean.TIME.values}).to_dataframe()
 
-            ## keep TIME as the only index
-            df_temp = df_temp.reset_index().set_index('TIME')
             df_temp = df_temp[parameter_names]
 
             df_temp = PDresample_by_hour(df_temp, function_dict, function_stats)  # do the magic

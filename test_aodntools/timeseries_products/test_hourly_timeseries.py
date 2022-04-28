@@ -138,7 +138,7 @@ class TestHourlyTimeseries(BaseTestCase):
                                                    input_dir=TEST_ROOT,
                                                    output_dir='/tmp'
                                                    )
-        self.assertEqual(1, len(bad_files))
+        self.assertEqual(0, len(bad_files))
 
 
 if __name__ == '__main__':

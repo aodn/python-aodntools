@@ -305,22 +305,22 @@ def PDresample_by_hour(df, function_dict, function_stats):
     :param df: pandas dataframe with ancillary variables and coords removed but with TIME as index
     :return: pandas dataframe
     """
-    ## back the index 30min
-    df.index = df.index - pd.Timedelta(30, units='m')
 
     varnames = df.columns
-    df_data = pd.DataFrame()
+    df_data = pd.DataFrame(index=pd.DatetimeIndex([]))
     for variable in varnames:
         ds_var = df[variable]
-        ds_var_mean = ds_var.resample('1H').apply(function_dict[variable]).astype(np.float32)
+        ds_var_resample = ds_var.resample('1H', offset='30min')  # offset centres bin on the hour
+        ds_var_mean = ds_var_resample.apply(function_dict[variable]).astype(np.float32)
         df_data = pd.concat([df_data, ds_var_mean], axis=1, sort=False)
         for stat_method in function_stats:
-            ds_var_stat = ds_var.resample('1H').apply(stat_method).astype(np.float32)
+            ds_var_stat = ds_var_resample.apply(stat_method).astype(np.float32)
             ds_var_stat = ds_var_stat.rename("_".join([variable, stat_method]))
             df_data = pd.concat([df_data, ds_var_stat], axis=1, sort=False)
 
-    ##forward the index 30min
-    df_data.index = df_data.index + pd.Timedelta(30, units='m')
+    ##forward the index 30min so the timestamps are on the hour
+    df_data.set_index(df_data.index.shift(30, 'min'), inplace=True)
+
     return df_data
 
 

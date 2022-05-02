@@ -310,7 +310,7 @@ def PDresample_by_hour(df, function_dict, function_stats):
     df_data = pd.DataFrame(index=pd.DatetimeIndex([]))
     for variable in varnames:
         ds_var = df[variable]
-        ds_var_resample = ds_var.resample('1H', offset='30min')  # offset centres bin on the hour
+        ds_var_resample = ds_var.resample('1H', base=0.5)  # shift by half hour to centre bin on the hour
         ds_var_mean = ds_var_resample.apply(function_dict[variable]).astype(np.float32)
         df_data = pd.concat([df_data, ds_var_mean], axis=1, sort=False)
         for stat_method in function_stats:
@@ -319,7 +319,7 @@ def PDresample_by_hour(df, function_dict, function_stats):
             df_data = pd.concat([df_data, ds_var_stat], axis=1, sort=False)
 
     ##forward the index 30min so the timestamps are on the hour
-    df_data.set_index(df_data.index.shift(30, 'min'), inplace=True)
+    df_data.index += pd.to_timedelta('30min')
 
     return df_data
 

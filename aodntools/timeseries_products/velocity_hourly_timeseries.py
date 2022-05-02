@@ -179,7 +179,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     print('PROCESSING...')
     slice_start = 0
     for index, file in enumerate(files_to_agg):
-        print(index, end=",", flush=True)
+        print(index, file, flush=True)
 
         ## this is for filling the slice of variables with INSTRUMENT dim
         slice_instrument_start = slice_start
@@ -203,6 +203,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
             chunk_index = 0
             while chunk_start < chunk_partial and chunk_start <= chunk_end:
                 nc_chunk = nc.where((nc.TIME >= chunk_start) & (nc.TIME < chunk_partial), drop=True)
+                print("  {i}: {n} samples".format(i=chunk_index, n=len(nc_chunk.TIME)))
                 if is_2D:
                     ## process all cells, one by one
                     heights = nc_chunk.HEIGHT_ABOVE_SENSOR.values

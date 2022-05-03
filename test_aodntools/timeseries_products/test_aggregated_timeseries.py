@@ -87,7 +87,8 @@ class TestAggregatedTimeseries(BaseTestCase):
         self.assertEqual(dataset['source_file'].opendap_url_prefix, 'http://test.opendap.url')
 
     def test_all_rejected(self):
-        self.assertRaises(NoInputFilesError, main_aggregator, [BAD_FILE], 'TEMP', 'NRSROT', input_dir=TEST_ROOT)
+        self.assertRaises(NoInputFilesError, main_aggregator, [BAD_FILE], 'TEMP', 'NRSROT',
+                          input_dir=TEST_ROOT, output_dir='/tmp')
 
 
 if __name__ == '__main__':

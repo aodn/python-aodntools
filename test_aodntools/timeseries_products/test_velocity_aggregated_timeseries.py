@@ -66,7 +66,8 @@ class TestVelocityAggregatedTimeseries(BaseTestCase):
         self.assertEqual(non_match_vars, [])
 
     def test_all_rejected(self):
-        self.assertRaises(NoInputFilesError, velocity_aggregated, [BAD_FILE], 'NRSROT', input_dir=TEST_ROOT)
+        self.assertRaises(NoInputFilesError, velocity_aggregated, [BAD_FILE], 'NRSROT',
+                          input_dir=TEST_ROOT, output_dir='/tmp')
 
 
 if __name__ == '__main__':

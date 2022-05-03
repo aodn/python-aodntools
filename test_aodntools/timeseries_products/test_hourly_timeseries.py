@@ -20,6 +20,9 @@ INPUT_FILES = [
     BAD_FILE
 ]
 INPUT_PATHS = [os.path.join(TEST_ROOT, f) for f in INPUT_FILES]
+EXPECTED_OUTPUT_FILE = os.path.join(
+    TEST_ROOT, 'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-20220404.nc'
+)
 
 INST_VARIABLES = {'instrument_id', 'source_file', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH'}
 OBS_VARIABLES = {'instrument_index', 'TIME'}
@@ -32,6 +35,17 @@ for v in measured_variables:
     OBS_VARIABLES.add(v)
     for s in function_stats:
         OBS_VARIABLES.add(v + s)
+
+NO_INWATER_DATA_FILE = 'IMOS_ANMN-NSW_TZ_PH100_NO_INWATER_DATA.nc'
+PH100_FILES = [
+    'IMOS_ANMN-NSW_TZ_20200703T001500Z_PH100_FV01_PH100-2007-Aqualogger-520T-96_END-20200907T233000Z_C-20210112T044909Z.nc',
+    'IMOS_ANMN-NSW_TZ_PH100_ALL_FLAGGED_BAD.nc',
+    NO_INWATER_DATA_FILE
+]
+
+SYD100_FILES = [
+    'IMOS_ANMN-NSW_TZ_SYD100_BAD_TIMESTAMPS.nc',
+]
 
 
 class TestHourlyTimeseries(BaseTestCase):
@@ -73,6 +87,15 @@ class TestHourlyTimeseries(BaseTestCase):
         self.assertIn('hourly_timeseries.py', dataset.lineage)
         self.assertIn(BAD_FILE, dataset.rejected_files)
 
+        # check variable values
+        expected = Dataset(EXPECTED_OUTPUT_FILE)
+        compare_vars = ('TIME', 'NOMINAL_DEPTH', 'instrument_index',
+                        'TEMP', 'TEMP_count', 'TEMP_min', 'TEMP_max')
+        non_match_vars = [var for var in compare_vars
+                          if not all(dataset[var][:] == expected[var][:])
+                          ]
+        self.assertEqual(non_match_vars, [])
+
     def test_hourly_aggregator_with_nonqc(self):
         output_file, bad_files = hourly_aggregator(files_to_aggregate=INPUT_FILES,
                                                    site_code='NRSROT',
@@ -95,6 +118,27 @@ class TestHourlyTimeseries(BaseTestCase):
 
     def test_all_rejected(self):
         self.assertRaises(NoInputFilesError, hourly_aggregator, [BAD_FILE], 'NRSROT', (1, 2), input_dir=TEST_ROOT)
+
+    def test_some_files_without_good_data(self):
+        output_file, bad_files = hourly_aggregator(files_to_aggregate=PH100_FILES,
+                                                   site_code='PH100',
+                                                   qcflags=(1, 2),
+                                                   input_dir=TEST_ROOT,
+                                                   output_dir='/tmp'
+                                                   )
+        self.assertEqual(1, len(bad_files))
+        for path, errors in bad_files.items():
+            self.assertEqual(NO_INWATER_DATA_FILE, path)
+            self.assertIn('no in-water data', errors)
+
+    def test_bad_timestamps(self):
+        output_file, bad_files = hourly_aggregator(files_to_aggregate=SYD100_FILES,
+                                                   site_code='SYD100',
+                                                   qcflags=(1, 2),
+                                                   input_dir=TEST_ROOT,
+                                                   output_dir='/tmp'
+                                                   )
+        self.assertEqual(0, len(bad_files))
 
 
 if __name__ == '__main__':

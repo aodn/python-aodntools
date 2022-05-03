@@ -14,8 +14,7 @@ from pkg_resources import resource_filename
 
 from aodntools import __version__
 from aodntools.timeseries_products import aggregated_timeseries as utils
-from aodntools.timeseries_products.common import NoInputFilesError, check_file, get_qc_variable_names
-
+from aodntools.timeseries_products.common import NoInputFilesError, check_file, get_qc_variable_names, in_water
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
 BINNING_METHOD_JSON = resource_filename(__name__, 'binning_method.json')
@@ -64,19 +63,6 @@ def get_parameter_names(nc):
     """
     params = list(set([s.strip('_quality_control') for s in get_qc_variable_names(nc)]) - set(list(nc.coords)))
     return params
-
-
-def in_water(nc):
-    """
-    cut data to in-water only timestamps, dropping resulting NaN.
-
-    :param nc: xarray dataset
-    :return: xarray dataset
-    """
-    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
-    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
-    TIME = nc['TIME'][:]
-    return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)
 
 
 def good_data_only(nc, qcflags):
@@ -421,10 +407,9 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
                                               'NOMINAL_DEPTH': get_nominal_depth(nc)},
                                              ignore_index=True)
 
-            df_temp = nc_clean.to_dataframe()
+            # reindex in case TIME had out-of-range values before cleaning
+            df_temp = nc_clean.reindex({'TIME': nc_clean.TIME.values}).to_dataframe()
 
-            ## keep TIME as the only index
-            df_temp = df_temp.reset_index().set_index('TIME')
             df_temp = df_temp[parameter_names]
 
             df_temp = PDresample_by_hour(df_temp, function_dict, function_stats)  # do the magic

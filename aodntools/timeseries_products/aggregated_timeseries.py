@@ -13,7 +13,7 @@ from netCDF4 import Dataset, num2date, stringtochar
 from pkg_resources import resource_filename
 
 from aodntools import __version__
-from aodntools.timeseries_products.common import NoInputFilesError, check_file
+from aodntools.timeseries_products.common import NoInputFilesError, check_file, in_water
 
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
@@ -69,18 +69,6 @@ def get_instrument_id(nc):
     instrument = nc.attrs.get('instrument', '[unknown instrument]')
     instrument_serial_number = nc.attrs.get('instrument_serial_number', '[unknown serial number]')
     return '; '.join([deployment_code, instrument, instrument_serial_number])
-
-
-def in_water(nc):
-    """
-    cut data the entire dataset to in-water only timestamps, dropping the out-of-water records.
-    :param nc: xarray dataset
-    :return: xarray dataset
-    """
-    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
-    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
-    TIME = nc['TIME'][:]
-    return nc.where((TIME >= time_deployment_start) & (TIME <= time_deployment_end), drop=True)
 
 
 def get_nominal_depth(nc):

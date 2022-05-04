@@ -407,8 +407,12 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
                                               'NOMINAL_DEPTH': get_nominal_depth(nc)},
                                              ignore_index=True)
 
-            # reindex in case TIME had out-of-range values before cleaning
-            df_temp = nc_clean.reindex({'TIME': nc_clean.TIME.values}).to_dataframe()
+            # If TIME had out-of-range values before cleaning, nc_clean would now have a CFTimeIndex, which
+            # breaks the resampling further down. Here we reset it to a DatetimeIndex as suggested here:
+            # https://stackoverflow.com/questions/55786995/converting-cftime-datetimejulian-to-datetime/55787899#55787899
+            if isinstance(nc_clean.indexes['TIME'], xr.coding.cftimeindex.CFTimeIndex):
+                nc_clean['TIME'] = nc_clean.indexes['TIME'].to_datetimeindex()
+            df_temp = nc_clean.to_dataframe()
 
             df_temp = df_temp[parameter_names]
 

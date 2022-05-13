@@ -64,13 +64,10 @@ class TestVelocityHourlyTimeseries(BaseTestCase):
         # check aggregated variable values
         expected = Dataset(EXPECTED_OUTPUT_FILE)
         self.assertEqual(len(expected['TIME']), len(dataset['TIME']))
-        compare_vars = ('TIME', 'UCUR', 'UCUR_min', 'UCUR_max', 'UCUR_std', 'UCUR_count', 'VCUR', 'NOMINAL_DEPTH',
-                        'CELL_INDEX', 'instrument_index', 'DEPTH')
 
         non_match_vars = []
-        for var in compare_vars:
-            i = ~np.isnan(expected[var][:])
-            if not all(dataset[var][i] == expected[var][i]):
+        for var in set(expected.variables.keys()) - STR_VARS:
+            if not all(np.isclose(dataset[var], expected[var], equal_nan=True)):
                 non_match_vars.append(var)
         self.assertEqual(non_match_vars, [])
 

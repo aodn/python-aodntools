@@ -58,8 +58,7 @@ class TestVelocityAggregatedTimeseries(BaseTestCase):
 
         # check aggregated variable values
         expected = Dataset(EXPECTED_OUTPUT_FILE)
-        compare_vars = ('TIME', 'UCUR', 'UCUR_quality_control', 'VCUR', 'VCUR_quality_control', 'NOMINAL_DEPTH',
-                        'CELL_INDEX', 'instrument_index', 'DEPTH', 'DEPTH_quality_control')
+        compare_vars = set(expected.variables.keys()) - STR_VARS
         non_match_vars = [var for var in compare_vars
                           if not all(dataset[var][:] == expected[var][:])
                           ]

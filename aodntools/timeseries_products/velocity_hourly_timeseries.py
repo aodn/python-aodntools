@@ -57,13 +57,12 @@ def append_resampled_values(nc_cell, ds, slice_start, binning_functions):
     df_cell = nc_cell.squeeze().to_dataframe()
     # shift the index forward 30min to centre the bins on the hour
     df_cell.index = df_cell.index + pd.Timedelta(minutes=30)
-    # TODO: shift timestamps to centre of sampling interval
 
     df_cell_1H = df_cell.resample('1H')
     slice_end = len(df_cell_1H) + slice_start
 
     # set binned timestamps
-    time_slice = (np.fromiter(df_cell_1H.groups.keys(), dtype='M8[ns]') - TIME_EPOCH) / ONE_DAY
+    time_slice = (np.fromiter(df_cell_1H.min().index, dtype='M8[ns]') - TIME_EPOCH) / ONE_DAY
     ds['TIME'][slice_start:slice_end] = time_slice
 
     # take the mean of the variables

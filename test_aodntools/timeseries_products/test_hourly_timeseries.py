@@ -21,7 +21,7 @@ INPUT_FILES = [
 ]
 INPUT_PATHS = [os.path.join(TEST_ROOT, f) for f in INPUT_FILES]
 EXPECTED_OUTPUT_FILE = os.path.join(
-    TEST_ROOT, 'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-20220404.nc'
+    TEST_ROOT, 'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-20220428.nc'
 )
 
 INST_VARIABLES = {'instrument_id', 'source_file', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH'}
@@ -89,6 +89,7 @@ class TestHourlyTimeseries(BaseTestCase):
 
         # check variable values
         expected = Dataset(EXPECTED_OUTPUT_FILE)
+        self.assertEqual(len(expected['TIME']), len(dataset['TIME']))
         compare_vars = ('TIME', 'NOMINAL_DEPTH', 'instrument_index',
                         'TEMP', 'TEMP_count', 'TEMP_min', 'TEMP_max')
         non_match_vars = [var for var in compare_vars

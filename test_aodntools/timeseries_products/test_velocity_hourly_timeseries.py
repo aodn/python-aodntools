@@ -3,11 +3,12 @@
 import os
 import unittest
 
+import numpy as np
 from netCDF4 import Dataset, chartostring
 
 from aodntools import __version__
 from aodntools.timeseries_products.common import NoInputFilesError
-from aodntools.timeseries_products.velocity_aggregated_timeseries import velocity_aggregated
+from aodntools.timeseries_products.velocity_hourly_timeseries import velocity_hourly_aggregated
 from test_aodntools.base_test import BaseTestCase
 
 TEST_ROOT = os.path.dirname(__file__)
@@ -19,18 +20,22 @@ INPUT_FILES = [
     BAD_FILE
 ]
 EXPECTED_OUTPUT_FILE = os.path.join(
-    TEST_ROOT, 'IMOS_ANMN-NRS_VZ_20180816_NRSROT_FV01_velocity-aggregated-timeseries_END-20191018_C-20200623.nc'
+    TEST_ROOT, 'IMOS_ANMN-NRS_VZ_20180816_NRSROT_FV02_velocity-hourly-timeseries_END-20191018_C-20220502.nc'
 )
 
-OBS_VARS = {'TIME', 'DEPTH', 'DEPTH_quality_control', 'UCUR', 'UCUR_quality_control',
-            'VCUR', 'VCUR_quality_control', 'WCUR', 'WCUR_quality_control', 'instrument_index', 'CELL_INDEX'}
+OBS_VARS = {'TIME', 'instrument_index', 'CELL_INDEX'}
 INST_VARS = {'LATITUDE', 'LONGITUDE', 'NOMINAL_DEPTH', 'SECONDS_TO_MIDDLE'}
 STR_VARS = {'source_file', 'instrument_id'}
+for v in ['DEPTH', 'UCUR', 'VCUR', 'WCUR']:
+    OBS_VARS.add(v)
+    for s in ['_min', '_max', '_std', '_count']:
+        OBS_VARS.add(v + s)
 
 
-class TestVelocityAggregatedTimeseries(BaseTestCase):
-    def test_velocity_aggregated(self):
-        output_file, bad_files = velocity_aggregated(INPUT_FILES, 'NRSROT', input_dir=TEST_ROOT, output_dir='/tmp')
+class TestVelocityHourlyTimeseries(BaseTestCase):
+    def test_velocity_hourly(self):
+        output_file, bad_files = velocity_hourly_aggregated(INPUT_FILES, 'NRSROT',
+                                                            input_dir=TEST_ROOT, output_dir='/tmp')
 
         self.assertEqual(1, len(bad_files))
         for file, errors in bad_files.items():
@@ -58,14 +63,16 @@ class TestVelocityAggregatedTimeseries(BaseTestCase):
 
         # check aggregated variable values
         expected = Dataset(EXPECTED_OUTPUT_FILE)
-        compare_vars = set(expected.variables.keys()) - STR_VARS
-        non_match_vars = [var for var in compare_vars
-                          if not all(dataset[var][:] == expected[var][:])
-                          ]
+        self.assertEqual(len(expected['TIME']), len(dataset['TIME']))
+
+        non_match_vars = []
+        for var in set(expected.variables.keys()) - STR_VARS:
+            if not all(np.isclose(dataset[var], expected[var], equal_nan=True)):
+                non_match_vars.append(var)
         self.assertEqual(non_match_vars, [])
 
     def test_all_rejected(self):
-        self.assertRaises(NoInputFilesError, velocity_aggregated, [BAD_FILE], 'NRSROT',
+        self.assertRaises(NoInputFilesError, velocity_hourly_aggregated, [BAD_FILE], 'NRSROT',
                           input_dir=TEST_ROOT, output_dir='/tmp')
 
 

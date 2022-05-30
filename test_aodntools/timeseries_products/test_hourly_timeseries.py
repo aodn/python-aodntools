@@ -117,6 +117,19 @@ class TestHourlyTimeseries(BaseTestCase):
         for f in chartostring(dataset['source_file'][:]):
             self.assertIn(f, INPUT_FILES)
 
+    def test_with_adcp(self):
+        # Replace the BAD_FILE with an ADCP file - aggregation should work (only takes TEMP from the ADCP)
+        input_files = INPUT_FILES[:2] + \
+                      ['IMOS_ANMN-NRS_AETVZ_20180816T080000Z_NRSROT-ADCP_FV01_NRSROT-ADCP-1808-Sentinel-or-Monitor-Workhorse-ADCP-44_END-20180822T053000Z_C-20200623T000000Z.nc']
+        output_file, bad_files = hourly_aggregator(files_to_aggregate=input_files,
+                                                   site_code='NRSROT',
+                                                   qcflags=(1, 2),
+                                                   input_dir=TEST_ROOT,
+                                                   output_dir='/tmp'
+                                                   )
+
+        self.assertEqual(0, len(bad_files))
+
     def test_all_rejected(self):
         self.assertRaises(NoInputFilesError, hourly_aggregator, [BAD_FILE], 'NRSROT', (1, 2), input_dir=TEST_ROOT)
 

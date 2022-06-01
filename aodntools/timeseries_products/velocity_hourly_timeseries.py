@@ -54,7 +54,7 @@ def append_resampled_values(nc_cell, ds, slice_start, binning_functions):
     :param binning_functions: list of numpy function names for binning
     :return: end index of the slice
     """
-    df_cell = nc_cell.squeeze().to_dataframe()
+    df_cell = nc_cell.to_dataframe().reset_index().set_index('TIME')
     # shift the index forward 30min to centre the bins on the hour
     df_cell.index = df_cell.index + pd.Timedelta(minutes=30)
 

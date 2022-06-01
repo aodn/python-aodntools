@@ -75,6 +75,16 @@ class TestVelocityHourlyTimeseries(BaseTestCase):
         self.assertRaises(NoInputFilesError, velocity_hourly_aggregated, [BAD_FILE], 'NRSROT',
                           input_dir=TEST_ROOT, output_dir='/tmp')
 
+    def test_size1_dimensions(self):
+        input_files = [
+            'IMOS_ANMN-NRS_ADCP_LAT_LON_DIMS.nc',
+            'IMOS_ANMN-NRS_ADCP_SINGLE_TIMESTAMP.nc'
+        ]
+        output_file, bad_files = velocity_hourly_aggregated(input_files, 'NRSROT',
+                                                            input_dir=TEST_ROOT, output_dir='/tmp')
+
+        self.assertEqual(0, len(bad_files))
+
 
 if __name__ == '__main__':
     unittest.main()

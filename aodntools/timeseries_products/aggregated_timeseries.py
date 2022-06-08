@@ -39,7 +39,7 @@ def get_variable_values(nc, variable):
     Get values of the variable and its QC flags.
     If variable is not present, nan returned, its QC flags set to 9
     If variable present but not its QC flags, QC set to 0
-    :param nc: dataset
+    :param nc: xarray dataset
     :param variable: name of the variable to get
     :return: variable values and variable qc flags
     """
@@ -48,6 +48,8 @@ def get_variable_values(nc, variable):
 
     if variable in file_variables:
         variable_values = nc[variable].values
+        if any(np.isnan(variable_values)):
+            variable_values = np.ma.masked_array(variable_values, mask=np.isnan(variable_values))
         if variable+'_quality_control' in file_variables:
             variableQC_values = nc[variable+'_quality_control'].values
         else:
@@ -317,12 +319,12 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
                     'site_code':                site_code,
                     'time_coverage_start':      time_start,
                     'time_coverage_end':        time_end,
-                    'geospatial_vertical_min':  np.min(ds['DEPTH']),
-                    'geospatial_vertical_max':  np.max(ds['DEPTH']),
-                    'geospatial_lat_min':       np.min(ds['LATITUDE']),
-                    'geospatial_lat_max':       np.max(ds['LATITUDE']),
-                    'geospatial_lon_min':       np.min(ds['LONGITUDE']),
-                    'geospatial_lon_max':       np.max(ds['LONGITUDE']),
+                    'geospatial_vertical_min':  np.min(ds['DEPTH'][:]),
+                    'geospatial_vertical_max':  np.max(ds['DEPTH'][:]),
+                    'geospatial_lat_min':       np.min(ds['LATITUDE'][:]),
+                    'geospatial_lat_max':       np.max(ds['LATITUDE'][:]),
+                    'geospatial_lon_min':       np.min(ds['LONGITUDE'][:]),
+                    'geospatial_lon_max':       np.max(ds['LONGITUDE'][:]),
                     'date_created':             datetime.utcnow().strftime(timeformat),
                     'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
                     'keywords':                 ', '.join([var_to_agg, 'AGGREGATED']),

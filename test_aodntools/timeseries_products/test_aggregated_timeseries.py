@@ -3,6 +3,7 @@
 import os
 import unittest
 
+import numpy as np
 from netCDF4 import Dataset, chartostring
 
 from aodntools import __version__
@@ -19,7 +20,7 @@ INPUT_FILES = [
     BAD_FILE
 ]
 EXPECTED_OUTPUT_FILE = os.path.join(
-    TEST_ROOT, 'IMOS_ANMN-NRS_TZ_20181213_NRSROT_FV01_TEMP-aggregated-timeseries_END-20190523_C-20200622.nc'
+    TEST_ROOT, 'IMOS_ANMN-NRS_TZ_20181213_NRSROT_FV01_TEMP-aggregated-timeseries_END-20190523_C-20220607.nc'
 )
 
 
@@ -69,13 +70,29 @@ class TestAggregatedTimeseries(BaseTestCase):
         self.assertIn(__version__, dataset.lineage)
         self.assertIn(BAD_FILE, dataset.rejected_files)
 
-        # check aggregated variable values
+        compare_attrs = ('Conventions', 'feature_type',  'author', 'author_email', 'file_version',
+                         'geospatial_lat_max', 'geospatial_lat_min', 'geospatial_lon_max', 'geospatial_lon_min',
+                         'geospatial_vertical_max', 'geospatial_vertical_min', 'naming_authority', 'project',
+                         'time_coverage_start', 'time_coverage_end'
+                         )
         expected = Dataset(EXPECTED_OUTPUT_FILE)
-        compare_vars = ('TIME', 'TEMP', 'TEMP_quality_control', 'NOMINAL_DEPTH', 'instrument_index')
-        non_match_vars = [var for var in compare_vars
-                          if not all(dataset[var][:] == expected[var][:])
-                          ]
-        self.assertEqual(non_match_vars, [])
+        for attr in compare_attrs:
+            self.assertEqual(dataset.getncattr(attr), expected.getncattr(attr))
+
+        # check that there are no NaN values in any variable (they should be fill values instead)
+        nan_vars = [name
+                    for name, var in dataset.variables.items()
+                    if var.dtype in (np.dtype('float32'), np.dtype('float64')) and any(np.isnan(var[:]))
+                    ]
+        self.assertEqual([], nan_vars)
+
+        # check aggregated variable values
+        non_match_vars = []
+        for var in set(expected.variables.keys()) - string_vars:
+            # compare the raw data arrays (not the masked_array)
+            if not all(dataset[var][:].data == expected[var][:].data):
+                non_match_vars.append(var)
+        self.assertEqual([], non_match_vars)
 
     def test_source_file_attributes(self):
         output_file, bad_files = main_aggregator(INPUT_FILES, 'PSAL', 'NRSROT', input_dir=TEST_ROOT,

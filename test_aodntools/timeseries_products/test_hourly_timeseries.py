@@ -20,9 +20,6 @@ INPUT_FILES = [
     BAD_FILE
 ]
 INPUT_PATHS = [os.path.join(TEST_ROOT, f) for f in INPUT_FILES]
-EXPECTED_OUTPUT_FILE = os.path.join(
-    TEST_ROOT, 'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-20220428.nc'
-)
 
 INST_VARIABLES = {'instrument_id', 'source_file', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH'}
 OBS_VARIABLES = {'instrument_index', 'TIME'}
@@ -49,6 +46,10 @@ SYD100_FILES = [
 
 
 class TestHourlyTimeseries(BaseTestCase):
+    EXPECTED_OUTPUT_FILE = os.path.join(
+        TEST_ROOT, 'IMOS_ANMN-NRS_STZ_20181213_NRSROT_FV02_hourly-timeseries_END-20190523_C-20220428.nc'
+    )
+
     def test_hourly_aggregator(self):
         output_file, bad_files = hourly_aggregator(files_to_aggregate=INPUT_PATHS,
                                                    site_code='NRSROT',
@@ -87,15 +88,11 @@ class TestHourlyTimeseries(BaseTestCase):
         self.assertIn('hourly_timeseries.py', dataset.lineage)
         self.assertIn(BAD_FILE, dataset.rejected_files)
 
-        # check variable values
-        expected = Dataset(EXPECTED_OUTPUT_FILE)
-        self.assertEqual(len(expected['TIME']), len(dataset['TIME']))
-        compare_vars = ('TIME', 'NOMINAL_DEPTH', 'instrument_index',
-                        'TEMP', 'TEMP_count', 'TEMP_min', 'TEMP_max')
-        non_match_vars = [var for var in compare_vars
-                          if not all(dataset[var][:] == expected[var][:])
-                          ]
-        self.assertEqual(non_match_vars, [])
+        self.compare_global_attributes(dataset)
+
+        self.check_nan_values(dataset)
+
+        self.compare_variables(dataset)
 
     def test_hourly_aggregator_with_nonqc(self):
         output_file, bad_files = hourly_aggregator(files_to_aggregate=INPUT_FILES,

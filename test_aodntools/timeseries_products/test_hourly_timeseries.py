@@ -141,6 +141,8 @@ class TestHourlyTimeseries(BaseTestCase):
         for path, errors in bad_files.items():
             self.assertEqual(NO_INWATER_DATA_FILE, path)
             self.assertIn('no in-water data', errors)
+        with Dataset(output_file) as dataset:
+            self.check_nan_values(dataset)
 
     def test_bad_timestamps(self):
         output_file, bad_files = hourly_aggregator(files_to_aggregate=SYD100_FILES,

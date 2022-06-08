@@ -144,7 +144,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 WCUR[start:end] = flat_variable(nc, 'WCUR')
                 WCURqc[start:end] = flat_variable(nc, 'WCUR_quality_control')
             else:
-                WCUR[start:end] = np.full(n_obs, np.nan)
+                WCUR[start:end] = np.ma.masked
                 WCURqc[start:end] = np.full(n_obs, 9)
 
             ##calculate depth and add CELL_INDEX

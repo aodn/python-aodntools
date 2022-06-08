@@ -31,7 +31,7 @@ for v in ['DEPTH', 'UCUR', 'VCUR', 'WCUR']:
 
 class TestVelocityHourlyTimeseries(BaseTestCase):
     EXPECTED_OUTPUT_FILE = os.path.join(
-        TEST_ROOT, 'IMOS_ANMN-NRS_VZ_20180816_NRSROT_FV02_velocity-hourly-timeseries_END-20191018_C-20220502.nc'
+        TEST_ROOT, 'IMOS_ANMN-NRS_VZ_20180816_NRSROT_FV02_velocity-hourly-timeseries_END-20191018_C-20220608.nc'
     )
 
     def test_velocity_hourly(self):

@@ -32,16 +32,15 @@ def cell_velocity_resample(df, binning_function):
     :return: binned U, v, W CUR according to the binning function
     """
     df_binned = df.apply(binning_function)
-    UCUR = np.array(df_binned['UCUR'])
-    VCUR = np.array(df_binned['VCUR'])
-    if 'WCUR' in df_binned:
-        WCUR = np.array(df_binned['WCUR'])
-    else:
-        WCUR = np.full(len(df), np.nan)
-    DEPTH = np.array(df_binned['DEPTH'])
+    binned_vars = []
+    for var in ('UCUR', 'VCUR', 'WCUR', 'DEPTH'):
+        if var in df_binned:
+            x = np.ma.masked_array(df_binned[var], mask=np.isnan(df_binned[var]))
+        else:
+            x = np.ma.masked
+        binned_vars.append(x)
 
-    return UCUR, VCUR, WCUR, DEPTH
-
+    return tuple(binned_vars)
 
 def append_resampled_values(nc_cell, ds, slice_start, binning_functions):
     """

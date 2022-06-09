@@ -68,7 +68,7 @@ class BaseTestCase(unittest.TestCase):
                     differences.append((var, "shapes differ"))
 
                 # compare the raw data arrays (not the masked_array)
-                if not all(dataset[var][:].data == expected[var][:].data):
+                if not all(np.isclose(dataset[var][:].data, expected[var][:].data)):
                     differences.append((var, "variable values differ"))
 
         self.assertEqual([], differences)

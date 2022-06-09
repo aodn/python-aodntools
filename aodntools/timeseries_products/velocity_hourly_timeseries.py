@@ -185,9 +185,10 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
             is_2D = 'HEIGHT_ABOVE_SENSOR' in list(nc.variables)
+            varlist_nc = [v for v in varlist if v in nc.variables.keys()]
 
             ## mask values with QC flag>2
-            for var in varlist:
+            for var in varlist_nc:
                 nc[var] = nc[var].where(nc[var+'_quality_control'] <= QC_FLAG_MAX)
 
             ## process in chunks
@@ -209,12 +210,12 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
                         nc_cell = nc_chunk.sel(HEIGHT_ABOVE_SENSOR=cell_height)
                         ## convert to absolute DEPTH
                         nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell_height
-                        slice_end = append_resampled_values(nc_cell[varlist], ds, slice_start, binning_fun)
+                        slice_end = append_resampled_values(nc_cell[varlist_nc], ds, slice_start, binning_fun)
                         CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)
 
                         slice_start = slice_end
                 else:
-                    slice_end = append_resampled_values(nc_chunk[varlist], ds, slice_start, binning_fun)
+                    slice_end = append_resampled_values(nc_chunk[varlist_nc], ds, slice_start, binning_fun)
                     CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, 0, dtype=np.uint32)
 
                     slice_start = slice_end

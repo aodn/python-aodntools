@@ -368,8 +368,8 @@
     "_global":{
         "abstract": "Hourly Time Series Product: This file contains selected variables from all instruments deployed at the {site_code} mooring site. The values are binned to a fixed 1-hour interval. Instrument details are stored as variables in order to keep a record of the origin of each measurement. Out-of-water measurements have been excluded. Only values flagged as {flags} are retained in the aggregation.",
         "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
-        "author": "Klein, Eduardo",
-        "author_email": "eduardo.kleinsalas@utas.edu.au",
+        "author": "Australian Ocean Data Network (AODN)",
+        "author_email": "info@aodn.org.au",
         "citation": "The citation in a list of references is: \"IMOS [year-of-data-download], [Title], [data-access-URL], accessed [date-of-access].\".",
         "Conventions": "CF-1.6,IMOS-1.4",
         "data_centre": "Australian Ocean Data Network (AODN)",

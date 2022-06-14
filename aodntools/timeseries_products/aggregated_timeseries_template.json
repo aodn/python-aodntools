@@ -289,8 +289,8 @@
     "_global":{
         "abstract": "Aggregated Time-series Product: This file contains all measurements of the selected variable from all instruments deployed at the selected site. Timestamps are chronologically ordered, but may not be at uniform intervals. Instrument details are stored as a variable in order to keep a record of the origin of each measurement. The quality control flags of the variable of interest and DEPTH are preserved. Out-of-water measurements have been excluded, but no other filtering has been applied to the input data.",
         "acknowledgement": "Any users of IMOS data are required to clearly acknowledge the source of the material derived from IMOS in the format: \"Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is a national collaborative research infrastructure, supported by the Australian Government.\" If relevant, also credit other organisations involved in collection of this particular datastream (as listed in 'credit' in the metadata record).",
-        "author": "Klein, Eduardo",
-        "author_email": "eduardo.kleinsalas@utas.edu.au",
+        "author": "Australian Ocean Data Network (AODN)",
+        "author_email": "info@aodn.org.au",
         "citation": "The citation in a list of references is: \"IMOS [year-of-data-download], [Title], [data-access-URL], accessed [date-of-access].\".",
         "Conventions": "CF-1.6,IMOS-1.4",
         "data_centre": "Australian Ocean Data Network (AODN)",

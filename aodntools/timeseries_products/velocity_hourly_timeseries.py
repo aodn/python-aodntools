@@ -3,7 +3,6 @@ import json
 import os
 import shutil
 import tempfile
-from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -13,7 +12,8 @@ from pkg_resources import resource_filename
 
 import aodntools.timeseries_products.aggregated_timeseries as utils
 from aodntools import __version__
-from aodntools.timeseries_products.common import NoInputFilesError, check_velocity_file
+from aodntools.timeseries_products.common import (NoInputFilesError, check_velocity_file, current_utc_timestamp,
+                                                  TIMESTAMP_FORMAT, DATESTAMP_FORMAT)
 
 TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
 QC_FLAG_MAX = 2
@@ -32,16 +32,15 @@ def cell_velocity_resample(df, binning_function):
     :return: binned U, v, W CUR according to the binning function
     """
     df_binned = df.apply(binning_function)
-    UCUR = np.array(df_binned['UCUR'])
-    VCUR = np.array(df_binned['VCUR'])
-    if 'WCUR' in df_binned:
-        WCUR = np.array(df_binned['WCUR'])
-    else:
-        WCUR = np.full(len(df), np.nan)
-    DEPTH = np.array(df_binned['DEPTH'])
+    binned_vars = []
+    for var in ('UCUR', 'VCUR', 'WCUR', 'DEPTH'):
+        if var in df_binned:
+            x = np.ma.masked_array(df_binned[var], mask=np.isnan(df_binned[var]))
+        else:
+            x = np.ma.masked
+        binned_vars.append(x)
 
-    return UCUR, VCUR, WCUR, DEPTH
-
+    return tuple(binned_vars)
 
 def append_resampled_values(nc_cell, ds, slice_start, binning_functions):
     """
@@ -186,9 +185,10 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
 
             is_2D = 'HEIGHT_ABOVE_SENSOR' in list(nc.variables)
+            varlist_nc = [v for v in varlist if v in nc.variables.keys()]
 
             ## mask values with QC flag>2
-            for var in varlist:
+            for var in varlist_nc:
                 nc[var] = nc[var].where(nc[var+'_quality_control'] <= QC_FLAG_MAX)
 
             ## process in chunks
@@ -210,12 +210,12 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
                         nc_cell = nc_chunk.sel(HEIGHT_ABOVE_SENSOR=cell_height)
                         ## convert to absolute DEPTH
                         nc_cell['DEPTH'] = nc_cell['DEPTH'] - cell_height
-                        slice_end = append_resampled_values(nc_cell[varlist], ds, slice_start, binning_fun)
+                        slice_end = append_resampled_values(nc_cell[varlist_nc], ds, slice_start, binning_fun)
                         CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, cell_idx, dtype=np.uint32)
 
                         slice_start = slice_end
                 else:
-                    slice_end = append_resampled_values(nc_chunk[varlist], ds, slice_start, binning_fun)
+                    slice_end = append_resampled_values(nc_chunk[varlist_nc], ds, slice_start, binning_fun)
                     CELL_INDEX[slice_start:slice_end] = np.full(slice_end - slice_start, 0, dtype=np.uint32)
 
                     slice_start = slice_end
@@ -252,13 +252,10 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
         ds['source_file'].setncatts(utils.source_file_attributes(download_url_prefix, opendap_url_prefix))
 
     ## set global attrs
-    timeformat = '%Y-%m-%dT%H:%M:%SZ'
-    file_timeformat = '%Y%m%d'
-
-    time_start = num2date(np.min(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(timeformat)
-    time_end = num2date(np.max(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(timeformat)
-    time_start_filename = num2date(np.min(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(file_timeformat)
-    time_end_filename = num2date(np.max(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(file_timeformat)
+    time_start = num2date(np.min(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(TIMESTAMP_FORMAT)
+    time_end = num2date(np.max(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(TIMESTAMP_FORMAT)
+    time_start_filename = num2date(np.min(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(DATESTAMP_FORMAT)
+    time_end_filename = num2date(np.max(TIME[:]), TIME_UNITS, TIME_CALENDAR).strftime(DATESTAMP_FORMAT)
 
 
     add_attribute = {
@@ -273,8 +270,8 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
                     'geospatial_lat_max':       np.float64(np.max(ds['LATITUDE'])),
                     'geospatial_lon_min':       np.float64(np.min(ds['LONGITUDE'])),
                     'geospatial_lon_max':       np.float64(np.max(ds['LONGITUDE'])),
-                    'date_created':             datetime.utcnow().strftime(timeformat),
-                    'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
+                    'date_created':             current_utc_timestamp(),
+                    'history':                  current_utc_timestamp() + ': Aggregated file created.',
                     'keywords':                 ', '.join(varlist + ['AGGREGATED']),
                     'rejected_files':           "\n".join(bad_files.keys()),
                     'generating_code_version':  __version__
@@ -306,7 +303,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     file_version = 2
     output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),
                             ("velocity-"+product_type),
-                            ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
+                            ('END-'+ time_end_filename), 'C-' + current_utc_timestamp(DATESTAMP_FORMAT)]) + '.nc'
     ncout_path = os.path.join(output_dir, output_name)
     shutil.move(temp_outfile, ncout_path)
 

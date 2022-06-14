@@ -4,7 +4,6 @@ import argparse
 import json
 import os.path
 from collections import OrderedDict
-from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -14,7 +13,8 @@ from pkg_resources import resource_filename
 
 from aodntools import __version__
 from aodntools.timeseries_products import aggregated_timeseries as utils
-from aodntools.timeseries_products.common import NoInputFilesError, check_file, get_qc_variable_names, in_water
+from aodntools.timeseries_products.common import (NoInputFilesError, check_file, get_qc_variable_names, in_water,
+                                                  current_utc_timestamp, TIMESTAMP_FORMAT, DATESTAMP_FORMAT)
 
 TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
 BINNING_METHOD_JSON = resource_filename(__name__, 'binning_method.json')
@@ -180,8 +180,8 @@ def set_globalattr(nc_aggregated, templatefile, site_code, add_attribute, parame
                 'geospatial_lat_max': nc_aggregated.LATITUDE.values.max(),
                 'geospatial_lon_min': nc_aggregated.LONGITUDE.values.min(),
                 'geospatial_lon_max': nc_aggregated.LONGITUDE.values.max(),
-                'date_created': datetime.utcnow().strftime(timeformat),
-                'history': datetime.utcnow().strftime(timeformat) + ': Hourly aggregated file created.',
+                'date_created': current_utc_timestamp(),
+                'history': current_utc_timestamp() + ': Hourly aggregated file created.',
                 'keywords': ', '.join(parameter_names + ['HOURLY', 'AGGREGATED'])}
     global_metadata.update(agg_attr)
     global_metadata.update(add_attribute)
@@ -259,14 +259,12 @@ def generate_netcdf_output_filename(nc, facility_code, data_code, site_code, pro
     :return: name of the output file
     """
 
-    file_timeformat = '%Y%m%d'
-
-    t_start = pd.to_datetime(nc.TIME.min().values).strftime(file_timeformat)
-    t_end = pd.to_datetime(nc.TIME.max().values).strftime(file_timeformat)
+    t_start = pd.to_datetime(nc.TIME.min().values).strftime(DATESTAMP_FORMAT)
+    t_end = pd.to_datetime(nc.TIME.max().values).strftime(DATESTAMP_FORMAT)
 
     output_name = '_'.join(
         ['IMOS', facility_code, data_code, t_start, site_code, ('FV0' + str(file_version)), product_type,
-         ('END-' + t_end), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
+         ('END-' + t_end), 'C-' + current_utc_timestamp(DATESTAMP_FORMAT)]) + '.nc'
 
     return output_name
 
@@ -567,4 +565,4 @@ if __name__ == "__main__":
     qcflags = [int(i) for i in args.qcflags]
 
     hourly_aggregator(files_to_aggregate=files_to_aggregate, site_code=args.site_code, qcflags=qcflags,
-                      input_dir=args.input_dir, output_dir=args.output_path)
+                      input_dir=args.input_dir, output_dir=args.output_dir)

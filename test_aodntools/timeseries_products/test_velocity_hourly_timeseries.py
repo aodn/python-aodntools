@@ -19,9 +19,6 @@ INPUT_FILES = [
     'IMOS_ANMN-NRS_AETVZ_20191016T080000Z_NRSROT-ADCP_FV01_NRSROT-ADCP-1910-Sentinel-or-Monitor-Workhorse-ADCP-44_END-20191018T100000Z_C-20200430T000000Z.nc',
     BAD_FILE
 ]
-EXPECTED_OUTPUT_FILE = os.path.join(
-    TEST_ROOT, 'IMOS_ANMN-NRS_VZ_20180816_NRSROT_FV02_velocity-hourly-timeseries_END-20191018_C-20220502.nc'
-)
 
 OBS_VARS = {'TIME', 'instrument_index', 'CELL_INDEX'}
 INST_VARS = {'LATITUDE', 'LONGITUDE', 'NOMINAL_DEPTH', 'SECONDS_TO_MIDDLE'}
@@ -33,6 +30,10 @@ for v in ['DEPTH', 'UCUR', 'VCUR', 'WCUR']:
 
 
 class TestVelocityHourlyTimeseries(BaseTestCase):
+    EXPECTED_OUTPUT_FILE = os.path.join(
+        TEST_ROOT, 'IMOS_ANMN-NRS_VZ_20180816_NRSROT_FV02_velocity-hourly-timeseries_END-20191018_C-20220608.nc'
+    )
+
     def test_velocity_hourly(self):
         output_file, bad_files = velocity_hourly_aggregated(INPUT_FILES, 'NRSROT',
                                                             input_dir=TEST_ROOT, output_dir='/tmp')
@@ -61,15 +62,11 @@ class TestVelocityHourlyTimeseries(BaseTestCase):
         self.assertEqual(__version__, dataset.generating_code_version)
         self.assertIn(__version__, dataset.lineage)
 
-        # check aggregated variable values
-        expected = Dataset(EXPECTED_OUTPUT_FILE)
-        self.assertEqual(len(expected['TIME']), len(dataset['TIME']))
+        self.compare_global_attributes(dataset)
 
-        non_match_vars = []
-        for var in set(expected.variables.keys()) - STR_VARS:
-            if not all(np.isclose(dataset[var], expected[var], equal_nan=True)):
-                non_match_vars.append(var)
-        self.assertEqual(non_match_vars, [])
+        self.check_nan_values(dataset)
+
+        self.compare_variables(dataset)
 
     def test_all_rejected(self):
         self.assertRaises(NoInputFilesError, velocity_hourly_aggregated, [BAD_FILE], 'NRSROT',

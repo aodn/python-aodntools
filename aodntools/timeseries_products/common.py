@@ -1,5 +1,11 @@
 """Code shared by all timeseries product generating code"""
+from datetime import datetime, timezone
+
 import numpy as np
+
+# Common date/time format strings
+TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+DATESTAMP_FORMAT = '%Y%m%d'
 
 
 class NoInputFilesError(Exception):
@@ -184,3 +190,7 @@ def in_water(nc):
     :return: xarray dataset
     """
     return nc.where(in_water_index(nc), drop=True)
+
+
+def current_utc_timestamp(format=TIMESTAMP_FORMAT):
+    return datetime.now(timezone.utc).strftime(format)

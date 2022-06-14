@@ -3,7 +3,7 @@ import bisect
 import argparse
 import os.path
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 import xarray as xr
 import pandas as pd
@@ -11,6 +11,7 @@ import pandas as pd
 from pkg_resources import resource_filename
 
 from aodntools import __version__
+from aodntools.timeseries_products.common import current_utc_timestamp, TIMESTAMP_FORMAT, DATESTAMP_FORMAT
 import aodntools.timeseries_products.aggregated_timeseries as TStools
 
 
@@ -122,14 +123,12 @@ def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code
     :return: name of the output file
     """
 
-    file_timeformat = '%Y%m%d'
-
     if '_' in VoI:
         VoI = VoI.replace('_', '-')
-    t_start = pd.to_datetime(nc.TIME.min().values).strftime(file_timeformat)
-    t_end = pd.to_datetime(nc.TIME.max().values).strftime(file_timeformat)
+    t_start = pd.to_datetime(nc.TIME.min().values).strftime(DATESTAMP_FORMAT)
+    t_end = pd.to_datetime(nc.TIME.max().values).strftime(DATESTAMP_FORMAT)
 
-    output_name = '_'.join(['IMOS', facility_code, data_code, t_start, site_code, ('FV0'+str(file_version)), (VoI+"-"+product_type), ('END-'+ t_end), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
+    output_name = '_'.join(['IMOS', facility_code, data_code, t_start, site_code, ('FV0'+str(file_version)), (VoI+"-"+product_type), ('END-'+ t_end), 'C-' + current_utc_timestamp(DATESTAMP_FORMAT)]) + '.nc'
 
     return output_name
 
@@ -250,10 +249,9 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
     for attr in ('geospatial_lat_min', 'geospatial_lat_max', 'geospatial_lon_min', 'geospatial_lon_max', 'site_code',
                  'included_values_flagged_as', 'contributor_name', 'contributor_role', 'contributor_email'):
         VoI_interpolated.attrs[attr] = input_global_attributes[attr]
-    timeformat = '%Y-%m-%dT%H:%M:%SZ'
-    date_start = pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(timeformat)
-    date_end = pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(timeformat)
-    date_created = datetime.utcnow().strftime(timeformat)
+    date_start = pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(TIMESTAMP_FORMAT)
+    date_end = pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(TIMESTAMP_FORMAT)
+    date_created = current_utc_timestamp()
     VoI_interpolated.attrs.update(global_attribute_dictionary)
     VoI_interpolated.attrs.update({
         'source_file':           input_file,

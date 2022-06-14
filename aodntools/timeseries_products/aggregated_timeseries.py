@@ -5,7 +5,6 @@ import json
 import os
 import shutil
 import tempfile
-from datetime import datetime
 
 import numpy as np
 import xarray as xr
@@ -13,7 +12,8 @@ from netCDF4 import Dataset, num2date, stringtochar
 from pkg_resources import resource_filename
 
 from aodntools import __version__
-from aodntools.timeseries_products.common import NoInputFilesError, check_file, in_water
+from aodntools.timeseries_products.common import (NoInputFilesError, check_file, in_water, current_utc_timestamp,
+                                                  TIMESTAMP_FORMAT, DATESTAMP_FORMAT)
 
 TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
 
@@ -39,7 +39,7 @@ def get_variable_values(nc, variable):
     Get values of the variable and its QC flags.
     If variable is not present, nan returned, its QC flags set to 9
     If variable present but not its QC flags, QC set to 0
-    :param nc: dataset
+    :param nc: xarray dataset
     :param variable: name of the variable to get
     :return: variable values and variable qc flags
     """
@@ -48,6 +48,8 @@ def get_variable_values(nc, variable):
 
     if variable in file_variables:
         variable_values = nc[variable].values
+        if any(np.isnan(variable_values)):
+            variable_values = np.ma.masked_array(variable_values, mask=np.isnan(variable_values))
         if variable+'_quality_control' in file_variables:
             variableQC_values = nc[variable+'_quality_control'].values
         else:
@@ -303,13 +305,10 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
         ds['source_file'].setncatts(source_file_attributes(download_url_prefix, opendap_url_prefix))
 
     ## set global attrs
-    timeformat = '%Y-%m-%dT%H:%M:%SZ'
-    file_timeformat = '%Y%m%d'
-
-    time_start = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(timeformat)
-    time_end = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(timeformat)
-    time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
-    time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(file_timeformat)
+    time_start = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(TIMESTAMP_FORMAT)
+    time_end = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(TIMESTAMP_FORMAT)
+    time_start_filename = num2date(np.min(TIME[:]), time_units, time_calendar).strftime(DATESTAMP_FORMAT)
+    time_end_filename = num2date(np.max(TIME[:]), time_units, time_calendar).strftime(DATESTAMP_FORMAT)
 
     add_attribute = {
                     'title':                    ("Long Timeseries Velocity Aggregated product: " + var_to_agg + " at " +
@@ -317,14 +316,14 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
                     'site_code':                site_code,
                     'time_coverage_start':      time_start,
                     'time_coverage_end':        time_end,
-                    'geospatial_vertical_min':  np.min(ds['DEPTH']),
-                    'geospatial_vertical_max':  np.max(ds['DEPTH']),
-                    'geospatial_lat_min':       np.min(ds['LATITUDE']),
-                    'geospatial_lat_max':       np.max(ds['LATITUDE']),
-                    'geospatial_lon_min':       np.min(ds['LONGITUDE']),
-                    'geospatial_lon_max':       np.max(ds['LONGITUDE']),
-                    'date_created':             datetime.utcnow().strftime(timeformat),
-                    'history':                  datetime.utcnow().strftime(timeformat) + ': Aggregated file created.',
+                    'geospatial_vertical_min':  np.min(ds['DEPTH'][:]),
+                    'geospatial_vertical_max':  np.max(ds['DEPTH'][:]),
+                    'geospatial_lat_min':       np.min(ds['LATITUDE'][:]),
+                    'geospatial_lat_max':       np.max(ds['LATITUDE'][:]),
+                    'geospatial_lon_min':       np.min(ds['LONGITUDE'][:]),
+                    'geospatial_lon_max':       np.max(ds['LONGITUDE'][:]),
+                    'date_created': current_utc_timestamp(),
+                    'history': current_utc_timestamp() + ': Aggregated file created.',
                     'keywords':                 ', '.join([var_to_agg, 'AGGREGATED']),
                     'rejected_files':           "\n".join(rejected_files),
                     'generating_code_version':  __version__}
@@ -346,7 +345,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     file_version = 1
     output_name = '_'.join(['IMOS', facility_code, data_code, time_start_filename, site_code, ('FV0'+str(file_version)),
                             (var_to_agg + "-" + product_type),
-                            ('END-'+ time_end_filename), 'C-' + datetime.utcnow().strftime(file_timeformat)]) + '.nc'
+                            ('END-'+ time_end_filename), 'C-' + current_utc_timestamp(DATESTAMP_FORMAT)]) + '.nc'
     ncout_path = os.path.join(output_dir, output_name)
     shutil.move(temp_outfile, os.path.join(output_dir, ncout_path))
 

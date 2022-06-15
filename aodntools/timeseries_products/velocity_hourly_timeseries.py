@@ -193,9 +193,8 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
 
             ## process in chunks
             ## in water only
-            chunk_start = np.datetime64(nc.attrs['time_deployment_start'])
-            chunk_end = np.datetime64(nc.attrs['time_deployment_end'])
-
+            chunk_start = max(np.datetime64(nc.attrs['time_deployment_start']), nc.TIME.data.min())
+            chunk_end = min(np.datetime64(nc.attrs['time_deployment_end']), nc.TIME.data.max())
             time_increment = 60*60*24*chunk_size    ## secs x mins x hours x days
             chunk_increment = np.timedelta64(time_increment, 's')
             chunk_partial = chunk_start + chunk_increment

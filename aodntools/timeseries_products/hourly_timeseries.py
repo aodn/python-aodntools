@@ -410,10 +410,11 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
             # https://stackoverflow.com/questions/55786995/converting-cftime-datetimejulian-to-datetime/55787899#55787899
             if isinstance(nc_clean.indexes['TIME'], xr.coding.cftimeindex.CFTimeIndex):
                 nc_clean['TIME'] = nc_clean.indexes['TIME'].to_datetimeindex()
-            df_temp = nc_clean.to_dataframe()
+            df_temp = nc_clean[parameter_names].to_dataframe()
 
             ## keep TIME as the only index (for ADCP files it would be a MultiIndex at this point)
-            df_temp = df_temp.reset_index().set_index('TIME')
+            df_temp.reset_index(inplace=True)
+            df_temp.set_index('TIME', inplace=True)
             df_temp = df_temp[parameter_names]
 
             df_temp = PDresample_by_hour(df_temp, function_dict, function_stats)  # do the magic

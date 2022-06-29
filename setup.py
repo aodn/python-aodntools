@@ -9,7 +9,9 @@ INSTALL_REQUIRES = [
 ]
 
 TESTS_REQUIRE = [
-    'pytest'
+    'pytest',
+    # Need to manually install Black while we support Python 3.5
+    # 'black'
 ]
 
 EXTRAS_REQUIRE = {

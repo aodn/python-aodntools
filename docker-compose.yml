@@ -2,7 +2,7 @@ version: '2'
 
 services:
   dev:
-    image: ncwriter-build
+    image: aodntools-build
     build:
       context: .
       args:

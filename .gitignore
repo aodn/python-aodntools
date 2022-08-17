@@ -4,3 +4,6 @@
 
 # PyCharm settings
 .idea
+
+.hypothesis
+build

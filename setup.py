@@ -9,7 +9,8 @@ INSTALL_REQUIRES = [
 ]
 
 TESTS_REQUIRE = [
-    'pytest'
+    'pytest',
+    'setuptools_scm'
 ]
 
 EXTRAS_REQUIRE = {

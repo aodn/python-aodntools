@@ -43,44 +43,82 @@ class TestAggregatedTimeseries(BaseTestCase):
             assert len(result) == 0
 
     def test_main_aggregator(self):
-        output_file, bad_files = main_aggregator(INPUT_FILES, 'TEMP', 'NRSROT', input_dir=TEST_ROOT,
-                                                 output_dir='/tmp')
+        output_file, bad_files = main_aggregator(
+            TEST_FILES,
+            VAR_TO_AGG,
+            SITE_CODE,
+            input_dir=TEST_ROOT,
+            output_dir="/tmp",
+        )
 
         self.assertEqual(1, len(bad_files))
+
         for file, errors in bad_files.items():
             self.assertEqual(BAD_FILE, file)
-            self.assertSetEqual(set(errors), {'no NOMINAL_DEPTH',
-                                              'Wrong file version: Level 0 - Raw Data',
-                                              'no time_deployment_start attribute',
-                                              'no time_deployment_end attribute'
-                                              }
-                                )
+            self.assertSetEqual(
+                set(errors),
+                {
+                    "no NOMINAL_DEPTH",
+                    "Wrong file version: Level 0 - Raw Data",
+                    "no time_deployment_start attribute",
+                    "no time_deployment_end attribute",
+                },
+            )
 
         dataset = Dataset(output_file)
 
         # check dimensions and variables
-        self.assertSetEqual(set(dataset.dimensions), {'OBSERVATION', 'INSTRUMENT', 'strlen'})
-        self.assertSetEqual(set(dataset.variables.keys()),
-                            {'TIME', 'LATITUDE', 'LONGITUDE', 'NOMINAL_DEPTH', 'DEPTH', 'DEPTH_quality_control',
-                             'PRES', 'PRES_quality_control', 'PRES_REL', 'PRES_REL_quality_control',
-                             'TEMP', 'TEMP_quality_control', 'instrument_index', 'instrument_id', 'source_file'}
-                            )
+        self.assertSetEqual(
+            set(dataset.dimensions), {"OBSERVATION", "INSTRUMENT", "strlen"}
+        )
+        self.assertSetEqual(
+            set(dataset.variables.keys()),
+            {
+                "TIME",
+                "LATITUDE",
+                "LONGITUDE",
+                "NOMINAL_DEPTH",
+                "DEPTH",
+                "DEPTH_quality_control",
+                "PRES",
+                "PRES_quality_control",
+                "PRES_REL",
+                "PRES_REL_quality_control",
+                "TEMP",
+                "TEMP_quality_control",
+                "instrument_index",
+                "instrument_id",
+                "source_file",
+            },
+        )
 
-        obs_vars = {'TIME', 'DEPTH', 'DEPTH_quality_control', 'PRES', 'PRES_quality_control',
-                    'PRES_REL', 'PRES_REL_quality_control', 'TEMP', 'TEMP_quality_control', 'instrument_index'}
+        obs_vars = {
+            "TIME",
+            "DEPTH",
+            "DEPTH_quality_control",
+            "PRES",
+            "PRES_quality_control",
+            "PRES_REL",
+            "PRES_REL_quality_control",
+            "TEMP",
+            "TEMP_quality_control",
+            "instrument_index",
+        }
         for var in obs_vars:
-            self.assertEqual(dataset.variables[var].dimensions, ('OBSERVATION',))
+            self.assertEqual(dataset.variables[var].dimensions, ("OBSERVATION",))
 
-        inst_vars = {'LATITUDE', 'LONGITUDE', 'NOMINAL_DEPTH'}
+        inst_vars = {"LATITUDE", "LONGITUDE", "NOMINAL_DEPTH"}
         for var in inst_vars:
-            self.assertEqual(dataset.variables[var].dimensions, ('INSTRUMENT',))
+            self.assertEqual(dataset.variables[var].dimensions, ("INSTRUMENT",))
 
-        string_vars = {'source_file', 'instrument_id'}
+        string_vars = {"source_file", "instrument_id"}
         for var in string_vars:
-            self.assertEqual(dataset.variables[var].dimensions, ('INSTRUMENT', 'strlen'))
+            self.assertEqual(
+                dataset.variables[var].dimensions, ("INSTRUMENT", "strlen")
+            )
 
-        for f in chartostring(dataset['source_file'][:]):
-            self.assertIn(f, INPUT_FILES)
+        for f in chartostring(dataset["source_file"][:]):
+            self.assertIn(f, TEST_FILES)
 
         # check attributes
         self.assertEqual(__version__, dataset.generating_code_version)
@@ -94,18 +132,34 @@ class TestAggregatedTimeseries(BaseTestCase):
         self.compare_variables(dataset)
 
     def test_source_file_attributes(self):
-        output_file, bad_files = main_aggregator(INPUT_FILES, 'PSAL', 'NRSROT', input_dir=TEST_ROOT,
-                                                 output_dir='/tmp', download_url_prefix='http://test.download.url',
-                                                 opendap_url_prefix='http://test.opendap.url'
-                                                 )
+        output_file, _ = main_aggregator(
+            TEST_FILES,
+            "PSAL",
+            "NRSROT",
+            input_dir=TEST_ROOT,
+            output_dir="/tmp",
+            download_url_prefix="http://test.download.url",
+            opendap_url_prefix="http://test.opendap.url",
+        )
         dataset = Dataset(output_file)
-        self.assertEqual(dataset['source_file'].download_url_prefix, 'http://test.download.url')
-        self.assertEqual(dataset['source_file'].opendap_url_prefix, 'http://test.opendap.url')
+        self.assertEqual(
+            dataset["source_file"].download_url_prefix, "http://test.download.url"
+        )
+        self.assertEqual(
+            dataset["source_file"].opendap_url_prefix, "http://test.opendap.url"
+        )
 
     def test_all_rejected(self):
-        self.assertRaises(NoInputFilesError, main_aggregator, [BAD_FILE], 'TEMP', 'NRSROT',
-                          input_dir=TEST_ROOT, output_dir='/tmp')
+        self.assertRaises(
+            NoInputFilesError,
+            main_aggregator,
+            [BAD_FILE],
+            "TEMP",
+            "NRSROT",
+            input_dir=TEST_ROOT,
+            output_dir="/tmp",
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

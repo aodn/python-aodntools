@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+from copy import deepcopy
 import json
 import os
 import shutil
@@ -199,6 +200,7 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
     :param opendap_url_prefix: URL prefix for OPENAP access (to be prepended to paths in files_to_agg)
     :return: name of the resulting file, list of rejected files
     """
+    files_to_agg = deepcopy(files_to_agg)
 
     time_units="days since 1950-01-01 00:00:00 UTC"
     time_calendar="gregorian"

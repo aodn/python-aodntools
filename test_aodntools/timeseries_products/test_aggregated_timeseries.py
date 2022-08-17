@@ -7,23 +7,40 @@ from netCDF4 import Dataset, chartostring
 
 from aodntools import __version__
 from aodntools.timeseries_products.aggregated_timeseries import main_aggregator
-from aodntools.timeseries_products.common import NoInputFilesError
+from aodntools.timeseries_products.common import NoInputFilesError, check_file
 from test_aodntools.base_test import BaseTestCase
 
+import xarray as xr
+
+
 TEST_ROOT = os.path.dirname(__file__)
-BAD_FILE = 'IMOS_ANMN-NRS_TZ_20181213T080000Z_NRSROT_FV00_NRSROT-1812-SBE39-43_END-20181214T004000Z_C-20190827T000000Z.nc'
-INPUT_FILES = [
-    'IMOS_ANMN-NRS_TZ_20181213T080000Z_NRSROT_FV01_NRSROT-1812-SBE39-23_END-20190306T160000Z_C-20190827T000000Z.nc',
-    'IMOS_ANMN-NRS_TZ_20190313T144000Z_NRSROT_FV01_NRSROT-1903-SBE39-27_END-20190524T010000Z_C-20190827T000000Z.nc',
-    'IMOS_ANMN-NRS_BCKOSTUZ_20181213T080038Z_NRSROT_FV01_NRSROT-1812-WQM-55_END-20181215T013118Z_C-20190828T000000Z.nc',
-    BAD_FILE
+SITE_CODE = "NRSROT"
+VAR_TO_AGG = "TEMP"
+BAD_FILE = "IMOS_ANMN-NRS_TZ_20181213T080000Z_NRSROT_FV00_NRSROT-1812-SBE39-43_END-20181214T004000Z_C-20190827T000000Z.nc"
+TEST_FILES = [
+    "IMOS_ANMN-NRS_TZ_20181213T080000Z_NRSROT_FV01_NRSROT-1812-SBE39-23_END-20190306T160000Z_C-20190827T000000Z.nc",
+    "IMOS_ANMN-NRS_TZ_20190313T144000Z_NRSROT_FV01_NRSROT-1903-SBE39-27_END-20190524T010000Z_C-20190827T000000Z.nc",
+    "IMOS_ANMN-NRS_BCKOSTUZ_20181213T080038Z_NRSROT_FV01_NRSROT-1812-WQM-55_END-20181215T013118Z_C-20190828T000000Z.nc",
+    BAD_FILE,
 ]
 
 
 class TestAggregatedTimeseries(BaseTestCase):
     EXPECTED_OUTPUT_FILE = os.path.join(
-        TEST_ROOT, 'IMOS_ANMN-NRS_TZ_20181213_NRSROT_FV01_TEMP-aggregated-timeseries_END-20190523_C-20220607.nc'
+        TEST_ROOT,
+        "IMOS_ANMN-NRS_TZ_20181213_NRSROT_FV01_TEMP-aggregated-timeseries_END-20190523_C-20220607.nc",
     )
+
+    def test_one_file(self):
+        # Bad file should return errors
+        with xr.open_dataset(os.path.join(TEST_ROOT, BAD_FILE)) as nc:
+            result = check_file(nc, SITE_CODE, VAR_TO_AGG)
+            assert len(result) > 0
+
+        # Good file should return no errors
+        with xr.open_dataset(os.path.join(TEST_ROOT, TEST_FILES[0])) as nc:
+            result = check_file(nc, SITE_CODE, VAR_TO_AGG)
+            assert len(result) == 0
 
     def test_main_aggregator(self):
         output_file, bad_files = main_aggregator(INPUT_FILES, 'TEMP', 'NRSROT', input_dir=TEST_ROOT,

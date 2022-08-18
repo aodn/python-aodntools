@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import tempfile
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -117,6 +118,7 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     print(" ")
 
     ## remove bad files form the list
+    files_to_agg = deepcopy(files_to_agg)
     for file in bad_files.keys():
         files_to_agg.remove(file)
     if len(files_to_agg) == 0:

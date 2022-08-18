@@ -37,7 +37,7 @@ class TestVelocityHourlyTimeseries(BaseTestCase):
     def test_velocity_hourly(self):
         output_file, bad_files = velocity_hourly_aggregated(INPUT_FILES, 'NRSROT',
                                                             input_dir=TEST_ROOT, output_dir='/tmp')
-
+        self.assertEqual(4, len(INPUT_FILES))
         self.assertEqual(1, len(bad_files))
         for file, errors in bad_files.items():
             self.assertEqual(BAD_FILE, file)

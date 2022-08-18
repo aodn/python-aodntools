@@ -1,6 +1,8 @@
 import os
 import tempfile
 import shutil
+from copy import deepcopy
+
 from  netCDF4 import Dataset, num2date, stringtochar
 import numpy as np
 import json
@@ -83,6 +85,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                 bad_files.update({file: error_list})
 
     # remove bad files form the list and sort in chronological order
+    files_to_agg = deepcopy(files_to_agg)
     for file in bad_files.keys():
         files_to_agg.remove(file)
     if len(files_to_agg) == 0:

@@ -29,6 +29,7 @@ class TestAggregatedTimeseries(BaseTestCase):
         output_file, bad_files = main_aggregator(INPUT_FILES, 'TEMP', 'NRSROT', input_dir=TEST_ROOT,
                                                  output_dir='/tmp')
 
+        self.assertEqual(4, len(INPUT_FILES))
         self.assertEqual(1, len(bad_files))
         for file, errors in bad_files.items():
             self.assertEqual(BAD_FILE, file)

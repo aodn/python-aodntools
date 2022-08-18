@@ -1,6 +1,10 @@
 # Python files
 *.pyc
 *.egg-info
+build
 
 # PyCharm settings
 .idea
+
+# vscode settings
+.hypothesis

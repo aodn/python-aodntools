@@ -4,12 +4,13 @@ from datetime import datetime, timezone
 import numpy as np
 
 # Common date/time format strings
-TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
-DATESTAMP_FORMAT = '%Y%m%d'
+TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+DATESTAMP_FORMAT = "%Y%m%d"
 
 
 class NoInputFilesError(Exception):
     """Exception raised if there are no valid input files to aggregate"""
+
     pass
 
 
@@ -21,7 +22,8 @@ def get_qc_variable_names(nc):
     :return: list of variable names
     """
     varlist = list(nc.variables)
-    return [v for v in varlist if v.endswith('_quality_control')]
+    return [v for v in varlist if v.endswith("_quality_control")]
+
 
 def check_imos_flag_conventions(nc, varnames=None):
     """
@@ -41,30 +43,42 @@ def check_imos_flag_conventions(nc, varnames=None):
 
     # accept two variants on the convention name, used in versions 1.3 and 1.4 of the
     # IMOS NetCDF Conventions document
-    accepted_conventions = {"IMOS standard flags", "IMOS standard set using the IODE flags"}
+    accepted_conventions = {
+        "IMOS standard flags",
+        "IMOS standard set using the IODE flags",
+    }
     errors = set()
     for var in varnames:
         if var not in nc.variables:
-            errors.add('variable {var} not in file'.format(var=var))
+            errors.add("variable {var} not in file".format(var=var))
             continue
-        conventions = getattr(nc[var], 'quality_control_conventions', None)
+        conventions = getattr(nc[var], "quality_control_conventions", None)
         if conventions is None:
-            errors.add('variable {var} missing quality_control_conventions'.format(var=var))
+            errors.add(
+                "variable {var} missing quality_control_conventions".format(var=var)
+            )
             continue
         if conventions not in accepted_conventions:
-            errors.add('unexpected quality_control_conventions: "{conventions}"'.format(conventions=conventions))
+            errors.add(
+                'unexpected quality_control_conventions: "{conventions}"'.format(
+                    conventions=conventions
+                )
+            )
 
     return sorted(errors)
 
 
-def check_file(nc, site_code, variables_of_interest,
-               required_variables=('TIME', 'LATITUDE', 'LONGITUDE'),
-               allowed_dimensions=('TIME', 'LATITUDE', 'LONGITUDE')
-               ):
+def check_file(
+    nc,
+    site_code,
+    variables_of_interest,
+    required_variables=("TIME", "LATITUDE", "LONGITUDE"),
+    allowed_dimensions=("TIME", "LATITUDE", "LONGITUDE"),
+):
     """
     Check that a file meets the requirements for inclusion in a product.
     Return a list of errors
-    
+
     Checks applied:
     * Correct site_code
     * file_version is FV01
@@ -92,46 +106,51 @@ def check_file(nc, site_code, variables_of_interest,
     variables = set(nc.variables)
     error_list = []
 
-    if site_code != nc.attrs.get('site_code', '[missing]'):
-        error_list.append('Wrong site_code: ' + nc.site_code)
+    if site_code != nc.attrs.get("site_code", "[missing]"):
+        error_list.append("Wrong site_code: " + nc.site_code)
 
-    nc_file_version = nc.attrs.get('file_version', '[missing]')
-    if 'Level 1' not in nc_file_version:
-        error_list.append('Wrong file version: ' + nc_file_version)
+    nc_file_version = nc.attrs.get("file_version", "[missing]")
+    if "Level 1" not in nc_file_version:
+        error_list.append("Wrong file version: " + nc_file_version)
 
     for var in set(required_variables) - variables:
-        error_list.append('{var} variable missing'.format(var=var))
+        error_list.append("{var} variable missing".format(var=var))
 
     variables_to_aggregate = set(variables_of_interest) & variables
     if not variables_to_aggregate:
-        error_list.append('no variables to aggregate')
+        error_list.append("no variables to aggregate")
 
     for var in variables_to_aggregate:
         dims = set(nc[var].dims)
-        if 'TIME' not in dims:
-            error_list.append('no TIME dimension for {}'.format(var))
-        if 'LATITUDE' in dims and len(nc.LATITUDE) > 1:
-            error_list.append('more than one LATITUDE')
-        if 'LONGITUDE' in dims and len(nc.LONGITUDE) > 1:
-            error_list.append('more than one LONGITUDE')
+        if "TIME" not in dims:
+            error_list.append("no TIME dimension for {}".format(var))
+        if "LATITUDE" in dims and len(nc.LATITUDE) > 1:
+            error_list.append("more than one LATITUDE")
+        if "LONGITUDE" in dims and len(nc.LONGITUDE) > 1:
+            error_list.append("more than one LONGITUDE")
         other_dims = dims - set(allowed_dimensions)
         if other_dims:
             error_list.append(
-                'dimension(s) {other_dims} not allowed for {var}'.format(other_dims=other_dims, var=var)
+                "dimension(s) {other_dims} not allowed for {var}".format(
+                    other_dims=other_dims, var=var
+                )
             )
 
-    if 'NOMINAL_DEPTH' not in variables and 'instrument_nominal_depth' not in attributes:
-        error_list.append('no NOMINAL_DEPTH')
+    if (
+        "NOMINAL_DEPTH" not in variables
+        and "instrument_nominal_depth" not in attributes
+    ):
+        error_list.append("no NOMINAL_DEPTH")
 
-    required_attributes = {'time_deployment_start', 'time_deployment_end'}
+    required_attributes = {"time_deployment_start", "time_deployment_end"}
     have_time_attributes = True
     for attr in required_attributes - attributes:
-        error_list.append('no {} attribute'.format(attr))
+        error_list.append("no {} attribute".format(attr))
         have_time_attributes = False
 
     # check for existence of in-water data
     if have_time_attributes and not in_water_index(nc).any():
-        error_list.append('no in-water data')
+        error_list.append("no in-water data")
 
     # check qc flag conventions for VoI and depth/pressure
     error_list.extend(check_imos_flag_conventions(nc))
@@ -139,10 +158,12 @@ def check_file(nc, site_code, variables_of_interest,
     return error_list
 
 
-def check_velocity_file(nc, site_code,
-                        required_variables=('TIME', 'DEPTH', 'LATITUDE', 'LONGITUDE', 'UCUR', 'VCUR'),
-                        allowed_dimensions=('TIME', 'LATITUDE', 'LONGITUDE', 'HEIGHT_ABOVE_SENSOR')
-                        ):
+def check_velocity_file(
+    nc,
+    site_code,
+    required_variables=("TIME", "DEPTH", "LATITUDE", "LONGITUDE", "UCUR", "VCUR"),
+    allowed_dimensions=("TIME", "LATITUDE", "LONGITUDE", "HEIGHT_ABOVE_SENSOR"),
+):
     """
     Check that a file meets the requirements for inclusion in a product.
     Return a list of errors
@@ -165,8 +186,13 @@ def check_velocity_file(nc, site_code,
     :return: list of failed tests
     """
 
-    return check_file(nc, site_code, variables_of_interest=('UCUR', 'VCUR', 'WCUR'),
-                      required_variables=required_variables, allowed_dimensions=allowed_dimensions)
+    return check_file(
+        nc,
+        site_code,
+        variables_of_interest=("UCUR", "VCUR", "WCUR"),
+        required_variables=required_variables,
+        allowed_dimensions=allowed_dimensions,
+    )
 
 
 def in_water_index(nc):
@@ -177,10 +203,11 @@ def in_water_index(nc):
     :param nc: xarray dataset
     :return: numpy.ndarray boolean index array
     """
-    time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
-    time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
-    TIME = nc['TIME'][:]
+    time_deployment_start = np.datetime64(nc.attrs["time_deployment_start"][:-1])
+    time_deployment_end = np.datetime64(nc.attrs["time_deployment_end"][:-1])
+    TIME = nc["TIME"][:]
     return (TIME >= time_deployment_start) & (TIME <= time_deployment_end)
+
 
 def in_water(nc):
     """

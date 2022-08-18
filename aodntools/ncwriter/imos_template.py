@@ -5,10 +5,10 @@ from netCDF4 import num2date
 
 from .template import DatasetTemplate
 
-IMOS_GLOBAL_JSON = resource_filename(__name__, 'imos_global.json')
+IMOS_GLOBAL_JSON = resource_filename(__name__, "imos_global.json")
 IMOS_GLOBAL_ATTRIBUTES = DatasetTemplate.from_json(IMOS_GLOBAL_JSON).global_attributes
 
-TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 class ImosTemplate(DatasetTemplate):
@@ -19,7 +19,9 @@ class ImosTemplate(DatasetTemplate):
         combined_attributes = IMOS_GLOBAL_ATTRIBUTES.copy()
         if global_attributes is not None:
             combined_attributes.update(global_attributes)
-        super(ImosTemplate, self).__init__(global_attributes=combined_attributes, *args, **kwargs)
+        super(ImosTemplate, self).__init__(
+            global_attributes=combined_attributes, *args, **kwargs
+        )
         self._date_created = None
 
     @property
@@ -30,9 +32,13 @@ class ImosTemplate(DatasetTemplate):
         return self._date_created
 
     def add_date_created_attribute(self):
-        self.global_attributes['date_created'] = self.date_created.strftime(TIMESTAMP_FORMAT)
+        self.global_attributes["date_created"] = self.date_created.strftime(
+            TIMESTAMP_FORMAT
+        )
 
-    def add_extent_attributes(self, time_var='TIME', vert_var='DEPTH', lat_var='LATITUDE', lon_var='LONGITUDE'):
+    def add_extent_attributes(
+        self, time_var="TIME", vert_var="DEPTH", lat_var="LATITUDE", lon_var="LONGITUDE"
+    ):
         """
         Calculate spatial and temporal extents from coordinate variables in the template and add/update
         the relevant global attributes. Set an input variable name to None to skip that coordinate.
@@ -46,28 +52,33 @@ class ImosTemplate(DatasetTemplate):
         if time_var:
             data_range = self.get_data_range(time_var)
             time = self.variables[time_var]
-            units = time.get('units')
+            units = time.get("units")
             if not units:
-                raise ValueError("Time variable '{time_var}' has no units".format(time_var=time_var))
-            calendar = time.get('calendar', 'gregorian')
+                raise ValueError(
+                    "Time variable '{time_var}' has no units".format(time_var=time_var)
+                )
+            calendar = time.get("calendar", "gregorian")
             time_range = num2date(data_range, units, calendar)
-            self.global_attributes['time_coverage_start'] = time_range[0].strftime(TIMESTAMP_FORMAT)
-            self.global_attributes['time_coverage_end'] = time_range[1].strftime(TIMESTAMP_FORMAT)
+            self.global_attributes["time_coverage_start"] = time_range[0].strftime(
+                TIMESTAMP_FORMAT
+            )
+            self.global_attributes["time_coverage_end"] = time_range[1].strftime(
+                TIMESTAMP_FORMAT
+            )
 
         if vert_var:
             vmin, vmax = self.get_data_range(vert_var)
-            self.global_attributes['geospatial_vertical_min'] = vmin
-            self.global_attributes['geospatial_vertical_max'] = vmax
+            self.global_attributes["geospatial_vertical_min"] = vmin
+            self.global_attributes["geospatial_vertical_max"] = vmax
 
         if lat_var:
             vmin, vmax = self.get_data_range(lat_var)
-            self.global_attributes['geospatial_lat_min'] = vmin
-            self.global_attributes['geospatial_lat_max'] = vmax
+            self.global_attributes["geospatial_lat_min"] = vmin
+            self.global_attributes["geospatial_lat_max"] = vmax
 
         if lon_var:
             vmin, vmax = self.get_data_range(lon_var)
-            self.global_attributes['geospatial_lon_min'] = vmin
-            self.global_attributes['geospatial_lon_max'] = vmax
+            self.global_attributes["geospatial_lon_min"] = vmin
+            self.global_attributes["geospatial_lon_max"] = vmax
 
     # TODO: def set_imos_filename(self):
-

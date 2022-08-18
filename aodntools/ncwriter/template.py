@@ -17,7 +17,12 @@ from warnings import warn
 import netCDF4
 import numpy as np
 
-from .schema import validate_dimensions, validate_variables, validate_global_attributes, ValidationError
+from .schema import (
+    validate_dimensions,
+    validate_variables,
+    validate_global_attributes,
+    ValidationError,
+)
 
 
 def metadata_attributes(attr):
@@ -49,41 +54,39 @@ def special_attributes(attr):
     """
     meta = attr.__class__()
     for k, v in attr.items():
-        if k[0].startswith('_'):
+        if k[0].startswith("_"):
             meta[k[1:]] = v
 
     return meta
 
 
 class NetCDFGroupDict(object):
-    def __init__(self,
-                 dimensions=None,
-                 variables=None,
-                 global_attributes=None,
-                 **kwargs):
-        """ A dictionary to hold netCDF groups
-            It consist of a generic class holding 3 different dictionaries:
-            dimensions is a <key:int>  dict
-            variables is <key:[str,class,list,dict,int]> dict
-            global_attributes is a <key:int> dict
+    def __init__(
+        self, dimensions=None, variables=None, global_attributes=None, **kwargs
+    ):
+        """A dictionary to hold netCDF groups
+        It consist of a generic class holding 3 different dictionaries:
+        dimensions is a <key:int>  dict
+        variables is <key:[str,class,list,dict,int]> dict
+        global_attributes is a <key:int> dict
 
-            This class has __add__ to combine variables/dimensions/global attributes
-            from :NetCDFGroupDict: instances.
+        This class has __add__ to combine variables/dimensions/global attributes
+        from :NetCDFGroupDict: instances.
 
-            Example:
-                dmn = {'lon':360,'lat':210}
-                var = {}
-                var['water'] = {'_datatype':'double','_dimensions':['lat','lon']}
-                w1 = NetCDFGroupDict(dimensions=dmn,variables=var)
+        Example:
+            dmn = {'lon':360,'lat':210}
+            var = {}
+            var['water'] = {'_datatype':'double','_dimensions':['lat','lon']}
+            w1 = NetCDFGroupDict(dimensions=dmn,variables=var)
 
-                dmn2 = {'time':300,'lon':720,'lat':330}
-                var2 = {}
-                var2['temp'] = {'_datatype':'double','_dimensions':['time','lat','lon']}
-                w2 = NetCDFGroupDict(dimensions=dmn2,variables=var2)
+            dmn2 = {'time':300,'lon':720,'lat':330}
+            var2 = {}
+            var2['temp'] = {'_datatype':'double','_dimensions':['time','lat','lon']}
+            w2 = NetCDFGroupDict(dimensions=dmn2,variables=var2)
 
-                w3 = w1+w2
-                #w3.variables.keys() = ['water','temp']
-                #w3.dimensions = {'time':300,'lon':360,'lat':210}
+            w3 = w1+w2
+            #w3.variables.keys() = ['water','temp']
+            #w3.dimensions = {'time':300,'lon':360,'lat':210}
         """
         self._dimensions = None
         self._variables = None
@@ -148,9 +151,19 @@ class NetCDFGroupDict(object):
 class DatasetTemplate(NetCDFGroupDict):
     """Template object used for creating netCDF files"""
 
-    STRUCTURAL_ATTRIBUTES = {'datatype', 'dimensions', 'zlib', 'complevel', 'shuffle', 'fletcher32', 'contiguous',
-                             'chunksizes', 'endian', 'least_significant_digit'}
-    FILL_VALUE_ALIASES = {'fill_value', 'FillValue'}
+    STRUCTURAL_ATTRIBUTES = {
+        "datatype",
+        "dimensions",
+        "zlib",
+        "complevel",
+        "shuffle",
+        "fletcher32",
+        "contiguous",
+        "chunksizes",
+        "endian",
+        "least_significant_digit",
+    }
+    FILL_VALUE_ALIASES = {"fill_value", "FillValue"}
 
     def __init__(self, *args, **kwargs):
         super(DatasetTemplate, self).__init__(*args, **kwargs)
@@ -165,12 +178,15 @@ class DatasetTemplate(NetCDFGroupDict):
             try:
                 template = json.load(f, object_pairs_hook=OrderedDict)
             except ValueError as e:
-                raise ValueError("invalid JSON file '{path}' ({e})".format(path=path, e=e))
+                raise ValueError(
+                    "invalid JSON file '{path}' ({e})".format(path=path, e=e)
+                )
 
-        return cls(dimensions=template.get('_dimensions'),
-                   variables=template.get('_variables'),
-                   global_attributes=metadata_attributes(template)
-                   )
+        return cls(
+            dimensions=template.get("_dimensions"),
+            variables=template.get("_variables"),
+            global_attributes=metadata_attributes(template),
+        )
 
     def ensure_completeness(self):
         """Ensure that all variables have all the necessary information to create a netCDF file.
@@ -186,17 +202,27 @@ class DatasetTemplate(NetCDFGroupDict):
                 var["_dimensions"] = []
 
             if "_data" not in var:
-                raise ValidationError("No data specified for variable '{name}'".format(name=name))
+                raise ValidationError(
+                    "No data specified for variable '{name}'".format(name=name)
+                )
             if var["_data"] is not None and not isinstance(var["_data"], np.ndarray):
                 var["_data"] = np.array(var["_data"])
 
             if "_datatype" not in var:
-                datatype = getattr(var["_data"], 'dtype', None)
+                datatype = getattr(var["_data"], "dtype", None)
                 if datatype is not None:
-                    warn("Guessed data type '{datatype}' for variable '{name}'".format(datatype=datatype, name=name))
+                    warn(
+                        "Guessed data type '{datatype}' for variable '{name}'".format(
+                            datatype=datatype, name=name
+                        )
+                    )
                     var["_datatype"] = datatype
                 else:
-                    raise ValidationError("No data type information for variable '{name}'".format(name=name))
+                    raise ValidationError(
+                        "No data type information for variable '{name}'".format(
+                            name=name
+                        )
+                    )
 
     def ensure_consistency(self):
         """For each variable, ensure that the specified dimensions and data arrays are consistent with each other, and
@@ -217,15 +243,18 @@ class DatasetTemplate(NetCDFGroupDict):
         # TODO: check for "unused" dimensions?
         for name, var in self.variables.items():
             # check dimensions exist
-            var_dims = var['_dimensions'] or []
+            var_dims = var["_dimensions"] or []
             inconsistent_dims = set(var_dims).difference(self.dimensions)
             if inconsistent_dims:
-                raise ValidationError("Variable '{name}' has undefined dimensions "
-                                      "{inconsistent_dims}".format(name=name, inconsistent_dims=inconsistent_dims)
-                                      )
+                raise ValidationError(
+                    "Variable '{name}' has undefined dimensions "
+                    "{inconsistent_dims}".format(
+                        name=name, inconsistent_dims=inconsistent_dims
+                    )
+                )
 
             # if we have no data array, can't do any more
-            values = var.get('_data')
+            values = var.get("_data")
             if values is None:
                 continue
 
@@ -234,7 +263,8 @@ class DatasetTemplate(NetCDFGroupDict):
             if len(var_shape) != len(var_dims):
                 raise ValueError(
                     "Variable '{name}' has {ndim} dimensions, but value array has {nshape} dimensions.".format(
-                        name=name, ndim=len(var_dims), nshape=len(var_shape))
+                        name=name, ndim=len(var_dims), nshape=len(var_shape)
+                    )
                 )
 
             # adjust dimension size if not already set
@@ -248,7 +278,10 @@ class DatasetTemplate(NetCDFGroupDict):
                 raise ValueError(
                     "Variable '{name}' has dimensions {var_dims} and shape {var_shape}, inconsistent with dimension "
                     "sizes defined in template {template_shape}".format(
-                        name=name, var_dims=var_dims, var_shape=var_shape, template_shape=template_shape
+                        name=name,
+                        var_dims=var_dims,
+                        var_shape=var_shape,
+                        template_shape=template_shape,
                     )
                 )
 
@@ -282,7 +315,7 @@ class DatasetTemplate(NetCDFGroupDict):
 
         var_opts = {k: special_dict[k] for k in struct_keys}
         if fill_aliases:
-            var_opts['fill_value'] = special_dict[fill_aliases.pop()]
+            var_opts["fill_value"] = special_dict[fill_aliases.pop()]
         return var_opts
 
     def create_dimensions(self):
@@ -298,11 +331,11 @@ class DatasetTemplate(NetCDFGroupDict):
 
         # variable attributes to convert to the same type as the variable
         # datatype
-        varattrs_to_convert_to_datatype = ['valid_min', 'valid_max', 'valid_range']
+        varattrs_to_convert_to_datatype = ["valid_min", "valid_max", "valid_range"]
 
         for varname, varattr in self.variables.items():
-            if not varattr['_dimensions']:  # no kwargs in createVariable
-                ncvar = self.ncobj.createVariable(varname, varattr['_datatype'])
+            if not varattr["_dimensions"]:  # no kwargs in createVariable
+                ncvar = self.ncobj.createVariable(varname, varattr["_datatype"])
             else:
                 var_c_opts = self._create_var_opts(varname, varattr)
                 var_c_opts.update(kwargs)
@@ -310,13 +343,15 @@ class DatasetTemplate(NetCDFGroupDict):
                 ncvar = self.ncobj.createVariable(varname, **var_c_opts)
 
             # add variable values
-            if varattr['_data'] is not None:
-                ncvar[:] = varattr['_data']
+            if varattr["_data"] is not None:
+                ncvar[:] = varattr["_data"]
 
             # convert some variables attribute to variable datatype
             for varattr_to_convert in varattrs_to_convert_to_datatype:
                 if varattr_to_convert in varattr.keys():
-                    varattr[varattr_to_convert] = np.array(varattr[varattr_to_convert], dtype=varattr['_datatype'])
+                    varattr[varattr_to_convert] = np.array(
+                        varattr[varattr_to_convert], dtype=varattr["_datatype"]
+                    )
 
             # add variable attributes
             ncvar.setncatts(metadata_attributes(varattr))
@@ -344,7 +379,7 @@ class DatasetTemplate(NetCDFGroupDict):
         self.ensure_consistency()
 
         try:
-            self.ncobj = netCDF4.Dataset(self.outfile, mode='w', **kwargs)
+            self.ncobj = netCDF4.Dataset(self.outfile, mode="w", **kwargs)
             self.create_dimensions()
             self.create_variables(**_var_args)
             self.create_global_attributes()
@@ -354,7 +389,7 @@ class DatasetTemplate(NetCDFGroupDict):
         finally:
             self.ncobj.close()
 
-        self.ncobj = netCDF4.Dataset(self.outfile, 'a')
+        self.ncobj = netCDF4.Dataset(self.outfile, "a")
 
     def get_data_range(self, varname):
         """
@@ -367,17 +402,21 @@ class DatasetTemplate(NetCDFGroupDict):
         """
         var = self.variables.get(varname)
         if var is None:
-            raise ValueError("Variable '{varname}' does not exist".format(varname=varname))
-        data = var.get('_data', [])
+            raise ValueError(
+                "Variable '{varname}' does not exist".format(varname=varname)
+            )
+        data = var.get("_data", [])
 
         # mask out the fillvalues
-        fill_value = var.get('_FillValue') or var.get('_fill_value')
+        fill_value = var.get("_FillValue") or var.get("_fill_value")
         if fill_value is None:
             mask = np.isnan(data)
         else:
             mask = np.logical_or(data == fill_value, np.isnan(data))
         data_masked = np.ma.array(data, mask=mask)
         if data_masked.mask.all():
-            raise ValueError("No valid data for variable '{varname}'".format(varname=varname))
+            raise ValueError(
+                "No valid data for variable '{varname}'".format(varname=varname)
+            )
 
         return data_masked.min(), data_masked.max()

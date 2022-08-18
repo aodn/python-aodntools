@@ -11,11 +11,15 @@ import pandas as pd
 from pkg_resources import resource_filename
 
 from aodntools import __version__
-from aodntools.timeseries_products.common import current_utc_timestamp, TIMESTAMP_FORMAT, DATESTAMP_FORMAT
+from aodntools.timeseries_products.common import (
+    current_utc_timestamp,
+    TIMESTAMP_FORMAT,
+    DATESTAMP_FORMAT,
+)
 import aodntools.timeseries_products.aggregated_timeseries as TStools
 
 
-TEMPLATE_JSON = resource_filename(__name__, 'gridded_timeseries_template.json')
+TEMPLATE_JSON = resource_filename(__name__, "gridded_timeseries_template.json")
 
 
 def make_depth_bins(nc, increment=10):
@@ -31,6 +35,7 @@ def make_depth_bins(nc, increment=10):
     dbin = list(range(dmin, dmax, increment))
 
     return dbin
+
 
 def adjust_depth_bins(depth_bins, depth_min, depth_max):
     """
@@ -65,17 +70,17 @@ def get_depth_mask(depth_bins, depths, max_separation):
     return depth_mask
 
 
-
 def sort_depths(depths, values):
     """
     Sort the list of depths and values
     """
-    index =list(range(len(depths)))
+    index = list(range(len(depths)))
     index.sort(key=depths.__getitem__)
     sorted_depths = [depths[i] for i in index]
     sorted_values = [values[i] for i in index]
 
     return sorted_depths, sorted_values
+
 
 def write_netCDF_aggfile(agg_dataset, output_path, encoding):
     """
@@ -86,7 +91,7 @@ def write_netCDF_aggfile(agg_dataset, output_path, encoding):
     :return: name of the netCDf file written
     """
 
-    agg_dataset.to_netcdf(output_path, encoding=encoding, format='NETCDF4_CLASSIC')
+    agg_dataset.to_netcdf(output_path, encoding=encoding, format="NETCDF4_CLASSIC")
 
     return output_path
 
@@ -104,13 +109,16 @@ def set_variableattr(varlist, variable_attribute_dictionary, add_variable_attrib
     # with open(templatefile) as json_file:
     #     variable_metadata = json.load(json_file)['_variables']
     variable_attributes = {key: variable_attribute_dictionary[key] for key in varlist}
-    if len(add_variable_attribute)>0:
+    if len(add_variable_attribute) > 0:
         for key in add_variable_attribute.keys():
             variable_attributes[key].update(add_variable_attribute[key])
 
     return variable_attributes
 
-def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code, product_type, file_version):
+
+def generate_netcdf_output_filename(
+    nc, facility_code, data_code, VoI, site_code, product_type, file_version
+):
     """
     generate the output filename for the VoI netCDF file
 
@@ -123,20 +131,43 @@ def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code
     :return: name of the output file
     """
 
-    if '_' in VoI:
-        VoI = VoI.replace('_', '-')
+    if "_" in VoI:
+        VoI = VoI.replace("_", "-")
     t_start = pd.to_datetime(nc.TIME.min().values).strftime(DATESTAMP_FORMAT)
     t_end = pd.to_datetime(nc.TIME.max().values).strftime(DATESTAMP_FORMAT)
 
-    output_name = '_'.join(['IMOS', facility_code, data_code, t_start, site_code, ('FV0'+str(file_version)), (VoI+"-"+product_type), ('END-'+ t_end), 'C-' + current_utc_timestamp(DATESTAMP_FORMAT)]) + '.nc'
+    output_name = (
+        "_".join(
+            [
+                "IMOS",
+                facility_code,
+                data_code,
+                t_start,
+                site_code,
+                ("FV0" + str(file_version)),
+                (VoI + "-" + product_type),
+                ("END-" + t_end),
+                "C-" + current_utc_timestamp(DATESTAMP_FORMAT),
+            ]
+        )
+        + ".nc"
+    )
 
     return output_name
 
 
-
 ## MAIN FUNCTION
-def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bins_increment=10,
-                  input_dir='', output_dir='.', download_url_prefix=None, opendap_url_prefix=None):
+def grid_variable(
+    input_file,
+    VoI,
+    depth_bins=None,
+    max_separation=50,
+    depth_bins_increment=10,
+    input_dir="",
+    output_dir=".",
+    download_url_prefix=None,
+    opendap_url_prefix=None,
+):
     """
     Grid VoI into depth_bins.
     :param input_file: Input hourly aggregated file with VoI, DEPTH and TIME only (path interpreted relative
@@ -153,7 +184,7 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
     """
 
     with xr.open_dataset(os.path.join(input_dir, input_file)) as nc_full:
-        nc = nc_full[[VoI, 'TIME', 'DEPTH']]
+        nc = nc_full[[VoI, "TIME", "DEPTH"]]
         ## get lat/lon
         longitude_mean = nc_full.LONGITUDE.mean()
         latitude_mean = nc_full.LATITUDE.mean()
@@ -162,33 +193,37 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
     ## get global attributes
     input_global_attributes = nc.attrs
 
-
-
     ## in case no depth bins provided, create depth bins to the nearest rounded depth
     ## if provided, adjust to the min-max registered depth
     if not depth_bins:
         depth_bins = make_depth_bins(nc=nc, increment=depth_bins_increment)
     else:
-        depth_bins = [float(depth) for depth in depth_bins]     # in case depth_bins provided through inline arguments
+        depth_bins = [
+            float(depth) for depth in depth_bins
+        ]  # in case depth_bins provided through inline arguments
         depth_bins = adjust_depth_bins(depth_bins, nc.DEPTH.min(), nc.DEPTH.max())
 
     ## create empty containers
-    time_0 = pd.to_datetime('1950-01-01T00:00:00')
+    time_0 = pd.to_datetime("1950-01-01T00:00:00")
     time_min = nc.TIME.values.min()
     depth_bin_len = len(depth_bins)
 
     ## create empty containers for the interpolated values
-    VoI_temp = xr.DataArray(np.full((depth_bin_len, 1), np.nan, dtype=np.float32), coords=[depth_bins, [time_0]],
-                              dims=['DEPTH', 'TIME'])
-    VoI_ndepths = xr.DataArray(np.full(1, 0, dtype='int'), coords=[[time_0]], dims=['TIME'])
+    VoI_temp = xr.DataArray(
+        np.full((depth_bin_len, 1), np.nan, dtype=np.float32),
+        coords=[depth_bins, [time_0]],
+        dims=["DEPTH", "TIME"],
+    )
+    VoI_ndepths = xr.DataArray(
+        np.full(1, 0, dtype="int"), coords=[[time_0]], dims=["TIME"]
+    )
 
     ## group nc by individual timestamps
-    VoI_grouped = nc.groupby('TIME')
-
+    VoI_grouped = nc.groupby("TIME")
 
     for timestamp, group in VoI_grouped:
         time = [timestamp]
-        n_depths = np.array(len(group[VoI]), dtype='int')
+        n_depths = np.array(len(group[VoI]), dtype="int")
 
         if n_depths >= 2:
             VoI_values = list(group[VoI].values)
@@ -197,9 +232,13 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
             depth, VoI_values = sort_depths(depth, VoI_values)
 
             ## check for max separation
-            depth_mask = get_depth_mask(depth_bins=depth_bins, depths=depth, max_separation=max_separation)
+            depth_mask = get_depth_mask(
+                depth_bins=depth_bins, depths=depth, max_separation=max_separation
+            )
             ## do the interpolation
-            interpolated_var = np.interp(depth_bins, depth, VoI_values, left=np.nan, right=np.nan)
+            interpolated_var = np.interp(
+                depth_bins, depth, VoI_values, left=np.nan, right=np.nan
+            )
             ## set masked depth bins to zero
             interpolated_var = interpolated_var * depth_mask
             interpolated_var[interpolated_var == 0] = np.nan
@@ -207,108 +246,148 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
         else:
             interpolated_var = np.full((depth_bin_len, 1), np.nan)
 
-        VoI_temp_tmp = xr.DataArray(interpolated_var.reshape(depth_bin_len, 1), coords=[depth_bins, time],
-                                dims=['DEPTH', 'TIME'])
-        VoI_ndepths_tmp = xr.DataArray([n_depths], coords=[time], dims=['TIME'])
+        VoI_temp_tmp = xr.DataArray(
+            interpolated_var.reshape(depth_bin_len, 1),
+            coords=[depth_bins, time],
+            dims=["DEPTH", "TIME"],
+        )
+        VoI_ndepths_tmp = xr.DataArray([n_depths], coords=[time], dims=["TIME"])
 
         ## concatenate the interpolated values
-        VoI_temp = xr.concat([VoI_temp, VoI_temp_tmp], dim='TIME')
-        VoI_ndepths = xr.concat([VoI_ndepths, VoI_ndepths_tmp], dim='TIME')
+        VoI_temp = xr.concat([VoI_temp, VoI_temp_tmp], dim="TIME")
+        VoI_ndepths = xr.concat([VoI_ndepths, VoI_ndepths_tmp], dim="TIME")
 
-    VoI_interpolated = xr.Dataset({VoI: VoI_temp.astype(np.float32),
-                                   VoI + '_count': VoI_ndepths.astype('int16')})
+    VoI_interpolated = xr.Dataset(
+        {VoI: VoI_temp.astype(np.float32), VoI + "_count": VoI_ndepths.astype("int16")}
+    )
 
     ## drop the very first record as it is dummy
-    VoI_interpolated = VoI_interpolated.where(VoI_interpolated.TIME >= time_min, drop=True)
+    VoI_interpolated = VoI_interpolated.where(
+        VoI_interpolated.TIME >= time_min, drop=True
+    )
 
     ## Add lat/lon as scalar variables
-    VoI_interpolated = VoI_interpolated.assign(LONGITUDE = longitude_mean,
-                                               LATITUDE = latitude_mean)
+    VoI_interpolated = VoI_interpolated.assign(
+        LONGITUDE=longitude_mean, LATITUDE=latitude_mean
+    )
 
     ## transpose dimensions to make CF compliant
-    VoI_interpolated = VoI_interpolated.transpose('TIME', 'DEPTH')
+    VoI_interpolated = VoI_interpolated.transpose("TIME", "DEPTH")
 
     ## get the variables attribute dictionary
     with open(TEMPLATE_JSON) as json_file:
         attr_dictionary = json.load(json_file)
 
-    variable_attribute_dictionary = attr_dictionary['_variables']
-    global_attribute_dictionary = attr_dictionary['_global']
+    variable_attribute_dictionary = attr_dictionary["_variables"]
+    global_attribute_dictionary = attr_dictionary["_global"]
 
     ## set variable attributes
     varlist = list(VoI_interpolated.variables)
     add_variable_attribute = {}
-    variable_attributes = set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute)
-    time_units = variable_attributes['TIME'].pop('units')
-    time_calendar = variable_attributes['TIME'].pop('calendar')
+    variable_attributes = set_variableattr(
+        varlist, variable_attribute_dictionary, add_variable_attribute
+    )
+    time_units = variable_attributes["TIME"].pop("units")
+    time_calendar = variable_attributes["TIME"].pop("calendar")
     for variable in varlist:
         VoI_interpolated[variable].attrs = variable_attributes[variable]
 
     ## set global attributes
     # copy selected attributes from input file
-    for attr in ('geospatial_lat_min', 'geospatial_lat_max', 'geospatial_lon_min', 'geospatial_lon_max', 'site_code',
-                 'included_values_flagged_as', 'contributor_name', 'contributor_role', 'contributor_email'):
+    for attr in (
+        "geospatial_lat_min",
+        "geospatial_lat_max",
+        "geospatial_lon_min",
+        "geospatial_lon_max",
+        "site_code",
+        "included_values_flagged_as",
+        "contributor_name",
+        "contributor_role",
+        "contributor_email",
+    ):
         VoI_interpolated.attrs[attr] = input_global_attributes[attr]
-    date_start = pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(TIMESTAMP_FORMAT)
-    date_end = pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(TIMESTAMP_FORMAT)
+    date_start = pd.to_datetime(VoI_interpolated.TIME.values.min()).strftime(
+        TIMESTAMP_FORMAT
+    )
+    date_end = pd.to_datetime(VoI_interpolated.TIME.values.max()).strftime(
+        TIMESTAMP_FORMAT
+    )
     date_created = current_utc_timestamp()
     VoI_interpolated.attrs.update(global_attribute_dictionary)
-    VoI_interpolated.attrs.update({
-        'source_file':           input_file,
-        'time_coverage_start':   date_start,
-        'time_coverage_end':     date_end,
-        'geospatial_vertical_min': min(depth_bins),
-        'geospatial_vertical_max': max(depth_bins),
-        'keywords':              ', '.join([VoI, 'DEPTH'] + ['HOURLY', 'GRIDDED']),
-        'abstract':              global_attribute_dictionary['abstract'].format(VoI=VoI, site_code=site_code),
-        'date_created': date_created,
-        'history': input_global_attributes['history'] +' {date_created}: Gridded file created.'.format(
-            date_created=date_created),
-        'generating_code_version': __version__,
-        'title':                 global_attribute_dictionary['title'].format(VoI=VoI,
-                                                                    site_code=site_code,
-                                                                    time_min=date_start,
-                                                                    time_max=date_end,
-                                                                    depth_min=min(depth_bins),
-                                                                    depth_max = max(depth_bins))
-    })
-    github_comment = ('\nThis file was created using https://github.com/aodn/python-aodntools/blob/'
-                      '{v}/aodntools/timeseries_products/{f}'.format(v=__version__, f=os.path.basename(__file__))
-                      )
-    VoI_interpolated.attrs['lineage'] += github_comment
+    VoI_interpolated.attrs.update(
+        {
+            "source_file": input_file,
+            "time_coverage_start": date_start,
+            "time_coverage_end": date_end,
+            "geospatial_vertical_min": min(depth_bins),
+            "geospatial_vertical_max": max(depth_bins),
+            "keywords": ", ".join([VoI, "DEPTH"] + ["HOURLY", "GRIDDED"]),
+            "abstract": global_attribute_dictionary["abstract"].format(
+                VoI=VoI, site_code=site_code
+            ),
+            "date_created": date_created,
+            "history": input_global_attributes["history"]
+            + " {date_created}: Gridded file created.".format(
+                date_created=date_created
+            ),
+            "generating_code_version": __version__,
+            "title": global_attribute_dictionary["title"].format(
+                VoI=VoI,
+                site_code=site_code,
+                time_min=date_start,
+                time_max=date_end,
+                depth_min=min(depth_bins),
+                depth_max=max(depth_bins),
+            ),
+        }
+    )
+    github_comment = (
+        "\nThis file was created using https://github.com/aodn/python-aodntools/blob/"
+        "{v}/aodntools/timeseries_products/{f}".format(
+            v=__version__, f=os.path.basename(__file__)
+        )
+    )
+    VoI_interpolated.attrs["lineage"] += github_comment
     if download_url_prefix:
-        VoI_interpolated.attrs['source_file_download'] = os.path.join(download_url_prefix, input_file)
+        VoI_interpolated.attrs["source_file_download"] = os.path.join(
+            download_url_prefix, input_file
+        )
     if opendap_url_prefix:
-        VoI_interpolated.attrs['source_file_opendap'] = os.path.join(opendap_url_prefix, input_file)
+        VoI_interpolated.attrs["source_file_opendap"] = os.path.join(
+            opendap_url_prefix, input_file
+        )
     VoI_interpolated.attrs = sorted(VoI_interpolated.attrs.items())
 
     ## create the output file name and write the aggregated product as netCDF
     facility_code = TStools.get_facility_code(input_file)
-    data_code = TStools.get_data_code(VoI) + 'Z'
-    product_type = 'gridded-timeseries'
+    data_code = TStools.get_data_code(VoI) + "Z"
+    product_type = "gridded-timeseries"
     file_version = 2
-    ncout_filename = generate_netcdf_output_filename(nc=VoI_interpolated, facility_code=facility_code,
-                                                             data_code=data_code, VoI=VoI,
-                                                             site_code=site_code, product_type=product_type,
-                                                             file_version=file_version)
+    ncout_filename = generate_netcdf_output_filename(
+        nc=VoI_interpolated,
+        facility_code=facility_code,
+        data_code=data_code,
+        VoI=VoI,
+        site_code=site_code,
+        product_type=product_type,
+        file_version=file_version,
+    )
     ncout_path = os.path.join(output_dir, ncout_filename)
 
-    encoding = {'TIME': {'_FillValue': None,
-                         'units': time_units,
-                         'calendar': time_calendar,
-                         'zlib': True,
-                         'complevel': 5},
-                VoI:    {'zlib': True,
-                         'complevel': 5,
-                         'dtype': np.dtype('float32')},
-                VoI+'_count': {'dtype': np.dtype('int16'),
-                               'zlib': True,
-                               'complevel': 5},
-                'DEPTH': {'dtype': np.dtype('float32'),
-                          'zlib': True,
-                          'complevel': 5},
-                'LONGITUDE': {'_FillValue': False},
-                'LATITUDE': {'_FillValue': False}}
+    encoding = {
+        "TIME": {
+            "_FillValue": None,
+            "units": time_units,
+            "calendar": time_calendar,
+            "zlib": True,
+            "complevel": 5,
+        },
+        VoI: {"zlib": True, "complevel": 5, "dtype": np.dtype("float32")},
+        VoI + "_count": {"dtype": np.dtype("int16"), "zlib": True, "complevel": 5},
+        "DEPTH": {"dtype": np.dtype("float32"), "zlib": True, "complevel": 5},
+        "LONGITUDE": {"_FillValue": False},
+        "LATITUDE": {"_FillValue": False},
+    }
 
     write_netCDF_aggfile(VoI_interpolated, ncout_path, encoding)
 
@@ -316,28 +395,77 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Gridded time series: interpolate ONE variable from ALL instruments from ALL deployments from ONE site into 1hr timestamps and fixed depth bins")
-    parser.add_argument('-var', dest='var', help='name of the variable to concatenate. Like TEMP, PSAL', default='TEMP', required=False)
-    parser.add_argument('-file', dest='filename', help='name of the Hourly Time Series Product file that contains the data', default=None, required=False)
-    parser.add_argument('-depth_bins', dest='depth_bins', help='list of depth where the VoI will be interpolated', default=None, nargs='+', required=False)
-    parser.add_argument('-max_separation', dest='max_separation', help='maximum difference between instruments to allow interpolation', default=50, required=False)
-    parser.add_argument('-depth_bins_increment', dest='depth_bins_increment', help='increment in meters for the automatic generated depth bins', default=10, required=False)
-    parser.add_argument('-indir', dest='input_dir', help='base path of input file. Default .', default='.',
-                        required=False)
-    parser.add_argument('-outdir', dest='output_dir', help='path where the result file will be written. Default .',
-                        default='.', required=False)
-    parser.add_argument('-config', dest='config_file', help='JSON configuration file', default=None, required=False)
+    parser = argparse.ArgumentParser(
+        description="Gridded time series: interpolate ONE variable from ALL instruments from ALL deployments from ONE site into 1hr timestamps and fixed depth bins"
+    )
+    parser.add_argument(
+        "-var",
+        dest="var",
+        help="name of the variable to concatenate. Like TEMP, PSAL",
+        default="TEMP",
+        required=False,
+    )
+    parser.add_argument(
+        "-file",
+        dest="filename",
+        help="name of the Hourly Time Series Product file that contains the data",
+        default=None,
+        required=False,
+    )
+    parser.add_argument(
+        "-depth_bins",
+        dest="depth_bins",
+        help="list of depth where the VoI will be interpolated",
+        default=None,
+        nargs="+",
+        required=False,
+    )
+    parser.add_argument(
+        "-max_separation",
+        dest="max_separation",
+        help="maximum difference between instruments to allow interpolation",
+        default=50,
+        required=False,
+    )
+    parser.add_argument(
+        "-depth_bins_increment",
+        dest="depth_bins_increment",
+        help="increment in meters for the automatic generated depth bins",
+        default=10,
+        required=False,
+    )
+    parser.add_argument(
+        "-indir",
+        dest="input_dir",
+        help="base path of input file. Default .",
+        default=".",
+        required=False,
+    )
+    parser.add_argument(
+        "-outdir",
+        dest="output_dir",
+        help="path where the result file will be written. Default .",
+        default=".",
+        required=False,
+    )
+    parser.add_argument(
+        "-config",
+        dest="config_file",
+        help="JSON configuration file",
+        default=None,
+        required=False,
+    )
     args = parser.parse_args()
 
     if args.config_file:
         with open(args.config_file) as ff:
             arguments = json.load(ff)
-        VoI = arguments['var']
-        depth_bins = arguments['depth_bins']
-        depth_bins_increment = int(arguments['depth_bins_increment'])
-        max_separation = int(arguments['max_separation'])
-        input_dir = arguments.get('input_dir', '.')
-        output_dir = arguments.get('output_dir', '.')
+        VoI = arguments["var"]
+        depth_bins = arguments["depth_bins"]
+        depth_bins_increment = int(arguments["depth_bins_increment"])
+        max_separation = int(arguments["max_separation"])
+        input_dir = arguments.get("input_dir", ".")
+        output_dir = arguments.get("output_dir", ".")
     else:
         VoI = args.var
         depth_bins = args.depth_bins
@@ -348,6 +476,14 @@ if __name__ == "__main__":
 
     file_name = args.filename
 
-    print(grid_variable(input_file=file_name, VoI=VoI, depth_bins=depth_bins,
-                        max_separation=int(max_separation), depth_bins_increment=int(depth_bins_increment),
-                        input_dir=input_dir, output_dir=output_dir))
+    print(
+        grid_variable(
+            input_file=file_name,
+            VoI=VoI,
+            depth_bins=depth_bins,
+            max_separation=int(max_separation),
+            depth_bins_increment=int(depth_bins_increment),
+            input_dir=input_dir,
+            output_dir=output_dir,
+        )
+    )

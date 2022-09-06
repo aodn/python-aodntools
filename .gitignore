@@ -1,3 +1,6 @@
+# Ignore the version file, it's created on install
+aodntools/_version.py
+
 # Python files
 *.pyc
 *.egg-info

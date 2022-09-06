@@ -9,7 +9,8 @@ INSTALL_REQUIRES = [
 ]
 
 TESTS_REQUIRE = [
-    'pytest'
+    'pytest',
+    'setuptools_scm',
 ]
 
 EXTRAS_REQUIRE = {
@@ -26,7 +27,8 @@ PACKAGE_NAME = 'aodntools'
 
 setup(
     name=PACKAGE_NAME,
-    version='0.0.0',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     packages=find_packages(exclude=PACKAGE_EXCLUDES),
     package_data=PACKAGE_DATA,
     url='https://github.com/aodn',

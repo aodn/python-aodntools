@@ -16,14 +16,11 @@ RUN apt-get update && \
 RUN add-apt-repository ppa:rael-gc/rvm && apt-get update
 
 RUN apt-get install -y --no-install-recommends \
-    build-essential \
     ca-certificates \
     git \
     libmagic1 \
     libudunits2-dev \
     python3-dev \
-    wget \
-    libffi-dev \
     # Pyenv pre-requisites (from https://github.com/pyenv/pyenv/wiki#suggested-build-environment)
     make build-essential libssl-dev zlib1g-dev \
     libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
@@ -42,12 +39,13 @@ RUN set -ex \
     && pyenv rehash \
     && chmod -R a+w $PYENV_ROOT/shims
 
-RUN pip install --upgrade pip==22.1.2 setuptools==63.1.0 wheel
+RUN pip install --upgrade pip==22.1.2 setuptools==63.1.0 wheel build
 
 RUN pip install \
     Cython==0.29.30 \
     bump2version==1.0.1 \
-    numpy==1.23.0
+    numpy==1.23.0 \
+    setuptools-scm==7.0.4
 
 RUN useradd --create-home --no-log-init --shell /bin/bash --uid $BUILDER_UID builder
 USER builder

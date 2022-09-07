@@ -2,6 +2,8 @@
 branch = True
 source = aodntools
 omit =
+    setup.py
+    aodntools/__init__.py
     examples/*
     test_aodntools/*
 

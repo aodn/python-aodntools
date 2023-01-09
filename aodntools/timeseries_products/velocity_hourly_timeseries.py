@@ -105,8 +105,8 @@ def velocity_hourly_aggregated(files_to_agg, site_code, input_dir='', output_dir
     chunk_size = 90  ## size in days
 
     ## default name for temporary file. It will be renamed at the end
-    _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
-
+    fd, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
+    os.close(fd)
     ## check files and get total number of flattened obs
     print("CHECKING FILES...")
     for index, file in enumerate(files_to_agg):

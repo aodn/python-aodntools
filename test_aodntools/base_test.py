@@ -51,7 +51,7 @@ class BaseTestCase(unittest.TestCase):
         "check that there are no NaN values in any variable (they should be fill values instead)"
         nan_vars = [(name, "contains NaN values")
                     for name, var in dataset.variables.items()
-                    if var.dtype in (np.dtype('float32'), np.dtype('float64')) and any(np.isnan(var[:]))
+                    if var.dtype in (np.dtype('float32'), np.dtype('float64')) and np.isnan(var[:]).any()
                     ]
         self.assertEqual([], nan_vars)
 
@@ -59,6 +59,16 @@ class BaseTestCase(unittest.TestCase):
         """Compare dimensions and values of all variables in dataset with those in self.EXPECTED_OUTPUT_FILE,
         except for variables listed in skip_vars.
         """
+
+        def _arrays_equal(testvar, expected):
+            """compare two numpy arrays, handling the case of scalar variables"""
+            if expected.shape == ():
+                if np.isclose(testvar, expected):
+                    return True
+            elif (np.isclose(testvar, expected)).all():
+                return True
+            return False
+
         differences = []
         with Dataset(self.EXPECTED_OUTPUT_FILE) as expected:
             for var in set(expected.variables.keys()) - set(skip_vars):
@@ -68,7 +78,7 @@ class BaseTestCase(unittest.TestCase):
                     differences.append((var, "shapes differ"))
 
                 # compare the raw data arrays (not the masked_array)
-                if not all(np.isclose(dataset[var][:].data, expected[var][:].data)):
+                if not _arrays_equal(dataset[var][:].data, expected[var][:].data):
                     differences.append((var, "variable values differ"))
 
         self.assertEqual([], differences)

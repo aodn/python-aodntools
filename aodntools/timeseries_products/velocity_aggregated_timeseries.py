@@ -71,8 +71,8 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
     bad_files = {}
 
     # default name for temporary file. It will be renamed at the end
-    _, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
-
+    fd, temp_outfile = tempfile.mkstemp(suffix='.nc', dir=output_dir)
+    os.close(fd)
     ## check files and get total number of flattened obs
     n_obs_total = 0
     for file in files_to_agg:
@@ -237,6 +237,7 @@ def velocity_aggregated(files_to_agg, site_code, input_dir='', output_dir='./',
                             ("velocity-"+product_type),
                             ('END-'+ time_end_filename), 'C-' + current_utc_timestamp(DATESTAMP_FORMAT)]) + '.nc'
     ncout_path = os.path.join(output_dir, output_name)
+
     shutil.move(temp_outfile, ncout_path)
 
 

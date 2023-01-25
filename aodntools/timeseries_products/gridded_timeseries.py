@@ -4,6 +4,7 @@ import argparse
 import os.path
 import json
 from datetime import datetime, timezone
+from collections import defaultdict
 
 import xarray as xr
 import pandas as pd
@@ -91,24 +92,28 @@ def write_netCDF_aggfile(agg_dataset, output_path, encoding):
     return output_path
 
 
-def set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute):
+def set_variableattr(varlist, variable_attribute_dictionary):
     """
-    set variables variables atributes
+    Set variable atributes, separate attributes that should be passed to xarray separately as encoding
+    parameters
 
-    :param varlist: list of variable names
+    :param varlist: list of variable names to pick out
     :param variable_attribute_dictionary: dictionary of the variable attributes
-    :param add_variable_attribute: additional attributes to add
-    :return: dictionary of attributes
+    :return: tuple (dictionary of attributes, dictionary of encoding attributes)
     """
 
-    # with open(templatefile) as json_file:
-    #     variable_metadata = json.load(json_file)['_variables']
-    variable_attributes = {key: variable_attribute_dictionary[key] for key in varlist}
-    if len(add_variable_attribute)>0:
-        for key in add_variable_attribute.keys():
-            variable_attributes[key].update(add_variable_attribute[key])
+    encoding_attributes = {'_FillValue'}
+    time_encoding_attributes = {'units', 'calendar'}
+    variable_attributes = defaultdict(dict)
+    variable_encodings = defaultdict(dict)
+    for var in varlist:
+        for name, value in variable_attribute_dictionary[var].items():
+            if name in encoding_attributes or (var == 'TIME' and name in time_encoding_attributes):
+                variable_encodings[var][name] = value
+            else:
+                variable_attributes[var][name] = value
 
-    return variable_attributes
+    return variable_attributes, variable_encodings
 
 def generate_netcdf_output_filename(nc, facility_code, data_code, VoI, site_code, product_type, file_version):
     """
@@ -237,10 +242,7 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
 
     ## set variable attributes
     varlist = list(VoI_interpolated.variables)
-    add_variable_attribute = {}
-    variable_attributes = set_variableattr(varlist, variable_attribute_dictionary, add_variable_attribute)
-    time_units = variable_attributes['TIME'].pop('units')
-    time_calendar = variable_attributes['TIME'].pop('calendar')
+    variable_attributes, encoding = set_variableattr(varlist, variable_attribute_dictionary)
     for variable in varlist:
         VoI_interpolated[variable].attrs = variable_attributes[variable]
 
@@ -293,22 +295,12 @@ def grid_variable(input_file, VoI, depth_bins=None, max_separation=50, depth_bin
                                                              file_version=file_version)
     ncout_path = os.path.join(output_dir, ncout_filename)
 
-    encoding = {'TIME': {'_FillValue': None,
-                         'units': time_units,
-                         'calendar': time_calendar,
-                         'zlib': True,
-                         'complevel': 5},
-                VoI:    {'zlib': True,
-                         'complevel': 5,
-                         'dtype': np.dtype('float32')},
-                VoI+'_count': {'dtype': np.dtype('int16'),
-                               'zlib': True,
-                               'complevel': 5},
-                'DEPTH': {'dtype': np.dtype('float32'),
-                          'zlib': True,
-                          'complevel': 5},
-                'LONGITUDE': {'_FillValue': False},
-                'LATITUDE': {'_FillValue': False}}
+    # data types and compression for encoding
+    for var in {'TIME', VoI, VoI+'_count', 'DEPTH'}:
+        encoding[var].update({'zlib': True, 'complevel': 5})
+    encoding[VoI].update({'dtype': np.dtype('float32')})
+    encoding[VoI+'_count'].update({'dtype': np.dtype('int16')})
+    encoding['DEPTH'].update({'dtype': np.dtype('float32')})
 
     write_netCDF_aggfile(VoI_interpolated, ncout_path, encoding)
 

@@ -102,7 +102,7 @@ class TestDatasetTemplate(TemplateTestCase):
 
     def test_invalid_json(self):
         error_pattern = r"invalid JSON file '{}'".format(re.escape(BAD_JSON))
-        self.assertRaisesRegexp(ValueError, error_pattern, DatasetTemplate.from_json, BAD_JSON)
+        self.assertRaisesRegex(ValueError, error_pattern, DatasetTemplate.from_json, BAD_JSON)
 
     def test_init_from_json(self):
         template = DatasetTemplate.from_json(TEMPLATE_JSON)
@@ -278,12 +278,12 @@ class TestDatasetTemplate(TemplateTestCase):
         self.assertEqual([], template.variables['Y']['_dimensions'])
 
         template.variables = {'Z': {'_dimensions': [], '_data': None}}
-        self.assertRaisesRegexp(ValidationError, r"No data type information for variable 'Z'",
-                                template.ensure_completeness)
+        self.assertRaisesRegex(ValidationError, r"No data type information for variable 'Z'",
+                               template.ensure_completeness)
 
         template.variables = {'Z': {'_dimensions': []}}
-        self.assertRaisesRegexp(ValidationError, r"No data specified for variable 'Z'",
-                                template.ensure_completeness)
+        self.assertRaisesRegex(ValidationError, r"No data specified for variable 'Z'",
+                               template.ensure_completeness)
 
     def test_ensure_consistency(self):
         template = DatasetTemplate()
@@ -314,21 +314,21 @@ class TestDatasetTemplate(TemplateTestCase):
         self.assertIs(empty, template.variables['EMPTY'])
 
         template.variables['X']['_data'] = self.values1
-        self.assertRaisesRegexp(ValueError, 'inconsistent with dimension sizes defined in template',
-                                template.ensure_consistency)  # now should fail because dim X is already set
+        self.assertRaisesRegex(ValueError, 'inconsistent with dimension sizes defined in template',
+                               template.ensure_consistency)  # now should fail because dim X is already set
 
         template.variables = {
             'Z': {'_dimensions': ["NOSUCHTHING"], '_data': self.values10}
         }
-        self.assertRaisesRegexp(ValidationError, 'undefined dimensions', template.ensure_consistency)
+        self.assertRaisesRegex(ValidationError, 'undefined dimensions', template.ensure_consistency)
 
         template.variables = {
             'W': {'_dimensions': ['X'], '_data': np.arange(20).reshape((10,2))}
         }
-        self.assertRaisesRegexp(ValueError,
-                                "Variable 'W' has 1 dimensions, but value array has 2 dimensions.",
-                                template.ensure_consistency
-                                )
+        self.assertRaisesRegex(ValueError,
+                               "Variable 'W' has 1 dimensions, but value array has 2 dimensions.",
+                               template.ensure_consistency
+                               )
 
 
 class TestDataValues(TemplateTestCase):

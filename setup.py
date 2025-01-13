@@ -4,7 +4,7 @@ INSTALL_REQUIRES = [
     'jsonschema>=2.6.0,<3.0.0',
     'numpy>=1.13.0',
     'netCDF4>=1.5.3',
-    'pandas>=0.24.2',
+    'pandas>=0.24.2,<2.0.0',
     'xarray>=0.11.3'
 ]
 

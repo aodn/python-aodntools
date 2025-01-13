@@ -7,3 +7,5 @@ aodntools/_version.py
 
 # PyCharm settings
 .idea
+/build
+/.eggs

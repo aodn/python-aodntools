@@ -1,0 +1,2397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:fn="http://www.w3.org/2005/xpath-functions#"
+	xmlns:dcterms="http://purl.org/dc/terms/"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:sesame="http://www.openrdf.org/schema/sesame#"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:cycAnnot="http://sw.cyc.com/CycAnnotations_v1#"
+	xmlns:csw="http://semantic-web.at/ontologies/csw.owl#"
+	xmlns:freebase="http://rdf.freebase.com/ns/"
+	xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+	xmlns:dbpedia="http://dbpedia.org/resource/"
+	xmlns:cyc="http://sw.cyc.com/concept/"
+	xmlns:tags="http://www.holygoat.co.uk/owl/redwood/0.1/tags/"
+	xmlns:opencyc="http://sw.opencyc.org/concept/"
+	xmlns:ctag="http://commontag.org/ns#"
+	xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#subject">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#subject"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#object">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#object"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#first">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#first"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+	<rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#value">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#value"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#List">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#domain">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#domain"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#Resource">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#range">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#range"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#subPropertyOf">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#subPropertyOf"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#subClassOf">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#subClassOf"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#Class">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#member">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#member"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#seeAlso">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#seeAlso"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#seeAlso"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#isDefinedBy"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#comment">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#comment"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#label">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#label"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#Literal">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#Alt">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Alt"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Container"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#Container">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Container"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Container"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Container"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#ContainerMembershipProperty">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#ContainerMembershipProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Datatype"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#Datatype">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Datatype"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://editor.vocabs.ands.org.au/user/eMII_Finney.Kim_Admin">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://purl.org/dc/terms/Agent"/>
+	<foaf:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMII_Finney.Kim_Admin</foaf:name>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/Agent">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://purl.org/dc/terms/Agent"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://xmlns.com/foaf/0.1/name">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://xmlns.com/foaf/0.1/name"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://purl.org/dc/terms/Agent"/>
+	<foaf:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sebastien Mancini</foaf:name>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://editor.vocabs.ands.org.au/user/eMII">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://purl.org/dc/terms/Agent"/>
+	<foaf:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMII</foaf:name>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://editor.vocabs.ands.org.au/user/eMarine-Information-Infrastructure-eMII">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://purl.org/dc/terms/Agent"/>
+	<foaf:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</foaf:name>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/65">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:label xml:lang="en">Testobject</rdfs:label>
+	<owl:deprecated rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:deprecated>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2002/07/owl#deprecated">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#deprecated"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/1">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
+	<dc:rights rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Freely Available For Reuse</dc:rights>
+	<dcterms:contributor rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dcterms:description xml:lang="en">This register contains a controlled vocabulary for XBT lines.</dcterms:description>
+	<dcterms:publisher rdf:resource="http://editor.vocabs.ands.org.au/user/eMarine-Information-Infrastructure-eMII"/>
+	<dcterms:subject xml:lang="en">xbtline</dcterms:subject>
+	<dcterms:title xml:lang="en">XBT line vocabulary</dcterms:title>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/1"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/10"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/100"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/101"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/102"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/103"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/104"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/105"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/106"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/107"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/108"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/109"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/11"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/110"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/111"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/112"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/113"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/114"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/115"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/116"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/117"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/118"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/119"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/12"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/120"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/121"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/122"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/123"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/124"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/125"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/126"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/127"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/128"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/129"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/13"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/130"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/131"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/132"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/133"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/134"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/135"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/14"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/15"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/16"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/17"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/18"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/19"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/2"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/20"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/21"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/22"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/23"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/24"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/25"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/26"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/27"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/28"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/29"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/3"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/30"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/31"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/32"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/33"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/34"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/35"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/36"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/37"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/38"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/39"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/4"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/40"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/41"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/42"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/43"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/44"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/45"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/46"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/47"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/48"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/49"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/5"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/50"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/51"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/52"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/53"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/54"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/55"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/56"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/57"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/58"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/59"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/6"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/60"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/61"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/62"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/63"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/64"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/66"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/67"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/68"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/69"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/7"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/70"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/71"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/72"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/73"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/74"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/75"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/76"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/77"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/78"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/79"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/8"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/80"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/81"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/82"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/83"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/84"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/85"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/86"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/87"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/88"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/89"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/9"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/90"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/91"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/92"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/93"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/94"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/95"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/96"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/97"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/98"/>
+	<skos:hasTopConcept rdf:resource="http://vocab.aodn.org.au/def/xbtline/entity/99"/>
+	<dcterms:identifier xml:lang="en">entity</dcterms:identifier>
+	<dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-02-27T22:28:07Z</dcterms:modified>
+	<dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2017-02-28</dcterms:issued>
+	<owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Version 1.0</owl:versionInfo>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/elements/1.1/rights">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/elements/1.1/rights"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/contributor">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/contributor"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/created">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/created"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/creator">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/creator"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/description">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/description"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/publisher">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/publisher"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/subject">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/subject"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/title">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/title"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#ConceptScheme">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#hasTopConcept">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#hasTopConcept"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/1">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Greenland - Iceland - Denmark</skos:altLabel>
+	<skos:altLabel xml:lang="en">Greenland - Iceland - Ireland</skos:altLabel>
+	<skos:altLabel xml:lang="en">Greenland - Iceland - Scotland</skos:altLabel>
+	<skos:definition xml:lang="en"></skos:definition>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX01</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/10">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">New York - Caracas</skos:altLabel>
+	<skos:altLabel xml:lang="en">New York - Trinidad</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX10</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/100">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Tahiti - Auckland</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX28</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/101">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Tahiti - Valparaiso</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX29</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/102">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Brisbane - Noumea - Fiji</skos:altLabel>
+	<skos:altLabel xml:lang="en">Brisbane - Noumea - Lautoka</skos:altLabel>
+	<skos:altLabel xml:lang="en">Brisbane - Noumea - Suva</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX30</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<code xmlns="http://imos.org.au/def/xbt/" xml:lang="en">PX30-31</code>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/103">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Fiji - California</skos:altLabel>
+	<skos:altLabel xml:lang="en">Noumea - Fiji</skos:altLabel>
+	<skos:altLabel xml:lang="en">Noumea - Fiji - California</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX31</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/104">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Sydney - Auckland</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX32</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/105">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hobart - Macquarie Island</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX33</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/106">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Sydney - Wellington</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX34</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<georssline xmlns="http://www.georss.org/" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">151.3483 -33.84711 172.84103 -40.25969</georssline>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/107">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Melbourne - Dunedin</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX35</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/108">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Christchurch - McMurdo</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX36</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/109">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - California</skos:altLabel>
+	<skos:altLabel xml:lang="en">Hawaii - San Francisco</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX37</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/11">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Europe - Brazil</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX11</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/110">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - California</skos:altLabel>
+	<skos:altLabel xml:lang="en">Hawaii - Long Beach</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX37-South</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/111">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - Alaska</skos:altLabel>
+	<skos:altLabel xml:lang="en">Hawaii - Kodiak</skos:altLabel>
+	<skos:altLabel xml:lang="en">Hawaii - Valdez</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX38</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/112">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - Seattle</skos:altLabel>
+	<skos:altLabel xml:lang="en">Hawaii - Vancouver</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX39</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/113">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - Yokohama</skos:altLabel>
+	<skos:altLabel xml:lang="en">Japan - Hawaii</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX40</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/114">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - Hong Kong</skos:altLabel>
+	<skos:altLabel xml:lang="en">Hawaii - Taiwan</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX41</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/115">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - New Guinea</skos:altLabel>
+	<skos:altLabel xml:lang="en">Hawaii - Solomon Islands</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX42</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/116">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - Marshall Islands - Guam</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX43</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/117">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hong Kong - Guam</skos:altLabel>
+	<skos:altLabel xml:lang="en">Taiwan - Guam</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX44</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/118">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">(3N,137E) - (34N,137E)</skos:altLabel>
+	<skos:altLabel xml:lang="en">137th meridian east from 3N to 34N</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX45</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/119">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">(3S,165E) - (50N,1165E)</skos:altLabel>
+	<skos:altLabel xml:lang="en">165th meridian east from 3S to 50N</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX46</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/12">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Europe - Antarctica</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX12</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/120">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Alaska - California</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX47</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/121">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Japan - Singapore</skos:altLabel>
+	<skos:altLabel xml:lang="en">Taiwan - Singapore</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX49</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/122">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Valparaiso - Auckland</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX50</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/123">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hong Kong - Auckland</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX51</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/124">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Japan - Fiji</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX52</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/125">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mindanao - Fiji</skos:altLabel>
+	<skos:altLabel xml:lang="en">Taiwan - Fiji</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX53</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/126">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Melbourne - Wellington</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX55</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/127">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Brisbane - Dunedin</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX56</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/128">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Brisbane - Wellington</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX57</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/129">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Costa Rica coast</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX76</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/13">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Brazil - Liberia</skos:altLabel>
+	<skos:altLabel xml:lang="en">Rio de Janeiro - Monrovia</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX13</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/130">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Peru coastal</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX77</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/131">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Valparaiso - 80W</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX79</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/132">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Tahiti - Cape Horn</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX80</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/133">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - Chile</skos:altLabel>
+	<skos:altLabel xml:lang="en">Honolulu - Coronel</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX81</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/134">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Melbourne - Fiji</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX82</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/135">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Melbourne - Auckland</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX83</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/14">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Brazil - Nigeria</skos:altLabel>
+	<skos:altLabel xml:lang="en">Rio de Janeiro - Lagos</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX14</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/15">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Europe - Cape of Good Hope</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX15</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/16">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Brazil - Namibia</skos:altLabel>
+	<skos:altLabel xml:lang="en">Rio de Janeiro - Walvis Bay</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX16</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/17">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Rio de Janeiro - Cape of Good Hope</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX17</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/18">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Buenos Aires - Cape of Good Hope</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX18</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/19">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape Horn - Cape of Good Hope</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX19</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/2">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Newfoundland - Iceland</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX02</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/20">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Europe - French Guyana</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX20</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/21">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape Verde - Belem</skos:altLabel>
+	<skos:altLabel xml:lang="en">Cape Verde - Brazil</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX20b</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/22">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Rio de Janeiro - Luanda</skos:altLabel>
+	<skos:altLabel xml:lang="en">Rio de Janeiro - Pointe Noire</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX21</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/23">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Drake Passage</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX22</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/24">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Gulf of Mexico</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX23</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/25">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape Town - Antarctica</skos:altLabel>
+	<skos:altLabel xml:lang="en">Cape of Good Hope - Antarctica</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX25</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/26">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape of Good Hope - Lagos</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX26</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/27">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Brazil - Cape Horn</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX27</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/28">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">New York - Brazil</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX29</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/29">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">New York - Bermuda</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX32</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/3">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Europe - New York</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX03</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/30">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Boston - Halifax</skos:altLabel>
+	<skos:altLabel xml:lang="en">Boston - Nova Scotia</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX33</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/31">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Gulf of Guinea - Caribbean</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX34</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/32">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape of Good Hope - Recife</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX35</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/33">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape Horn - Gulf of Guinea</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX36</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/34">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Rio de Janeiro - Trindade island</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX97</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/35">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Norwegian Sea</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX98</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/36">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Southern Ocean</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX99</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<code xmlns="http://imos.org.au/def/xbt/" xml:lang="en">SO</code>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/37">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Fremantle - Sunda Strait</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX01</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<code xmlns="http://imos.org.au/def/xbt/" xml:lang="en">IX1</code>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/38">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape of Good Hope - Fremantle</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX02</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<code xmlns="http://imos.org.au/def/xbt/" xml:lang="en">IX2</code>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/39">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Red Sea - La Reunion</skos:altLabel>
+	<skos:altLabel xml:lang="en">Red Sea - Mauritius</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX03</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/4">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">New York - Gibraltar</skos:altLabel>
+	<skos:altLabel xml:lang="en">New York - Lisbon</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX04</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/40">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">La Reunion - Malacca Strait</skos:altLabel>
+	<skos:altLabel xml:lang="en">Mauritius - Malacca Strait</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX06</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/41">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape of Good Hope - Persian Gulf</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX07</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/42">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mauritius - Bombay</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX08</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<code xmlns="http://imos.org.au/def/xbt/" xml:lang="en">IX8</code>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/43">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Fremantle - Persian Gulf</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX09</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<code xmlns="http://imos.org.au/def/xbt/" xml:lang="en">IX9</code>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/44">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Sri Lanka - Persian Gulf</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX09-North</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/45">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Red Sea - Malacca Strait</skos:altLabel>
+	<skos:altLabel xml:lang="en">Red Sea - Singapore</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX10</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/46">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Calcutta - Java Sea</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX11</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/47">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Fremantle - Red Sea</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX12</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/48">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Bay of Bengal</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX14</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/49">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mauritius - Fremantle</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX15</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/5">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Europe - Panama Canal</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX05</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/50">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mombassa - Singapore</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX16</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/51">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mombassa - Karachi</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX17</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/52">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mombassa - Bombay</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX18</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/53">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">La Reunion - Kerguelen</skos:altLabel>
+	<skos:altLabel xml:lang="en">Mauritius - Kerguelen</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX19</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/54">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">La Reunion - Amsterdam</skos:altLabel>
+	<skos:altLabel xml:lang="en">Mauritius - Amsterdam</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX19b</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/55">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mauritius - Rodriguez</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX20</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/56">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cape of Good Hope - Mauritius</skos:altLabel>
+	<skos:altLabel xml:lang="en">Durban - Mauritius</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX21</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/57">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Shark Bay - Banda Sea</skos:altLabel>
+	<skos:altLabel xml:lang="en">Shark Bay - Timor Strait</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX22</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/58">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Port Hedland - Japan</skos:altLabel>
+	<skos:altLabel xml:lang="en">Shark Bay - Japan</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX22-PX11</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/59">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hobart - Casey station</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX23</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/6">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">New York - Abidjan</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX06</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/60">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mauritius - Karachi</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX25</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/61">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Red Sea - Karachi</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX26</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/62">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Mombassa - La Reunion</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX27</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/63">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hobart - Dumont d'Urville</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX28</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/64">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Macquarie Island - Casey station</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX29</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/66">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Melbourne - Point Leeuwin</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">IX31</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/67">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Haifa - Gibraltar</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">MX01</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/68">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Barcelona - Skikda</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">MX02</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/69">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Sete - Tunis</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">MX03</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/7">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Gulf of Mexico - Abidjan</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX07</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/70">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Genoa - Palermo</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">MX04</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/71">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Malta - Trieste</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">MX05</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/72">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Alexandria - Crete - Tessaloniki</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">MX06</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/73">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Cyprus - Port Said</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">MX07</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/74">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Seattle - Indonesia</skos:altLabel>
+	<skos:altLabel xml:lang="en">Vancouver - Indonesia</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX01</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/75">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Flores Sea - Torres Strait</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX02</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<code xmlns="http://imos.org.au/def/xbt/" xml:lang="en">PX2</code>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/76">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Coral Sea</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX03</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/77">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Japan - Kiribati - Fiji</skos:altLabel>
+	<skos:altLabel xml:lang="en">Japan - Kiribati - Samoa</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX04</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/78">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Japan - New Zealand</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX05</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/79">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Brisbane - Yokohama</skos:altLabel>
+	<skos:altLabel xml:lang="en">Japan - Australia</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX05b</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/8">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">New York - Cape of Good Hope</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX08</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/80">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Auckland - Suva</skos:altLabel>
+	<skos:altLabel xml:lang="en">New Zealand - Fiji</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX06</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/81">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Auckland - Panama</skos:altLabel>
+	<skos:altLabel xml:lang="en">Dunedin - Panama</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX08</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/82">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - Auckland</skos:altLabel>
+	<skos:altLabel xml:lang="en">Hawaii - Fiji</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX09</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/83">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Guam - Hawaii</skos:altLabel>
+	<skos:altLabel xml:lang="en">Saipan - Hawaii</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX10</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/84">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Flores Sea - Japan</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX11</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/85">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Tahiti - Noumea</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX12</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/86">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">New Zealand - California</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX13</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/87">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Alaska - Cape Horn</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX14</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/88">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Ecuador - Japan</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX15</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/89">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Hawaii - Peru</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX16</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/9">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Caracas - Gibraltar</skos:altLabel>
+	<skos:altLabel xml:lang="en">Trinidad - Gibraltar</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">AX09</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/90">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Maruroa - Panama</skos:altLabel>
+	<skos:altLabel xml:lang="en">Tahiti - Panama</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX17</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/91">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Tahiti - California</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX18</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/92">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">California - Panama</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX20</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/93">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">California - Chile</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX21</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/94">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Panama - Valparaiso</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX22</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/95">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Panama - 115W</skos:altLabel>
+	<skos:altLabel xml:lang="en">Panama - 115th meridian west</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX23</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/96">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Panama - Indonesia</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX24</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/97">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Valparaiso - Japan</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX25</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/98">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">TRANSPAC</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX26</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://vocab.aodn.org.au/def/xbtline/entity/99">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-18T00:00:00Z</dcterms:created>
+	<dcterms:creator rdf:resource="http://editor.vocabs.ands.org.au/user/Sebastien-Mancini"/>
+	<dc:publisher rdf:datatype="http://www.w3.org/2001/XMLSchema#string">eMarine Information Infrastructure (eMII)</dc:publisher>
+	<dc:source rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Australian Ocean Data Network XBT line register</dc:source>
+	<skos:altLabel xml:lang="en">Guayaquil - Galapagos</skos:altLabel>
+	<skos:inScheme rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+	<skos:prefLabel xml:lang="en">PX27</skos:prefLabel>
+	<skos:topConceptOf rdf:resource="http://vocab.aodn.org.au/def/xbtline/1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/elements/1.1/publisher">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/elements/1.1/publisher"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/elements/1.1/source">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/elements/1.1/source"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#Concept">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subClassOf rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#altLabel">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#altLabel"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#definition">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#definition"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#inScheme">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#inScheme"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#prefLabel">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#prefLabel"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#topConceptOf">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#topConceptOf"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://imos.org.au/def/xbt/code">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://imos.org.au/def/xbt/code"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.georss.org/georssline">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.georss.org/georssline"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/identifier">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/identifier"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/modified">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/modified"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://purl.org/dc/terms/issued">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/issued"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.w3.org/2002/07/owl#versionInfo">
+	<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#versionInfo"/>
+</rdf:Description>
+
+</rdf:RDF>

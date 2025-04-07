@@ -5,7 +5,7 @@ INSTALL_REQUIRES = [
     'numpy>=2.2.4',
     'netCDF4>=1.7.2',
     'pandas>=2.2.3',
-    'xarray>=2025.3.1'
+    'xarray>=2023.1.0'
 ]
 
 TESTS_REQUIRE = [

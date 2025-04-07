@@ -46,7 +46,8 @@ for name, var in template.variables.items():
     var_type = var['_datatype']
     for attr in ('valid_min', 'valid_max'):
         if attr in var:
-            var[attr] = np.cast[var_type](var[attr])
+            var[attr] = np.array(var[attr], dtype=var_type)
+
 
 # update range attributes
 template.add_extent_attributes()

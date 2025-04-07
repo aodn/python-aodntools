@@ -190,12 +190,11 @@ def in_water(nc):
     :param nc: xarray dataset
     :return: xarray dataset
     """
-
-    condition = in_water_index(nc)  # This returns a numpy array
-    # Wrap the condition in a DataArray so that it aligns with the TIME coordinate.
-    cond_da = xr.DataArray(condition, dims=["TIME"], coords={"TIME": nc["TIME"].values})
-    return nc.where(cond_da, drop=True)
-
+    condition = in_water_index(nc)  # NumPy boolean array
+    # Get the integer indices where condition is True.
+    indices = np.nonzero(condition)[0]
+    # Use positional indexing to select the TIME entries that satisfy the condition.
+    return nc.isel(TIME=indices)
 
 def current_utc_timestamp(format=TIMESTAMP_FORMAT):
     return datetime.now(timezone.utc).strftime(format)

@@ -58,7 +58,7 @@ def append_resampled_values(nc_cell, ds, slice_start, binning_functions):
     # shift the index forward 30min to centre the bins on the hour
     df_cell.index = df_cell.index + pd.Timedelta(minutes=30)
 
-    df_cell_1H = df_cell.resample('1H')
+    df_cell_1H = df_cell.resample('1h')
     slice_end = len(df_cell_1H) + slice_start
 
     # set binned timestamps

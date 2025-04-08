@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
 INSTALL_REQUIRES = [
-    'jsonschema>=2.6.0,<3.0.0',
-    'numpy>=1.13.0',
-    'netCDF4>=1.5.3',
-    'pandas>=0.24.2',
-    'xarray>=0.11.3'
+    'jsonschema>=4.23.0',
+    'numpy>=2.2.4',
+    'netCDF4>=1.7.2',
+    'pandas>=2.2.3',
+    'xarray>=2023.1.0'
 ]
 
 TESTS_REQUIRE = [
@@ -37,7 +37,7 @@ setup(
     author_email='projectofficers@emii.org.au',
     description='AODN data tools library',
     zip_safe=False,
-    python_requires='>=3.5',
+    python_requires='>=3.11, <3.12',
     install_requires=INSTALL_REQUIRES,
     tests_require=TESTS_REQUIRE,
     extras_require=EXTRAS_REQUIRE,
@@ -49,8 +49,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: Implementation :: CPython',
     ]
 )

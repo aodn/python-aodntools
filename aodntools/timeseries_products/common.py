@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 
 import numpy as np
+import xarray as xr
 
 # Common date/time format strings
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
@@ -179,7 +180,7 @@ def in_water_index(nc):
     """
     time_deployment_start = np.datetime64(nc.attrs['time_deployment_start'][:-1])
     time_deployment_end = np.datetime64(nc.attrs['time_deployment_end'][:-1])
-    TIME = nc['TIME'][:]
+    TIME = nc['TIME'].values
     return (TIME >= time_deployment_start) & (TIME <= time_deployment_end)
 
 def in_water(nc):
@@ -189,8 +190,11 @@ def in_water(nc):
     :param nc: xarray dataset
     :return: xarray dataset
     """
-    return nc.where(in_water_index(nc), drop=True)
-
+    condition = in_water_index(nc)  # NumPy boolean array
+    # Get the integer indices where condition is True.
+    indices = np.nonzero(condition)[0]
+    # Use positional indexing to select the TIME entries that satisfy the condition.
+    return nc.isel(TIME=indices)
 
 def current_utc_timestamp(format=TIMESTAMP_FORMAT):
     return datetime.now(timezone.utc).strftime(format)

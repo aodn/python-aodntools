@@ -30,27 +30,27 @@ def check_files(file_list, site_code, parameter_names_accepted, input_dir=''):
     :param input_dir: base path where source files are stored
     :return: dictionary with the file name and list of failed tests, list good files chronologically ordered
     """
-
-    file_list_dataframe = pd.DataFrame(columns=["url", "deployment_date"])
+    rows = []
     error_dict = {}
 
     for file in file_list:
         with xr.open_dataset(os.path.join(input_dir, file)) as nc:
             error_list = check_file(nc, site_code, parameter_names_accepted)
             if error_list:
-                error_dict.update({file: error_list})
+                error_dict[file] = error_list
             else:
-                file_list_dataframe = file_list_dataframe.append({'url': file,
-                                                                  'deployment_date': parse(nc.time_deployment_start)},
-                                                                 ignore_index=True)
+                rows.append({
+                    'url': file,
+                    'deployment_date': parse(nc.time_deployment_start)
+                })
 
+    file_list_dataframe = pd.DataFrame(rows, columns=["url", "deployment_date"])
     file_list_dataframe = file_list_dataframe.sort_values(by='deployment_date')
-    file_list = file_list_dataframe['url'].to_list()
-    if file_list == []:
+    sorted_files = file_list_dataframe['url'].to_list()
+    if not sorted_files:
         raise NoInputFilesError("no valid input files to aggregate")
 
-    return file_list, error_dict
-
+    return sorted_files, error_dict
 
 
 def get_parameter_names(nc):
@@ -308,7 +308,7 @@ def PDresample_by_hour(df, function_dict, function_stats):
     df_data = pd.DataFrame(index=pd.DatetimeIndex([]))
     for variable in varnames:
         ds_var = df[variable]
-        ds_var_resample = ds_var.resample('1H', base=0.5)  # shift by half hour to centre bin on the hour
+        ds_var_resample = ds_var.resample('1h', offset='30min')  # shift by half hour to centre bin on the hour
         ds_var_mean = ds_var_resample.apply(function_dict[variable]).astype(np.float32)
         df_data = pd.concat([df_data, ds_var_mean], axis=1, sort=False)
         for stat_method in function_stats:
@@ -366,8 +366,6 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
         variable_attribute_dictionary = json.load(json_file)['_variables']
 
     df_data = pd.DataFrame()
-
-
     ## create empty DF with dtypes
     metadata_df_types = [('source_file', str),
                          ('instrument_id', str),
@@ -380,6 +378,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
     parameter_names_all = []
     applied_offset = []
     qc_count_all = {}
+    metadata_rows = []
 
     for file_index, file in enumerate(files_to_aggregate):
         print(file_index)
@@ -398,13 +397,16 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
             qc_count = get_QCcount(nc_clean, qcflags)
             qc_count_all = update_QCcount(qc_count_all, qc_count)
             nc_clean = good_data_only(nc_clean, qcflags)  # good quality data only
-            df_metadata = df_metadata.append({'source_file': file,
-                                              'instrument_id': utils.get_instrument_id(nc),
-                                              'LONGITUDE': nc.LONGITUDE.squeeze().values,
-                                              'LATITUDE': nc.LATITUDE.squeeze().values,
-                                              'NOMINAL_DEPTH': get_nominal_depth(nc)},
-                                             ignore_index=True)
-
+                    
+            # Append a new row as a dictionary to the list.
+            metadata_rows.append({
+                'source_file': file,
+                'instrument_id': utils.get_instrument_id(nc),
+                'LONGITUDE': nc.LONGITUDE.squeeze().values,
+                'LATITUDE': nc.LATITUDE.squeeze().values,
+                'NOMINAL_DEPTH': get_nominal_depth(nc)
+            })
+            
             # If TIME had out-of-range values before cleaning, nc_clean would now have a CFTimeIndex, which
             # breaks the resampling further down. Here we reset it to a DatetimeIndex as suggested here:
             # https://stackoverflow.com/questions/55786995/converting-cftime-datetimejulian-to-datetime/55787899#55787899
@@ -421,6 +423,7 @@ def hourly_aggregator(files_to_aggregate, site_code, qcflags, input_dir='', outp
             df_temp['instrument_index'] = np.repeat(file_index, len(df_temp)).astype(np.int32)
             df_data = pd.concat([df_data, df_temp.reset_index()], ignore_index=True, sort=False)
 
+    df_metadata = pd.DataFrame(metadata_rows, columns=['source_file', 'instrument_id', 'LONGITUDE', 'LATITUDE', 'NOMINAL_DEPTH'])
     df_metadata.index.rename('INSTRUMENT', inplace=True)
     df_data.index.rename('OBSERVATION', inplace=True)
     ## rename index to TIME

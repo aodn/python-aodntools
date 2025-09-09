@@ -298,7 +298,7 @@ class DatasetTemplate(NetCDFGroupDict):
 
         # variable attributes to convert to the same type as the variable
         # datatype
-        varattrs_to_convert_to_datatype = ['valid_min', 'valid_max', 'valid_range']
+        varattrs_to_convert_to_datatype = ['valid_min', 'valid_max', 'valid_range', 'flag_values']
 
         for varname, varattr in self.variables.items():
             if not varattr['_dimensions']:  # no kwargs in createVariable

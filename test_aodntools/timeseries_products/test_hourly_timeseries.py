@@ -94,7 +94,6 @@ class TestHourlyTimeseries(BaseTestCase):
 
         self.compare_variables(dataset)
 
-
     def test_hourly_aggregator_with_nonqc(self):
         output_file, bad_files = hourly_aggregator(files_to_aggregate=INPUT_FILES,
                                                    site_code='NRSROT',

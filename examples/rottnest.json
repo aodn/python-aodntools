@@ -65,7 +65,18 @@
             "coordinates": "TIME PRES_REL DEPTH LATITUDE LONGITUDE",
             "_FillValue": 999999.0,
             "valid_min": -2.5,
-            "valid_max": 40.0
+            "valid_max": 40.0,
+            "ancillary_variables": "TEMP_quality_control"
+        },
+        "TEMP_quality_control": {
+          "_dimensions": ["TIME"],
+          "_datatype": "b",
+          "standard_name": "sea_water_temperature status_flag",
+          "long_name": "quality flag for sea_water_temperature",
+          "quality_control_conventions": "IMOS standard flags",
+          "flag_meanings": "No_QC_performed Good_data Probably_good_data Bad_data_that_are_potentially_correctable Bad_data Value_changed Not_used Not_used Not_used Missing_value",
+          "flag_values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+          "_FillValue": 99
         }
     },
     "title": "Sample data from Rottnest Island NRS",

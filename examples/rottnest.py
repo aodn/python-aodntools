@@ -40,15 +40,6 @@ for name, var in template.variables.items():
     if '_data' not in var:
         var['_data'] = df[name].values
 
-# convert valid_min/max attributes to match variable type
-# TODO: make this a template method
-for name, var in template.variables.items():
-    var_type = var['_datatype']
-    for attr in ('valid_min', 'valid_max'):
-        if attr in var:
-            var[attr] = np.array(var[attr], dtype=var_type)
-
-
 # update range attributes
 template.add_extent_attributes()
 

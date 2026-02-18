@@ -4,7 +4,7 @@ template, and also the helper functions necessary to validate an object against 
 import json
 import numpy as np
 from jsonschema import validators, Draft4Validator, FormatChecker, ValidationError
-from pkg_resources import resource_filename
+from pathlib import Path
 
 # helper function that will later be used to tell the schema validator how to validate objects of type "array"
 def is_array(checker, instance):
@@ -31,7 +31,7 @@ def is_python_datatype(value):
     return False
 
 # Load JSON schema file
-TEMPLATE_SCHEMA_JSON = resource_filename(__name__, 'template_schema.json')
+TEMPLATE_SCHEMA_JSON = Path(__file__).parent  / 'template_schema.json'
 with open(TEMPLATE_SCHEMA_JSON) as f:
     TEMPLATE_SCHEMA = json.load(f)
 

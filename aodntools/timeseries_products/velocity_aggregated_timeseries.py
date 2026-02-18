@@ -2,12 +2,12 @@ import os
 import tempfile
 import shutil
 from copy import deepcopy
+from pathlib import Path
 
 from  netCDF4 import Dataset, num2date, stringtochar
 import numpy as np
 import json
 import argparse
-from pkg_resources import resource_filename
 from aodntools import __version__
 
 import xarray as xr
@@ -16,7 +16,7 @@ from aodntools.timeseries_products import aggregated_timeseries as utils
 from aodntools.timeseries_products.common import (NoInputFilesError, check_velocity_file, current_utc_timestamp,
                                                   TIMESTAMP_FORMAT, DATESTAMP_FORMAT)
 
-TEMPLATE_JSON = resource_filename(__name__, 'velocity_aggregated_timeseries_template.json')
+TEMPLATE_JSON = Path(__file__).parent  / 'velocity_aggregated_timeseries_template.json'
 
 
 def get_number_flatvalues(nc):

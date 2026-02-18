@@ -4,19 +4,19 @@ import argparse
 from copy import deepcopy
 import json
 import os
+from pathlib import Path
 import shutil
 import tempfile
 
 import numpy as np
 import xarray as xr
 from netCDF4 import Dataset, num2date, stringtochar
-from pkg_resources import resource_filename
 
 from aodntools import __version__
 from aodntools.timeseries_products.common import (NoInputFilesError, check_file, in_water, current_utc_timestamp,
                                                   TIMESTAMP_FORMAT, DATESTAMP_FORMAT)
 
-TEMPLATE_JSON = resource_filename(__name__, 'aggregated_timeseries_template.json')
+TEMPLATE_JSON = Path(__file__).parent  / 'aggregated_timeseries_template.json'
 
 
 def sort_files(files_to_agg, input_dir=''):

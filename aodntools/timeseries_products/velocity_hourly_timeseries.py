@@ -4,19 +4,19 @@ import os
 import shutil
 import tempfile
 from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 from netCDF4 import Dataset, num2date, stringtochar
-from pkg_resources import resource_filename
 
 import aodntools.timeseries_products.aggregated_timeseries as utils
 from aodntools import __version__
 from aodntools.timeseries_products.common import (NoInputFilesError, check_velocity_file, current_utc_timestamp,
                                                   TIMESTAMP_FORMAT, DATESTAMP_FORMAT)
 
-TEMPLATE_JSON = resource_filename(__name__, 'velocity_hourly_timeseries_template.json')
+TEMPLATE_JSON = Path(__file__).parent  / 'velocity_hourly_timeseries_template.json'
 QC_FLAG_MAX = 2
 TIME_UNITS = "days since 1950-01-01 00:00:00 UTC"
 TIME_CALENDAR = "gregorian"

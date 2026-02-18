@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 
 import argparse
+from collections import OrderedDict
 import json
 import os.path
-from collections import OrderedDict
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 from dateutil.parser import parse
-from pkg_resources import resource_filename
 
 from aodntools import __version__
 from aodntools.timeseries_products import aggregated_timeseries as utils
 from aodntools.timeseries_products.common import (NoInputFilesError, check_file, get_qc_variable_names, in_water,
                                                   current_utc_timestamp, TIMESTAMP_FORMAT, DATESTAMP_FORMAT)
 
-TEMPLATE_JSON = resource_filename(__name__, 'hourly_timeseries_template.json')
-BINNING_METHOD_JSON = resource_filename(__name__, 'binning_method.json')
+TEMPLATE_JSON = Path(__file__).parent  / 'hourly_timeseries_template.json'
+BINNING_METHOD_JSON = Path(__file__).parent  / 'binning_method.json'
 
 
 def check_files(file_list, site_code, parameter_names_accepted, input_dir=''):

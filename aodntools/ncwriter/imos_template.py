@@ -1,11 +1,11 @@
 from datetime import datetime
-from pkg_resources import resource_filename
+from pathlib import Path
 
 from netCDF4 import num2date
 
 from .template import DatasetTemplate
 
-IMOS_GLOBAL_JSON = resource_filename(__name__, 'imos_global.json')
+IMOS_GLOBAL_JSON = Path(__file__).parent / 'imos_global.json'
 IMOS_GLOBAL_ATTRIBUTES = DatasetTemplate.from_json(IMOS_GLOBAL_JSON).global_attributes
 
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'

@@ -2,6 +2,7 @@ import numpy as np
 import bisect
 import argparse
 import os.path
+from pathlib import Path
 import json
 from datetime import datetime, timezone
 from collections import defaultdict
@@ -9,14 +10,12 @@ from collections import defaultdict
 import xarray as xr
 import pandas as pd
 
-from pkg_resources import resource_filename
-
 from aodntools import __version__
 from aodntools.timeseries_products.common import current_utc_timestamp, TIMESTAMP_FORMAT, DATESTAMP_FORMAT
 import aodntools.timeseries_products.aggregated_timeseries as TStools
 
 
-TEMPLATE_JSON = resource_filename(__name__, 'gridded_timeseries_template.json')
+TEMPLATE_JSON = Path(__file__).parent  / 'gridded_timeseries_template.json'
 
 
 def make_depth_bins(nc, increment=10):

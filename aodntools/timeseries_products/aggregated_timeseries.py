@@ -288,8 +288,8 @@ def main_aggregator(files_to_agg, var_to_agg, site_code, input_dir='', output_di
             LATITUDE[index] = nc.LATITUDE.values
             LONGITUDE[index] = nc.LONGITUDE.values
             NOMINAL_DEPTH[index] = get_nominal_depth(nc)
-            source_file[index] = stringtochar(np.array(file, dtype='S256'))
-            instrument_id[index] = stringtochar(np.array(get_instrument_id(nc), dtype='S256'))
+            source_file[index] = stringtochar(np.array(file, dtype='S256'), encoding='ascii')
+            instrument_id[index] = stringtochar(np.array(get_instrument_id(nc), dtype='S256'), encoding='ascii')
 
         start = end
 
